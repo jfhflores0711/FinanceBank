@@ -1,0 +1,231 @@
+package org.finance.bank.util;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.finance.bank.bean.TCuentaPersona;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TRegistroDepositoRetiro;
+import org.finance.bank.model.BibliotecaException;
+import org.finance.bank.model.dao.DAOGeneral;
+
+/**
+ *
+ * @author oscar
+ */
+public class Runner {
+
+    public static double[] mes = new double[]{31.00, 28.00, 31.00, 30.00, 31.00, 30.00, 31.00, 31.00, 30.00, 31.00, 30.00, 31.00};
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws BibliotecaException {
+        DAOGeneral dao = new DAOGeneral();
+        String sqlRun = "from TRegistroDepositoRetiro where numCta='51501117962958' and (not estado='EXTORNADO') and fecha >='2012/10/02%' order by fecha";
+        List result = dao.findAll(sqlRun);
+        Iterator it = result.iterator();
+        boolean first = true;
+        BigDecimal rentail = BigDecimal.ZERO;
+        while (it.hasNext()) {
+            TRegistroDepositoRetiro depret = (TRegistroDepositoRetiro) it.next();
+            if (depret.getEstado().equals("EXTORNADO")) {
+                continue;
+            }
+            if (first) {
+                rentail = depret.getTOperacion().getSaldofinal();
+                first = false;
+                continue;
+            }
+            if (depret.getTOperacion().getTTipoOperacion().getCodigoTipoOperacion().equals("TIPC3")) {
+                rentail = rentail.add(depret.getImporte());
+            } else {
+                rentail = rentail.subtract(depret.getImporte());
+            }
+            TOperacion o = (TOperacion) dao.load(TOperacion.class, depret.getTOperacion().getIdOperacion());
+            o.setSaldofinal(rentail);
+            dao.update();
+            TCuentaPersona c=(TCuentaPersona)dao.load(TCuentaPersona.class, depret.getTCuentaPersona().getIdcuentapersona());
+            c.setSaldo(rentail);
+            c.setSaldoSinInteres(rentail);
+            dao.update();
+            Logger.getLogger(Runner.class.getName()).log(Level.INFO, "->" + depret.getFecha() + " s=" + rentail);
+        }
+//        Date f1 = DateUtil.convertStringToDate("yyyy/MM/dd", "2012/04/23");
+//        Date f2 = DateUtil.convertStringToDate("yyyy/MM/dd", "2012/04/26");
+//        Calendar c = Calendar.getInstance();
+//        c.setTime(f1);
+//        Long when = 0L;
+//        while (f2.after(f1)) {
+//            List mons = dao.findAll("from TMoneda where estado='ACTIVO'");
+//            if (!mons.isEmpty()) {
+//                Iterator iMons = mons.iterator();
+//                while (iMons.hasNext()) {
+//                    TMoneda m = (TMoneda) iMons.next();
+//                    List a = dao.findAll("from TCaja where estado='ACTIVO'");
+//                    Iterator b = a.iterator();
+//                    while (b.hasNext()) {
+//                        TCaja ca = (TCaja) b.next();
+//                        String idForInitNewesttable = DateUtil.getDate(f1).replaceAll("/", "") + ca.getCodCaja() + m.getCodParaNumCuenta() + "00";
+//                        TDetalleCaja d = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDateAnt(f1).replaceAll("/", "") + ca.getCodCaja() + m.getCodParaNumCuenta() + "00");
+//                        TDetalleCaja e = (TDetalleCaja) dao.load(TDetalleCaja.class, idForInitNewesttable);
+//                        if (e == null) {
+//                            if (d == null) {
+//                                TDetalleCaja detallecaja = new TDetalleCaja(idForInitNewesttable, ca,
+//                                        m, DateUtil.getNOW_S(), "IDDE" + " TRASLADO", "IDDE", DateUtil.getNOW_S());
+//                                detallecaja.setMontoInicial(BigDecimal.ZERO);
+//                                detallecaja.setMontoFinal(BigDecimal.ZERO);
+//                                detallecaja.setMontoRecibido(BigDecimal.ZERO);
+//                                detallecaja.setMontoEntregado(BigDecimal.ZERO);
+//                                detallecaja.setEstado("ACTIVO");
+//                                dao.persist(detallecaja);
+//                            } else {
+//                                TDetalleCaja detallecaja = new TDetalleCaja(idForInitNewesttable, ca,
+//                                        m, DateUtil.getNOW_S(), d.getIddetallecaja() + " TRASLADO", "IDDE", DateUtil.getNOW_S());
+//                                detallecaja.setMontoInicial(d.getMontoFinal());
+//                                detallecaja.setMontoFinal(d.getMontoFinal());
+//                                detallecaja.setMontoRecibido(BigDecimal.ZERO);
+//                                detallecaja.setMontoEntregado(BigDecimal.ZERO);
+//                                detallecaja.setEstado("ACTIVO");
+//                                dao.persist(detallecaja);
+//                            }
+//                            System.out.println("i="+idForInitNewesttable);
+//                        }
+//                    }
+//                }
+//            }
+//            c.add(Calendar.DATE, +1);
+//            f1 = c.getTime();
+//            c.setTime(f1);
+//        }
+//        DAOGeneral dao = new DAOGeneral();
+//        List ops = dao.findAll("from TOperacion order by fecha asc");
+//        Date datex = DateUtil.convertStringToDate("yyyy/MM/dd HH:mm:ss", ((TOperacion) ops.iterator().next()).getFecha());
+//
+//        List cp = dao.findAll("from TOperacion where fecha like '" + DateUtil.getDate(datex) + "%'");
+//        if (cp.size() > 0) {
+//            Iterator i = cp.iterator();
+//            while (i.hasNext()) {
+//            }
+//            while(i.hasNext()){
+//                TOperacion o=(TOperacion)i.next();
+//                Set xrc=o.getTCobranzas();
+//                if(xrc.size()>0){
+//                    Iterator it=xrc.iterator();
+//                    while(it.hasNext()){
+//                        TCobranza c=(TCobranza)it.next();
+//                        dao.delete(c);
+//                    }
+//                }
+//                Set xrcv=o.getTRegistroCompraVentas();
+//                if(xrcv.size()>0){
+//                    Iterator it=xrcv.iterator();
+//                    while(it.hasNext()){
+//                        TRegistroCompraVenta r=(TRegistroCompraVenta)it.next();
+//                        dao.delete(r);
+//                    }
+//                }
+//                Set xrdr=o.getTRegistroDepositoRetiros();
+//                if(xrdr.size()>0){
+//                    Iterator it=xrdr.iterator();
+//                    while(it.hasNext()){
+//                        TRegistroDepositoRetiro d=(TRegistroDepositoRetiro)it.next();
+//                        dao.delete(d);
+//                    }
+//                }
+//                Set xrg=o.getTRegistroGiros();
+//                if(xrg.size()>0){
+//                    Iterator it=xrg.iterator();
+//                    while(it.hasNext()){
+//                        TRegistroGiro g=(TRegistroGiro)it.next();
+//                        dao.delete(g);
+//                    }
+//                }
+//                Set xro=o.getTRegistroOtroses();
+//                if(xro.size()>0){
+//                    Iterator it=xro.iterator();
+//                    while(it.hasNext()){
+//                        TRegistroOtros oo=(TRegistroOtros)it.next();
+//                        dao.delete(oo);
+//                    }
+//                }
+//                Set xrp=o.getTRegistroPrestamos();
+//                if(xrp.size()>0){
+//                    Iterator it=xrp.iterator();
+//                    while(it.hasNext()){
+//                        TRegistroPrestamo p=(TRegistroPrestamo)it.next();
+//                        Set s=p.getTDetallePrestamos();
+//                        if(s.size()>0){
+//                            Iterator ii=s.iterator();
+//                            while(ii.hasNext()){
+//                                TDetallePrestamo dp=(TDetallePrestamo)ii.next();
+//                                Set xc=dp.getTCobranzas();
+//                                if(xc.size()>0){
+//                                    Iterator t=xc.iterator();
+//                                    while(t.hasNext()){
+//                                        TCobranza co=(TCobranza)t.next();
+//                                        TOperacion xo=co.getTOperacion();
+//                                        dao.delete(co);
+//                                        dao.delete(xo);
+//                                    }
+//                                }
+//                                dao.delete(dp);
+//                            }
+//                        }
+//                        Set c=p.getTContratos();
+//                        if(c.size()>0){
+//                            Iterator ii=c.iterator();
+//                            while(ii.hasNext()){
+//                                TContrato xc=(TContrato)ii.next();
+//                                dao.delete(xc);
+//                            }
+//                        }
+//                        dao.delete(p);
+//                    }
+//                }
+//                Set xtc=o.getTTransferenciaCajas();
+//                if(xtc.size()>0){
+//                    Iterator it=xtc.iterator();
+//                    while(it.hasNext()){
+//                        TTransferenciaCaja t=(TTransferenciaCaja)it.next();
+//                        dao.delete(t);
+//                    }
+//                }
+//                dao.delete(o);
+//            }
+//        }
+    }
+
+    public static String getDateAnt(Date date) {
+        SimpleDateFormat df;
+        String returnValue = "";
+        if (date != null) {
+            df = new SimpleDateFormat("yyyy/MM/dd");
+            Calendar a = Calendar.getInstance();
+            a.setTime(date);
+            a.add(Calendar.DATE, -1);
+            date = a.getTime();
+            returnValue = df.format(date);
+        }
+        return (returnValue);
+    }
+
+    public static String getDateMam(Date date) {
+        SimpleDateFormat df;
+        String returnValue = "";
+        if (date != null) {
+            df = new SimpleDateFormat("yyyy/MM/dd");
+            Calendar a = Calendar.getInstance();
+            a.setTime(date);
+            a.add(Calendar.DATE, 1);
+            date = a.getTime();
+            returnValue = df.format(date);
+        }
+        return (returnValue);
+    }
+}

@@ -1,0 +1,212 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.finance.bank.bean.TCaja;
+import org.finance.bank.bean.TDetalleCaja;
+import org.finance.bank.bean.TLogFinance;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TPersonaCaja;
+import org.finance.bank.bean.TTipoOperacion;
+import org.finance.bank.bean.TTransferenciaCaja;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+import org.finance.bank.util.formatFecha;
+import org.finance.bank.util.numeroOperacion;
+
+/**
+ *
+ * @author ronald
+ */
+public class SGrabarMonto extends HttpServlet {
+
+    /**
+     * Falta Modificar Manager Caja
+     * El servlet es para manejar transferencias en todas las monedas existentes...
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession(true);
+        String myCaja = session.getAttribute("USER_CODCAJA").toString();
+        String myId = session.getAttribute("USER_ID").toString();
+        String myIp = session.getAttribute("USER_IP").toString();
+        String perCaja = session.getAttribute("USER_ID_PERSONA_CAJA").toString();
+        String codFilial = session.getAttribute("USER_CODFILIAL").toString();
+        DAOGeneral dao = new DAOGeneral();
+        String idForInitNewestTable = DateUtil.convertDateId(perCaja, SGrabarMonto.class.getSimpleName());
+        try {
+            String codCaja = "";
+            if (request.getParameter("codCaja") != null && !request.getParameter("codCaja").equals("")) {
+                codCaja = request.getParameter("codCaja").toString();
+            }
+            String codM = "";
+            if (request.getParameter("codM") != null && !request.getParameter("codM").equals("")) {
+                codM = request.getParameter("codM").toString();
+            }
+            String codD = "";
+            if (request.getParameter("codD") != null && !request.getParameter("codD").equals("")) {
+                codD = request.getParameter("codD").toString();
+            }
+            List res = ListDetalle(codD);
+            Iterator itP = res.iterator();
+            while (itP.hasNext()) {
+                TDetalleCaja dcaja2 = (TDetalleCaja) itP.next();
+//                TDetalleCaja xdc = iniDetalleCaja.detalleActivaCaja(myCaja, dcaja2.getTMoneda().getCodMoneda(), DateUtil.getDate(new Date()));
+                //TDetalleCaja xdc = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(new Date()).replaceAll("/", "") + myCaja + dcaja2.getTMoneda().getCodMoneda() + "00");
+                TLogFinance xdc = (TLogFinance) dao.load(TLogFinance.class, "LOG" + myCaja + dcaja2.getTMoneda().getCodMoneda() );
+                BigDecimal montoCambio=xdc.getMontoFinal().subtract(dcaja2.getMontoFinal());
+                xdc.setMontoFinal(dcaja2.getMontoFinal());
+                xdc.setActivoCajaybanco(xdc.getActivoCajaybanco().subtract(montoCambio));
+                xdc.setMonto(xdc.getMonto().subtract(montoCambio));
+                dao.update();
+            }
+            List result = ListTranfer(codM);
+            Iterator it = result.iterator();
+            TCaja caja = (TCaja) dao.load(TCaja.class, myCaja);
+            while (it.hasNext()) {
+                TTransferenciaCaja ttcaja2 = (TTransferenciaCaja) it.next();
+                TPersonaCaja pcaja = (TPersonaCaja) dao.load(TPersonaCaja.class, perCaja);
+                TOperacion operacion = new TOperacion();
+                operacion.setIdOperacion(idForInitNewestTable);
+                operacion.setDescripcion(" TRANSFERENCIA INTERNA");
+                operacion.setFecha(formatFecha.get());
+                TTipoOperacion tipoOper = (TTipoOperacion) dao.load(TTipoOperacion.class, "TIPC9");
+                operacion.setTTipoOperacion(tipoOper);
+                operacion.setEstado("ACTIVO");
+                operacion.setNumeroOperacion(numeroOperacion.getNumber(codFilial, myCaja));
+                operacion.setTMoneda(ttcaja2.getTOperacion().getTMoneda());
+                operacion.setIdUser(myId + " SGrabarMonto.java");
+                operacion.setIpUser(myIp);
+                operacion.setDateUser(formatFecha.get());
+                operacion.setTPersonaCaja(pcaja);
+                operacion.setSaldofinal(BigDecimal.ZERO);
+                operacion.setSaldoFinalSinInteres(BigDecimal.ZERO);
+                operacion.setFd(new Date());
+                dao.persist(operacion);
+                TTransferenciaCaja ttcaja = new TTransferenciaCaja();
+                ttcaja.setIdtransferenciacaja(idForInitNewestTable);
+                ttcaja.setFecha(formatFecha.get());
+                ttcaja.setMonto(ttcaja2.getMonto());
+                ttcaja.setDescripcion(DateUtil.getDate(new Date()) + " *");
+                ttcaja.setCodCajaDestino(codCaja);
+                ttcaja.setTCaja(caja);
+                ttcaja.setTipo("PAGADO");
+                ttcaja.setIdUser(myId);
+                ttcaja.setIpUser(myIp);
+                ttcaja.setEstado("ACTIVO");
+                ttcaja.setDateUser(formatFecha.get());
+                ttcaja.setTOperacion(operacion);
+                ttcaja.setIdOperacion(operacion.getIdOperacion());
+                dao.persist(ttcaja);
+                TCaja cajadestino = (TCaja) dao.load(TCaja.class, codCaja);
+//                String dca = iniDetalleCaja.detalleActivaCaja(cajadestino.getCodCaja(), ttcaja.getTOperacion().getTMoneda().getCodMoneda());
+//                TDetalleCaja xdcUp = iniDetalleCaja.detalleActivaCaja(cajadestino.getCodCaja(), ttcaja.getTOperacion().getTMoneda().getCodMoneda(), DateUtil.getDate(new Date()));
+                //TDetalleCaja xdcUp = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(new Date()).replaceAll("/", "") + cajadestino.getCodCaja() + ttcaja.getTOperacion().getTMoneda().getCodMoneda() + "00");
+                TLogFinance xdcUp = (TLogFinance) dao.load(TLogFinance.class, "LOG" + cajadestino.getCodCaja() + ttcaja.getTOperacion().getTMoneda().getCodMoneda());
+                xdcUp.setMontoFinal(xdcUp.getMontoFinal().add(ttcaja.getMonto()));
+                xdcUp.setMontoRecibido(xdcUp.getMontoRecibido().add(ttcaja.getMonto()));
+                xdcUp.setActivoCajaybanco(xdcUp.getActivoCajaybanco().add(ttcaja.getMonto()));
+                xdcUp.setMonto(xdcUp.getMonto().add(ttcaja.getMonto()));
+                dao.update();
+            }
+        } finally {
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+    private static List ListTranfer(String str) {
+        DAOGeneral dao = new DAOGeneral();
+        String[] array = str.split("wxw");
+        List LdItem = new ArrayList();
+        for (int i = 0; i < array.length; i++) {
+            TTransferenciaCaja ttcaja = new TTransferenciaCaja();
+            String[] part = array[i].split("=");
+            TMoneda dep = (TMoneda) dao.load(TMoneda.class, part[0]);
+            TOperacion tof = new TOperacion();
+            tof.setTMoneda(dep);
+            ttcaja.setTOperacion(tof);
+            BigDecimal dec = new BigDecimal(part[1]);
+            ttcaja.setMonto(dec);
+            LdItem.add(ttcaja);
+        }
+        return LdItem;
+    }
+
+    private static List ListDetalle(String str) {
+        DAOGeneral dao = new DAOGeneral();
+        String[] array = str.split("wxw");
+        List LdItem = new ArrayList();
+        for (int i = 0; i < array.length; i++) {
+            TDetalleCaja dcaja = new TDetalleCaja();
+            String[] part = array[i].split("=");
+            TMoneda dep = (TMoneda) dao.load(TMoneda.class, part[0]);
+            dcaja.setTMoneda(dep);
+            BigDecimal dec;
+            if (part[1] == null) {
+                dec = BigDecimal.ZERO;
+                continue;
+            }
+            Logger.getLogger(SGrabarMonto.class.getName()).log(Level.INFO, "part[1] = " + part[1]);
+            dec = new BigDecimal(part[1]);
+            dcaja.setMontoFinal(dec);
+            LdItem.add(dcaja);
+        }
+        return LdItem;
+    }
+}

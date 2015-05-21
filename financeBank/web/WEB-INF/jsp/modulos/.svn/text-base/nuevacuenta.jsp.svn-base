@@ -1,0 +1,1031 @@
+<%--
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : roger
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank - Nueva Cuenta</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <script language="javascript" type="text/javascript">
+            function activarTicket(){
+                var answer = window.confirm ("¿Si Desea Primero suba imagen de foto o firma del Cliente?");
+                if (answer){
+                    document.frmiraticket.submit();
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function tean(){
+                var va=document.getElementById("txtTasa").value;
+                document.getElementById("im").innerHTML=round(100*(Math.pow(eeparseFloat(va)/100 + 1, 1.0 / 12) - 1.0), 4);
+                document.getElementById("tea").innerHTML=round(100*(Math.pow(1+eeparseFloat(document.getElementById("im").innerHTML)/100,12)-1), 4);
+                //document.getElementById("ia").innerHTML=round(100*(Math.pow(1 + eeparseFloat(va) / 1200, 12) - 1.0),4);
+                document.getElementById("id").innerHTML=round(100*(Math.pow(eeparseFloat(va)/100+ 1, 1.0 / 360) - 1.0), 8);
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req4;
+            function activarformfichero(){
+                req4 = null;
+                if (window.XMLHttpRequest) {
+                    req4 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req4!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/uploadFichero";
+                    req4.open("GET",url,true);
+                    req4.send(null);
+                }
+            }
+
+            function pprocesarRespuesta(){
+                contenido = document.getElementById('divficheroo');
+                contenido.innerHTML="Cargando los datos...";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req2;
+            function buscarcuenta(parameter,tipoB){
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesarRespuesta;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SNuevaCuenta?parameter="+parameter+"&tipoB="+tipoB;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function procesarRespuesta(){
+                contenido = document.getElementById('divtemporal');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                    var cad;
+                    cad=document.getElementById("divtemporal").innerHTML;
+                    if(cad!="NO ENCONTRADO"){
+                        document.getElementById('txtPersonaExiste').value="SI EXISTE";
+                        var tablita = cad.split("/");
+                        var direccion="",celular="",telefono="",ubigeo="",email="",ruc=document.getElementById("txtRUC").value;
+                        document.getElementById('txtdatapersona').value=tablita[0];
+                        document.getElementById('txtDNI').value=tablita[1];
+                        if(tablita[2]!=null){
+                            ruc=tablita[2];
+                        }
+                        document.getElementById('txtRUC').value=ruc;
+                        document.getElementById('txtNombre').value=tablita[3].replace("&amp;", "&", "gi");
+                        document.getElementById('txtApellidos').value=tablita[4];
+                        if(tablita[5]!=null){
+                            email=tablita[5];
+                        }
+                        document.getElementById('txtEmail').value=email;
+                        if(tablita[6]!=null){
+                            ubigeo=tablita[6];
+                        }
+                        document.getElementById('txtUbigeo').value=ubigeo;
+                        if(tablita[7]!=null){
+                            telefono=tablita[7];
+                        }
+                        document.getElementById('txtTelefono').value=telefono;
+                        if(tablita[8]!=null){
+                            celular=tablita[8];
+                        }
+                        document.getElementById('txtCelular').value=celular;
+                        if(tablita[9]!=null){
+                            direccion=tablita[9];
+                        }
+                        document.getElementById('txtDireccion').value=direccion;
+                    }else{
+                        document.getElementById('txtPersonaExiste').value="NO EXISTE";
+                        document.getElementById('txtdatapersona').value="";
+                        document.getElementById('txtRUC').value=document.getElementById("txtRUC").value;
+                        document.getElementById('txtNombre').value="";
+                        document.getElementById('txtApellidos').value="";
+                        document.getElementById('txtEmail').value="";
+                        document.getElementById('txtUbigeo').value="";
+                        document.getElementById('txtTelefono').value="";
+                        document.getElementById('txtCelular').value="";
+                        document.getElementById('txtDireccion').value="";
+                    }
+
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            function mostrarDataAPF(){
+                var tipocuenta="";
+                tipocuenta = document.getElementById("selTipoCuenta") [document.getElementById("selTipoCuenta").selectedIndex].value;
+                if(tipocuenta=="CPF"){
+                    document.getElementById("divNumDia").innerHTML="<font color='#385b88' style='font-size: 12px;'><b>Numero de Dias:</b></font>";
+                    document.getElementById("divNumeroDias").innerHTML="<input type='text' id='txtNumDias' name='txtNumDias' onkeypress='return solonumeros(event);' value='' maxlength='20' onblur='calcularTiempoPF();'>";
+                    document.getElementById("divTiempo").innerHTML="<font color='#385b88' style='font-size: 12px;'><b>Tiempo de Plazo Fijo:</b></font>";
+                    document.getElementById("divTipoTiempo").innerHTML="<input type='text' id='txtTiempoPF' name='txtTiempoPF' onkeypress='return solodecimales(event);' value='' maxlength='50' readonly>";
+                }else{
+                    document.getElementById("divNumDia").innerHTML="";
+                    document.getElementById("divNumeroDias").innerHTML="";
+                    document.getElementById("divTitulo").innerHTML="";
+                    document.getElementById("divTiempo").innerHTML="";
+                    document.getElementById("divTipoTiempo").innerHTML="";
+                }
+            }
+
+            var req5;
+            function calcularTiempoPF(){
+                var numdias;
+                numdias=document.getElementById("txtNumDias").value;
+                req5 = null;
+                if (window.XMLHttpRequest) {
+                    req5 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req5 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req5 != null){
+                    req5.onreadystatechange = pprocesar;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SCalcularPF?numdias="+numdias;
+                    req5.open("GET",url,true);
+                    req5.send(null);
+                }
+            }
+
+            function pprocesar(){
+                contenido = document.getElementById('divf');
+                contenido.innerHTML="Cargando los datos...";
+                if (req5.readyState==4 && req5.status==200) {
+                    contenido.innerHTML = req5.responseText;
+                }
+                document.getElementById("txtTiempoPF").value=document.getElementById("divf").innerHTML;
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            function activarform(){
+                if(document.getElementById("txtDNI").value!="" || document.getElementById("txtRUC").value!=""){
+                    var cat;
+                    if(document.getElementById("txtDNI").value!="")
+                        cat="N";
+                    else{
+                        cat="J";
+                    }
+                    var j;
+                    for (j=0;j<document.formulario.txtcategoria.length;j++){
+                        if (document.formulario.txtcategoria[j].checked)
+                            break;
+                    }
+                    var categoria = document.formulario.txtcategoria[j].value;
+                    if(cat=="N"){
+                        if(document.getElementById("txtNombre").value!=""){
+                            if(document.getElementById("txtApellidos").value!=""){
+                                if(document.getElementById("txtMontoInicial").value!=""){
+                                    if(document.getElementById("txtTasa").value!=""){
+                                        if("CPF"==document.getElementById("selTipoCuenta").value){
+                                            if(document.getElementById("txtNumDias").value!=""){
+                                                if(document.getElementById("txtTiempoPF").value!=""){                                                    
+                                                    var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR NUEVA CUENTA?");
+                                                    if (answer){
+                                                        document.formulario.action="SGenerarNuevaCuenta?selCategoriaPer="+categoria;
+                                                        document.formulario.submit();
+                                                        window.alert("Su cuenta se ha creado exitosamente");
+                                                        document.getElementById("cmdGuardar").disabled=true;
+                                                    }
+                                                }else{
+                                                    alert("Por favor ingrese Fecha Plazo Fijo");
+                                                    document.formulario.txtTiempoPF.focus();
+                                                }
+                                            }else{
+                                                alert("Por favor ingrese numero de dias Plazo Fijo");
+                                                document.formulario.txtNumDias.focus();
+                                            }
+                                        }else{
+                                            var answer = confirm ("¿ESTA SEGURO QUE DESEA REALIZAR REGISTRO?");
+                                            if (answer){
+                                                document.formulario.action="SGenerarNuevaCuenta?selCategoriaPer="+categoria;
+                                                document.formulario.submit();
+                                                alert("Su cuenta se ha creado exitosamente");
+                                                document.getElementById("cmdGuardar").disabled=true;
+                                            }
+                                        }
+                                    }else{
+                                        alert("Por favor Ingrese Interes");
+                                        document.formulario.txtTasa.focus();
+                                    }
+                                }else{
+                                    alert("Por favor Ingrese Monto Inicial");
+                                    document.formulario.txtMontoInicial.focus();
+                                }
+                            }else {
+                                alert("Por favor Ingrese sus Apellidos");
+                                document.formulario.txtApellidos.focus();
+                            }
+                        }else{
+                            alert("Por favor Ingrese su Nombre");
+                            document.formulario.txtNombre.focus();
+                        }
+                    }else{
+                        if(document.getElementById("txtNombre").value!=""){
+                            if(document.getElementById("txtMontoInicial").value!=""){
+                                if(document.getElementById("txtTasa").value!=""){
+                                    if("CPF"==document.getElementById("selTipoCuenta").value){
+                                        if(document.getElementById("txtNumDias").value!=""){
+                                            if(document.getElementById("txtTiempoPF").value!=""){
+                                                var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR NUEVA CUENTA?");
+                                                if (answer){
+                                                    document.formulario.action="SGenerarNuevaCuenta?selCategoriaPer="+categoria;
+                                                    document.formulario.submit();
+                                                    alert("Su cuenta se ha creado exitosamente");
+                                                    document.getElementById("cmdGuardar").disabled=true;
+                                                }
+                                            }else{
+                                                alert("Por favor ingrese Fecha Plazo Fijo");
+                                                document.formulario.txtTiempoPF.focus();
+                                            }
+                                        }else{
+                                            alert("Por favor ingrese numero de dias Plazo Fijo");
+                                            document.formulario.txtNumDias.focus();
+                                        }
+                                    }else{
+                                        var answer = confirm ("¿ESTA SEGURO QUE DESEA REALIZAR REGISTRO?");
+                                        if (answer){
+                                            document.formulario.action="SGenerarNuevaCuenta?selCategoriaPer="+categoria;
+                                            document.formulario.submit();
+                                            window.alert("Su cuenta se ha creado exitosamente");
+                                            document.getElementById("cmdGuardar").disabled=true;
+                                        }
+                                    }
+                                }else{
+                                    alert("Por favor Ingrese Interes");
+                                    document.formulario.txtTasa.focus();
+                                }
+                            }else{
+                                alert("Por favor Ingrese Monto Inicial");
+                                document.formulario.txtMontoInicial.focus();
+                            }
+                        }else {
+                            alert("Por favor Ingrese Razón Social");
+                            document.formulario.txtApellidos.focus();
+                        }
+                    }
+                }else{
+                    alert("Por favor Ingrese su DNI/RUC");
+                    document.formulario.txtDNI.focus();
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var eeisus=0;
+            var eetrue="VERDADERO";
+            var eefalse="FALSO";
+            var eedec=".";
+            var eeth=" ";
+            var eedecreg=new RegExp("\\.","g");
+            var eethreg=new RegExp(" ","g");
+            var eecurrencyreg=new RegExp("â¬","g");
+            var eepercentreg=new RegExp("%","g");
+            var fmtdaynamesshort=new Array("dom","lun","mar","miÃ©","jue","vie","sÃ¡b");
+            var fmtdaynameslong=new Array("domingo","lunes","martes","miÃ©rcoles","jueves","viernes","sÃ¡bado");
+            var fmtmonthnamesshort=new Array("ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic");
+            var fmtmonthnameslong=new Array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+            var fmtstrings=new Array(","," ","S/.","pta","â¬","/","$");
+            var fmtdate6=new Array(34,33,25,2);
+            var fmtdate7=new Array(25,2,33,35);
+            var fmtdate8=new Array(25,2,33,36);
+            var fmtdate9=new Array(7,37,3,37,11);
+            var fmtdate10=new Array(38,25,2);
+
+            function myIsNaN(x){
+                return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+            }
+
+            function round(n,nd){
+                if(isFinite(n)&&isFinite(nd)){
+                    var sign_n=(n<0)?-1:1;
+                    var abs_n=Math.abs(n);
+                    var factor=Math.pow(10,nd);
+                    return sign_n*Math.round(abs_n*factor)/factor;
+                }else{
+                    return NaN;
+                }
+            }
+
+            function b2s(b){
+                return b?eetrue:eefalse;
+            }
+
+            function eeparseFloat(str){
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeparsePercent(str){
+                var parts=String(str).split('%');
+                var tmp=String(parts[0]).replace(eedecreg,".");
+                var res=parseFloat(tmp)/100;if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+            function eedisplayFloat(x){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var str=String(x);
+                    if(near0RegExp.test(str)){
+                        x=round(x,8);
+                        str=String(x);
+                    }
+                    return str.replace(/\./g,eedec);
+                }
+            }
+
+            function eedisplayFloatV(x){
+                if(x=="")return x;
+                if(isFinite(x)){
+                    return eedisplayFloat(x);
+                }else{
+                    return x;
+                }
+            }
+
+            function eedisplayFloatND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }
+                    }else{
+                        return res;
+                    }
+                }
+            }
+
+            function eedisplayPercentND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    return eedisplayFloatND(x*100,nd)+'%';
+                }
+            }
+
+            function eeparseFloatTh(str){
+                str=String(str).replace(eethreg,"");
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eedisplayFloatNDTh(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        var res2=eeinsertThousand(parts[0].toString());
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }
+                    }else{
+                        return(eeinsertThousand(res.toString()));
+                    }
+                }
+            }
+
+            var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+            function eeparseFloatV(str){
+                if(str=="")
+                    return str;str=String(str).replace(eedecreg,".");
+                if(!eeparseFloatVreg.test(str)){
+                    return str;
+                }
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return str;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeinsertThousand(whole){
+                if(whole==""||whole.indexOf("e")>=0){
+                    return whole;
+                }else{
+                    var minus_sign="";
+                    if(whole.charAt(0)=="-"){
+                        minus_sign="-";
+                        whole=whole.substring(1);
+                    }
+                    var res="";
+                    var str_length=whole.length-1;
+                    for(var ii=0;ii<=str_length;ii++){
+                        if(ii>0&&ii%3==0){
+                            res=eeth+res;
+                        }
+                        res=whole.charAt(str_length-ii)+res;
+                    }
+                    return minus_sign+res;
+                }
+            }
+
+            function validar(e){
+                obj=e.srcElement || e.target;
+                tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo<14)return true;
+                patron =/[\d.]/;
+                tecla_valor = String.fromCharCode(tecla_codigo);
+                control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true
+                return patron.test(tecla_valor) &&  control;
+            }
+        </script>
+        <script type="text/javascript" language="JavaScript">
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i = j = 0;
+                var len = len2 = 0;
+                var strCheck = '0123456789';
+                var aux = aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode == 13) return true; // Enter
+                key = String.fromCharCode(whichCode); // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false; // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+
+            var req5;
+            function enviarsession(){
+                var foto,firma;
+                req5 = null;
+                if (window.XMLHttpRequest) {
+                    req5 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req5 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req5!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SFicheroup?sfoto="+foto+"&sfirma="+firma;
+                    req5.open("GET",url,true);
+                    req5.send(null);
+                }
+            }
+
+            function limpiar(){
+                document.getElementById("cmdsubir").disabled=true;
+            }
+
+            function waa(){
+                var asa;
+                window.alert(asa);
+            }
+        </script>
+        <script type="text/javascript">
+            function cleanx(er){
+                this.document.getElementById(er+'idpersona').value="";
+                this.document.getElementById(er+'RUC').value="";
+                this.document.getElementById(er+'DNI').value="";
+                this.document.getElementById(er+'Nombre').value="";
+                this.document.getElementById(er+'Apellidos').value="";
+                this.document.getElementById(er+'Email').value="";
+                this.document.getElementById(er+'Ubigeo').value="";
+                this.document.getElementById(er+'Telefono').value="";
+                this.document.getElementById(er+'Celular').value="";
+                this.document.getElementById(er+'Direccion').value="";
+            }
+
+            function naturalx(er){
+                cleanx(er)
+                this.document.getElementById(er+'RUC').disabled=true;
+                this.document.getElementById(er+'tr_dni').style.visibility='';
+                this.document.getElementById(er+'td_nombres').style.display='';
+                this.document.getElementById(er+'td_razonsocial').style.display='none';
+                this.document.getElementById(er+'tr_apellidos').style.visibility='';
+                this.document.getElementById(er+'tr_ubigeo').style.visibility='';
+                this.document.getElementById(er+'tr_dni').style.visibility='';
+            }
+
+            function juridicax(er){
+                this.document.getElementById(er+'RUC').disabled='';
+                cleanx(er)
+                this.document.getElementById(er+'tr_dni').style.visibility='hidden';
+                this.document.getElementById(er+'td_nombres').style.display='none';
+                this.document.getElementById(er+'td_razonsocial').style.display='';
+                this.document.getElementById(er+'tr_apellidos').style.visibility='hidden';
+                this.document.getElementById(er+'tr_ubigeo').style.visibility='hidden';
+                this.document.getElementById(er+'tr_dni').style.visibility='hidden';
+            }
+
+            function buscarpersonax(er){
+                var dni = document.getElementById(er+"DNI").value;
+                var ruc = document.getElementById(er+"RUC").value;
+                var j;
+                for (j=0;j<document.formulario.txtcategoria.length;j++){
+                    if (document.formulario.txtcategoria[j].checked)
+                        break;
+                }
+                var categoria = document.formulario.txtcategoria[j].value;
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/Sbuscarpersona?dni="+dni+"&categoria="+categoria+"&er="+er+"&ruc="+ruc;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = procesarRespuesta2x;
+                    req2.send(null);
+
+                }
+            }
+
+            function procesarRespuesta2x(){
+                contenido = document.getElementById('detalle');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    var values = new Array();
+                    var names;
+                    contenido.innerHTML = req2.responseText;
+                    var params = document.getElementById('detalle').innerHTML.split('-');
+                    for(i=0; i<params.length; i++) {
+                        names = params[i].split('=');
+                        values[names[0]] = names[1];
+                        document.getElementById(names[0]).value= names[1];
+                    }
+                }
+            }
+        </script>
+        <script type="text/javascript" src="js/validacion.js">
+        </script>
+        <script type="text/javascript" src="js/calendar/popcalendar.js">
+        </script>
+    </head>
+    <body onload="document.getElementById('txtcategoria').focus();">
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "20110228202911514866");
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>                
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Modulo Nueva Cuenta!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                            <%
+                                        String DNI = "";
+                                        if (request.getParameter("txtDNI") != null) {
+                                            DNI = request.getParameter("txtDNI");
+                                        }
+                                        String RUC = "";
+                                        if (request.getParameter("txtRUC") != null) {
+                                            RUC = request.getParameter("txtRUC");
+                                        }
+                                        String Nombre = "";
+                                        if (request.getParameter("txtNombre") != null) {
+                                            Nombre = request.getParameter("txtNombre");
+                                        }
+                                        String Apellidos = "";
+                                        if (request.getParameter("txtApellidos") != null) {
+                                            Apellidos = request.getParameter("txtApellidos");
+                                        }
+                                        String Email = "";
+                                        if (request.getParameter("txtEmail") != null) {
+                                            Email = request.getParameter("txtEmail");
+                                        }
+                                        String Ubigeo = "";
+                                        if (request.getParameter("txtUbigeo") != null) {
+                                            Ubigeo = request.getParameter("txtUbigeo");
+                                        }
+                                        String Telefono = "";
+                                        if (request.getParameter("txtTelefono") != null) {
+                                            Telefono = request.getParameter("txtTelefono");
+                                        }
+                                        String Celular = "";
+                                        if (request.getParameter("txtCelular") != null) {
+                                            Celular = request.getParameter("txtCelular");
+                                        }
+                                        String Direccion = "";
+                                        if (request.getParameter("txtDireccion") != null) {
+                                            Direccion = request.getParameter("txtDireccion");
+                                        }
+                                        String MontoInicial = "0.00";
+                                        if (request.getParameter("txtMontoInicial") != null) {
+                                            MontoInicial = request.getParameter("txtMontoInicial");
+                                        }
+                                        String Tasa = "0.00";
+                                        if (request.getParameter("txtTasa") != null) {
+                                            Tasa = request.getParameter("txtTasa");
+                                        }
+                                        String observacionn = "";
+                                        if (request.getParameter("observacion") != null) {
+                                            observacionn = request.getParameter("observacion");
+                                        }
+                                        String DNIapoderado = "";
+                                        if (request.getParameter("txtDNIapoderado") != null) {
+                                            DNIapoderado = request.getParameter("txtDNIapoderado");
+                                        }
+                                        String NombreApoderado = "";
+                                        if (request.getParameter("txtNombreApoderado") != null) {
+                                            NombreApoderado = request.getParameter("txtNombreApoderado");
+                                        }
+                                        String ApellidoApoderado = "";
+                                        if (request.getParameter("txtApellidoApoderado") != null) {
+                                            ApellidoApoderado = request.getParameter("txtApellidoApoderado");
+                                        }
+                                        String FechaNacApoderado = "";
+                                        if (request.getParameter("txtFechaNacApoderado") != null) {
+                                            FechaNacApoderado = request.getParameter("txtFechaNacApoderado");
+                                        }
+                                        /*String TiempoPF = "1";
+                                        if (request.getParameter("txtTiempoPF") != null) {
+                                            TiempoPF = request.getParameter("txtTiempoPF");
+                                        }*/
+                                        String banfichero = "";
+                                        if (request.getParameter("bansubirfichero") == null) {
+                                            banfichero = "0";
+                                        } else {
+                                            banfichero = "1";
+                                        }
+                                        if (banfichero.equals("1")) {
+                                            String idper = (String) session.getAttribute("id_user_PK");
+                                            TPersona pers = (TPersona) d.findAll("from TPersona pe where pe.idUserPk='" + idper + "'").get(0);
+                            %>
+                    <br>
+                    <br>
+                    <div id="divVerTicket">
+                        <form id="frmiraticket" name="frmiraticket" method="post" action="ticket.htm">
+                            <center>NUMERO DE CUENTA: <%=request.getParameter("numcuent")%><br><input id="txtVerTicket" name="txtVerTicket" type="button" value="Ticket" onclick="activarTicket();"></center>
+                        </form>
+                    </div>
+                    <div id="divsubirfichero">
+                        <form id="frmsubirfile" name="frmsubirfile" method="POST" action="uploadFichero" enctype='multipart/form-data'>
+                            <fieldset   style="border-width:3px">
+                                <legend><b>Si Dispone de una foto o firma digital del Usuario puede subirla:</b></legend>
+                                <table>
+                                    <tr>
+                                        <td colspan="2">
+                                        </td>
+                                    </tr>
+                                    <%
+                                                                                if (!pers.getUrlFoto().equals(".")) {
+                                    %>
+                                    <tr>
+                                        <td colspan="2">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><font color="red" style="font-size: 12px;"><b><%=pers.getNombre()%> <%=pers.getApellidos()%> ya posee FOTO</b></font></td>
+                                    </tr>
+                                    <%
+                                                                                }
+                                    %>
+                                    <tr>
+                                        <td><font color="#385b88" style="font-size: 12px;"><b>BUSCAR FOTO:</b></font></td>
+                                        <td><input type="file" id="ExaminarFoto" name="ExaminarFoto" value="" maxlength="200" onfocus="enviarsession();" accept="image/jpg;image/jpeg;image/gif;image/png;image/bmp"/></td>
+                                    </tr>
+                                    <%
+                                                                                if (!pers.getUrlFirma().equals(".")) {
+                                    %>
+                                    <tr>
+                                        <td colspan="2">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><font color="red" style="font-size: 12px;"><b><%=pers.getNombre()%> <%=pers.getApellidos()%> ya psee FIRMA</b></font></td>
+                                    </tr>
+                                    <%}%>
+                                    <tr>
+                                        <td><font color="#385b88" style="font-size: 12px;"><b>BUSCAR FIRMA:</b></font></td>
+                                        <td><input type="file" id="ExaminarFirma" name="ExaminarFirma" value="" onfocus="enviarsession();" maxlength="200"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input id="cmdsubir" type="submit" value="Subir" disabled <%--onclick="activarformfichero()"--%> >
+                                            <input type="button" id="cmdLimpiar" value="Limpiar" onclick="limpiar();" disabled>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <%}%>
+                    <div class="story">
+                        <form id="formulario" name="formulario" action="SGenerarNuevaCuenta" method="post">
+                            <table >
+                                <tr>
+                                    <td colspan="2"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="divtemporal" style="display:none"></div>
+                                        <div id="divDatosPersonales">
+                                            <fieldset   style="border-width:3px">
+                                                <legend><b>DATOS PERSONALES</b></legend>
+                                                <table id="tablaDatosPersonales" border="0">
+                                                    <tr>
+                                                        <td colspan="2" align="center"><input type="text" id="txtPersonaExiste" name="txtPersonaExiste" value="NO EXISTE" style="display:none"><input id="txtidpersona" type='hidden' value="" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><font color="#385B88" style="font-size:12px"><b>Categoria&nbsp;</b></font></td>
+                                                        <td align='left'>
+                                                            <%
+                                                                        String er = "txt";
+                                                                        //sess = sessFact.openSession();
+                                                                        List result = d.findAll("from TCategoriaPersona");
+                                                                        //Query query = query.list();
+                                                                        Iterator it4 = result.iterator();
+                                                                        int j = 0;
+                                                                        String check = "onclick=\"juridicax('" + er + "')\"";
+                                                                        while (it4.hasNext()) {
+                                                                            if (j == 0) {
+                                                                                check = "checked onclick=\"naturalx('" + er + "')\"";
+                                                                            } else {
+                                                                                check = "onclick=\"juridicax('" + er + "')\"";
+                                                                            }
+                                                                            TCategoriaPersona cate = (TCategoriaPersona) it4.next();
+                                                                            out.println(cate.getDescripcion() + "<input type='radio' name='txtcategoria' id='txtcategoria' value='" + cate.getIdcategoriapersona() + "' " + check + "  />");
+                                                                            j++;
+                                                                        }
+                                                            %>
+                                                        </td>
+                                                    </tr>
+                                                    <tr id="txttr_dni">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>DNI N&deg;:</b></font></td>
+                                                        <td><table><tr><td><input type="text" id="txtDNI" name="txtDNI" value="<%=DNI%>" onkeypress="return solonumeros(event);" maxlength="8" onblur="buscarcuenta(document.getElementById('txtDNI').value,'DNI');" /></td><td style="color: red">*</td></tr></table></td>
+                                                    </tr>
+                                                    <tr id="txttr_ruc">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>RUC:</b></font></td>
+                                                        <td><input type="text" disabled="true" id="txtRUC" name="txtRUC" value="<%=RUC%>" onkeypress="return solonumeros(event);" maxlength="15" onblur="buscarcuenta(document.getElementById('txtRUC').value,'RUC');" /></td>
+                                                    </tr>
+                                                    <tr id="txttr_nombres">
+                                                        <td align='left'><table><tr>
+                                                                    <td align='left' id="txttd_nombres"> <font color="#385b88" style="font-size: 12px;"><b>Nombre:</b></font></td>
+                                                                    <td align='left' id="txttd_razonsocial"  style='display:none'>
+                                                                        <font color="#385B88" style="font-size:12px"><b>Razon Social:</b></font>
+                                                                    </td></tr></table></td>
+                                                        <td><input type="text" id="txtNombre" name="txtNombre" value="<%=Nombre%>" maxlength="60" /><font color='red'>*</font></td>
+                                                    </tr>
+                                                    <tr id="txttr_apellidos">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>Apellidos:</b></font></td>
+                                                        <td><table><tr><td><input type="text" id="txtApellidos" name="txtApellidos" value="<%=Apellidos%>" maxlength="60"/></td><td style="color:red">*</td></tr></table></td>
+                                                    </tr>
+                                                    <tr id="txttr_email">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>E-mail:</b></font></td>
+                                                        <td><input type="text" id="txtEmail" name="txtEmail" value="<%=Email%>" maxlength="50" /></td>
+                                                    </tr>
+                                                    <tr id="txttr_ubigeo">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>Ubigeo</b></font></td>
+                                                        <td><input type="text" id="txtUbigeo" name="txtUbigeo" value="<%=Ubigeo%>" onkeypress="return solonumeros(event);" maxlength="6"/></td>
+                                                    </tr>
+                                                    <tr id="txttr_telefono">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>Telefono:</b></font></td>
+                                                        <td><input type="text" id="txtTelefono" name="txtTelefono" value="<%=Telefono%>" onkeypress="return soloNumeroTelefonico(event);" maxlength="100"/></td>
+                                                    </tr>
+                                                    <tr id="txttr_celular">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>Celular:</b></font></td>
+                                                        <td><input type="text" id="txtCelular" name="txtCelular" value="<%=Celular%>" maxlength="100"/></td>
+                                                    </tr>
+                                                    <tr id="txttr_direccion">
+                                                        <td><font color="#385b88" style="font-size: 12px;"><b>Direccion:</b></font></td>
+                                                        <td><input type="text" id="txtDireccion" name="txtDireccion" value="<%=Direccion%>" maxlength="100" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><input type="text" id="txtdatapersona" name="txtdatapersona" value="" maxlength="200" style="display:none"/></td>
+                                                    </tr>
+                                                </table>
+                                            </fieldset>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <fieldset style="border-width:3px">
+                                            <legend><b>DATOS DE LA CUENTA</b></legend>
+                                            <table id="tablaCuentaPersona" border="0">
+                                                <tr>
+                                                    <td colspan="2">&nbsp;</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Tipo de cuenta:</b></font></td>
+                                                    <td >
+                                                        <select id="selTipoCuenta" name="selTipoCuenta" onChange="mostrarDataAPF()">
+                                                            <%
+                                                                        List result2 = d.findAll("from TTipoCuenta");
+                                                                        Iterator iter = result2.iterator();
+                                                                        while (iter.hasNext()) {
+                                                                            TTipoCuenta tipocuenta = (TTipoCuenta) iter.next();
+                                                                            out.println("<option value='" + tipocuenta.getCodigoCuenta() + "'>" + tipocuenta.getDescripcion() + "</option>");
+                                                                        }
+                                                            %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Moneda:</b></font></td>
+                                                    <td>
+                                                        <select id="lstMoneda" name="lstMoneda">
+                                                            <%
+                                                                        List result3 = d.findAll("from TMoneda");
+                                                                        Iterator itera = result3.iterator();
+                                                                        while (itera.hasNext()) {
+                                                                            TMoneda moneda = (TMoneda) itera.next();
+                                                                            out.println("<option value='" + moneda.getCodMoneda() + "'>" + moneda.getNombre() + "</option>");
+                                                                        }
+                                                            %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Monto Inicial:</b></font></td>
+                                                    <td><input type="text" id="txtMontoInicial" name="txtMontoInicial" value="<%=MontoInicial%>" onfocus="this.select();" onblur="this.value=eedisplayFloatNDTh(eeparseFloatTh(this.value),2);" onkeypress="return validar(event);" maxlength="23"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td ><input type="button" value="Limpiar monto" onclick="document.getElementById('txtMontoInicial').value=''; document.getElementById('txtMontoInicial').focus();" ></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="checkbox" id="txtradius"  value="SIN INTERES" onclick="if(document.getElementById('txtradius').checked==true){document.getElementById('txtTasa').disabled=true; document.getElementById('txtTasa').value='0.00';} else{ document.getElementById('txtTasa').disabled=false;}" > Sin Tasa de Interes:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Tasa Inter&eacute;s</b></font></td>
+                                                    <td><input type="text" id="txtTasa" name="txtTasa" onkeyup="tean();" value="<%=Tasa%>" maxlength="12" onfocus="this.select()" onkeypress="return validar(event);" onchange="range = /^\d{1,3}(\.\d{1,3})?$/;
+                                                        hundred = /^1000$/;
+                                                        if(!(range.test(this.value) || hundred.test(this.value))){alert('La tasa de interés es inválida.'); document.getElementById('txtTasa').focus();};"/><font color="#385b88" style="font-size: 12px;"><b>% ANUAL</b></font>
+                                                        <br/>
+                                                        EFECTIVO (TEA/TAE):<span id="tea">0.00</span>%
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2"><div id="divTitulo"></div></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><div id="divNumDia"></div></td>
+                                                    <td><div id="divNumeroDias"></div></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><div id="divTiempo"></div></td>
+                                                    <td><div id="divTipoTiempo"></div></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Observaciones:</b></font></td>
+                                                    <td><textarea id="observacion" name="observacion" rows="2" cols="26" maxlength="500"><%=observacionn%></textarea></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Int. mensual:</td>
+                                                    <td><span id="im">0.00</span>% Mensual</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Int. DIARIO: </td>
+                                                    <td><span id="id">0.00</span>% DIARIO</td>
+                                                </tr>
+                                            </table>
+                                        </fieldset>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <fieldset style="border-width:3px">
+                                            <legend><b>EN CASO DE URGENCIA:</b></legend>
+                                            <table border="0">
+                                                <tr>
+                                                    <td colspan="2">&nbsp;</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2"><b>APODERADO</b></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>DNI N&deg;</b></font></td>
+                                                    <td><input type="text" id="txtDNIapoderado" name="txtDNIapoderado" value="<%=DNIapoderado%>" onkeypress="return solonumeros(event);"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Nombre:</b></font></td>
+                                                    <td><input type="text" id="txtNombreApoderado" name="txtNombreApoderado" value="<%=NombreApoderado%>" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Apellido</b></font></td>
+                                                    <td><input type="text" id="txtApellidoApoderado" name="txtApellidoApoderado" value="<%=ApellidoApoderado%>" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><font color="#385b88" style="font-size: 12px;"><b>Fecha Nacimiento:</b></font></td>
+                                                    <td><input type="text" id="txtFechaNacApoderado" name="txtFechaNacApoderado" value="<%=FechaNacApoderado%>" onclick="popUpCalendar(this, formulario.txtFechaNacApoderado , 'dd/mm/yyyy');" /></td>
+                                                </tr>
+                                            </table>
+                                        </fieldset>
+                                    </td>
+                                </tr>
+                            </table>
+                            <center>
+                                <table>
+                                    <tr>
+                                        <td><input type="hidden" value="1" name="save"><center><input id="cmdGuardar" type="button" onclick="activarform();" value="Guardar Registro" <%if (banfichero.equals("1")) {%>disabled<%}%>></center></td>
+                                    </tr>
+                                </table>
+                            </center>
+                            <input type="hidden" value="" id="bansubirfichero" name="bansubirfichero">
+                        </form>
+                        <div id="divf"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

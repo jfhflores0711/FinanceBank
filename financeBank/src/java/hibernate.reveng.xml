@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd">
+<hibernate-reverse-engineering>
+  <schema-selection match-catalog="financebank" match-schema="public"/>
+  <table-filter match-name="t_persona_caja"/>
+  <table-filter match-name="t_registro_prestamo"/>
+  <table-filter match-name="t_caja"/>
+  <table-filter match-name="t_sesion"/>
+  <table-filter match-name="t_transaccion"/>
+  <table-filter match-name="t_categoria_persona"/>
+  <table-filter match-name="sumasnashot"/>
+  <table-filter match-name="t_cuenta_persona"/>
+  <table-filter match-name="t_log_finance"/>
+  <table-filter match-name="t_garantia_cliente"/>
+  <table-filter match-name="t_operacion"/>
+  <table-filter match-name="t_denominacion_moneda"/>
+  <table-filter match-name="t_moneda"/>
+  <table-filter match-name="t_persona"/>
+  <table-filter match-name="t_control_modulo"/>
+  <table-filter match-name="t_tipo_credito"/>
+  <table-filter match-name="t_filial"/>
+  <table-filter match-name="t_bloqueo"/>
+  <table-filter match-name="t_detalle_caja"/>
+  <table-filter match-name="t_detalle_intereses"/>
+  <table-filter match-name="t_cargos_admin"/>
+  <table-filter match-name="t_control_tipo"/>
+  <table-filter match-name="t_tipo_operacion"/>
+  <table-filter match-name="t_balancexmoneda"/>
+  <table-filter match-name="t_detalle_prestamo"/>
+  <table-filter match-name="t_tipo_cambio"/>
+  <table-filter match-name="t_registro_otros"/>
+  <table-filter match-name="t_departamento"/>
+  <table-filter match-name="t_detalle_suma"/>
+  <table-filter match-name="t_contrato"/>
+  <table-filter match-name="t_registro_giro"/>
+  <table-filter match-name="t_cobranza"/>
+  <table-filter match-name="t_utilidad"/>
+  <table-filter match-name="t_patrimonio_transit"/>
+  <table-filter match-name="t_cargos_prestamo"/>
+  <table-filter match-name="t_distrito"/>
+  <table-filter match-name="t_suma_moneda"/>
+  <table-filter match-name="t_tipo_cuenta"/>
+  <table-filter match-name="t_historial_cuenta_persona"/>
+  <table-filter match-name="t_provincia"/>
+  <table-filter match-name="t_modulo"/>
+  <table-filter match-name="t_registro_compra_venta"/>
+  <table-filter match-name="t_tipo_garantia"/>
+  <table-filter match-name="t_sobregiro"/>
+  <table-filter match-name="t_detalle_cuenta_persona"/>
+  <table-filter match-name="t_cuenta_acceso"/>
+  <table-filter match-name="t_tipo_persona"/>
+  <table-filter match-name="t_certificado"/>
+  <table-filter match-name="t_transaccion_c"/>
+  <table-filter match-name="t_registro_deposito_retiro"/>
+  <table-filter match-name="t_transferencia_caja"/>
+  <table-filter match-name="t_tasa"/>
+</hibernate-reverse-engineering>

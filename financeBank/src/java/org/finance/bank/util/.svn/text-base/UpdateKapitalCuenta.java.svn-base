@@ -1,0 +1,28 @@
+package org.finance.bank.util;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+/**
+ *
+ * @author ZAMORA
+ */
+public class UpdateKapitalCuenta {
+
+    public UpdateKapitalCuenta() {
+    }
+
+    public static Double CalcularInteresDiario(double iANUAL) {
+        double iTEAD;
+        double iD = iANUAL / 100;
+        BigDecimal h = new BigDecimal(iD);
+        iTEAD = (StrictMath.pow((h.doubleValue() + (new BigDecimal(BigInteger.ONE)).doubleValue()), (1D / 360D)));
+        return iTEAD - 1;
+    }
+
+    public static Double CalcularNuevoSaldo(double K, double iTEAD, int n) {
+        double NK;
+        NK = K * (Math.pow((1D + iTEAD), n));
+        return NK;
+    }
+}

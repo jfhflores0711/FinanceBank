@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TRegistroDepositoRetiro" table="t_registro_deposito_retiro" schema="public">
+        <id name="iddepositoretiro" type="string">
+            <column name="iddepositoretiro" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCuentaPersona" class="org.finance.bank.bean.TCuentaPersona" fetch="select">
+            <column name="idcuentapersona" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TOperacion" class="org.finance.bank.bean.TOperacion" fetch="select">
+            <column name="id_operacion" length="41" not-null="true" />
+        </many-to-one>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" not-null="true" />
+        </property>
+        <property name="numCta" type="string">
+            <column name="num_cta" length="30" not-null="true" />
+        </property>
+        <property name="importe" type="big_decimal">
+            <column name="importe" precision="20" not-null="true" />
+        </property>
+        <property name="nombreRepresentante" type="string">
+            <column name="nombre_representante" length="200" />
+        </property>
+        <property name="apellidosRepresentante" type="string">
+            <column name="apellidos_representante" length="200" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="numeroCheque" type="string">
+            <column name="numero_cheque" length="20" />
+        </property>
+        <property name="numDias" type="string">
+            <column name="num_dias" length="10" />
+        </property>
+        <property name="dniRepresentante" type="string">
+            <column name="dni_representante" length="12" />
+        </property>
+        <property name="fechaNacRepresentante" type="string">
+            <column name="fecha_nac_representante" length="50" />
+        </property>
+        <set name="TCertificados" inverse="true">
+            <key>
+                <column name="iddepositoretiro" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCertificado" />
+        </set>
+    </class>
+</hibernate-mapping>

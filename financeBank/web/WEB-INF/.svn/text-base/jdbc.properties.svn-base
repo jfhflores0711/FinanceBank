@@ -1,0 +1,7 @@
+# To change this template, choose Tools | Templates
+# and open the template in the editor.
+
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.url=jdbc:postgresql://localhost:5432/financebank
+jdbc.username=financebank
+jdbc.password=UfFfYvXs

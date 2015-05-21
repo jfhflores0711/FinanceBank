@@ -1,0 +1,854 @@
+<%-- 
+    Document   : managerdh.jsp
+    Created on : 07-abr-2010, 9:37:57
+    Author     : oscar
+--%>
+
+<%@page session="true" import="org.finance.bank.util.*,org.finance.bank.model.*,java.util.*, java.math.*,java.io.*"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href="css/francesGral.css" rel="stylesheet" type="text/css" media="All">
+        <link href="css/tabla.css" rel="stylesheet" type="text/css" media="screen">
+        <link href="css/francesScreen.css" rel="stylesheet" type="text/css" media="screen">
+        <link href="css/francesPrint.css" rel="stylesheet" type="text/css" media="print">
+        <style type="text/css" media="print">
+            .eebuttonbar_top {
+                display:none;
+            }
+            .eebuttonbar_bottom {
+                display:none;
+            }
+            #dh{
+                display:none;
+            }
+            #footer{
+                display: none;
+            }
+            #sidebar {
+                display:none;
+                width:0px;
+            }
+            #logo {
+                display:none;
+            }
+            .conf{
+                display:block;
+            }
+            #main{
+                width: 1050px;
+                margin: -20px;
+                font-size: 7pt;
+            }
+            #panel1{
+                font-size: 7pt;
+            }
+            .tabla{
+                font-size: 7pt;
+            }
+            .ee115{
+                font-size: 7pt;
+            }
+            .modo1{
+                font-size: 7pt;
+            }
+            .modo2{
+                font-size: 7pt;
+            }
+
+        </style>
+        <script type="text/javascript">
+            //Script original de KarlanKas para forosdelweb.com
+            if (history.forward(1)){location.replace(history.forward(1))}
+        </script>
+        <script type="text/javascript">
+            <!-- //Begin
+            function formatCurrency(num) {
+                num = num.toString().replace(/\$|\,/g,'');
+                if(isNaN(num)) num = "0";
+                cents = Math.floor((num*100+0.5)%100);
+                num = Math.floor(num).toString();
+                if(cents < 10) cents = "0" + cents;
+                for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+                    num = num.substring(0,num.length-(4*i+3))+','+num.substring(num.length-(4*i+3));
+                return (num + '.' + cents);
+            }
+            // End -->
+        </script>
+        <script type="text/javascript">
+            <!--//Begin
+            function abrir(){
+                window.alert("Es importante que todos cierren la caja,\n para manejar con más precisión los cálculos");
+                document.getElementById("await").innerHTML="<img src='images/ajax/await.gif' alt='Cargando...'>"
+            }
+            // End -->
+        </script>
+        <script type="text/javascript">
+            function letras(c,d,u){
+                var centenas,decenas,decom;
+                var lc="";
+                var ld="";
+                var lu="";
+                centenas=eval(c);
+                decenas=eval(d);
+                decom=eval(u);
+                switch(centenas){
+                    case 0: lc="";break;
+                    case 1:
+                        if (decenas==0 && decom==0)
+                            lc="Cien";
+                        else
+                            lc="Ciento ";
+                        break;
+                    case 2: lc="Doscientos ";break;
+                    case 3: lc="Trescientos ";break;
+                    case 4: lc="Cuatrocientos ";break;
+                    case 5: lc="Quinientos ";break;
+                    case 6: lc="Seiscientos ";break;
+                    case 7: lc="Setecientos ";break;
+                    case 8: lc="Ochocientos ";break;
+                    case 9: lc="Novecientos ";break;
+                }
+                switch(decenas){
+                    case 0: ld="";break;
+                    case 1:
+
+                        switch(decom){
+                            case 0:ld="Diez";break;
+                            case 1:ld="Once";break;
+                            case 2:ld="Doce";break;
+                            case 3:ld="Trece";break;
+                            case 4:ld="Catorce";break;
+                            case 5:ld="Quince";break;
+                            case 6:ld="Dieciseis";break;
+                            case 7:ld="Diecisiete";break;
+                            case 8:ld="Dieciocho";break;
+                            case 9:ld="Diecinueve";break;
+                        }
+                        break;
+                    case 2:ld="Veinte";break;
+                    case 3:ld="Treinta";break;
+                    case 4:ld="Cuarenta";break;
+                    case 5:ld="Cincuenta";break;
+                    case 6:ld="Sesenta";break;
+                    case 7:ld="Setenta";break;
+                    case 8:ld="Ochenta";break;
+                    case 9:ld="Noventa";break;
+                }
+                switch(decom){
+                    case 0: lu="";break;
+                    case 1: lu="Un";break;
+                    case 2: lu="Dos";break;
+                    case 3: lu="Tres";break;
+                    case 4: lu="Cuatro";break;
+                    case 5: lu="Cinco";break;
+                    case 6: lu="Seis";break;
+                    case 7: lu="Siete";break;
+                    case 8: lu="Ocho";break;
+                    case 9: lu="Nueve";break;
+                }
+                if (decenas==1){
+                    return lc+ld;
+                }
+                if (decenas==0 || decom==0){
+                    return lc+" "+ld+lu;
+                }
+                else{
+                    if(decenas==2){
+                        ld="Veinti";
+                        return lc + ld + lu.toLowerCase();
+                    } else {
+                        return lc+ld+" y "+lu
+                    }
+                }
+            }
+            function getNumberLiteral(n){
+                var m0,cm,dm,um,cmi,dmi,umi,ce,de,un,hlp,decimal;
+                if (isNaN(n)) {
+                    alert("La Cantidad debe ser un valor Numérico.");
+                    return null
+                }
+                m0= parseInt(n/ 1000000000000); rm0=n% 1000000000000;
+                m1= parseInt(rm0/100000000000); rm1=rm0%100000000000;
+                m2= parseInt(rm1/10000000000); rm2=rm1%10000000000;
+                m3= parseInt(rm2/1000000000); rm3=rm2%1000000000;
+                cm= parseInt(rm3/100000000); r1= rm3%100000000;
+                dm= parseInt(r1/10000000); r2= r1% 10000000;
+                um= parseInt(r2/1000000); r3= r2% 1000000;
+                cmi=parseInt(r3/100000); r4= r3% 100000;
+                dmi=parseInt(r4/10000); r5= r4% 10000;
+                umi=parseInt(r5/1000); r6= r5% 1000;
+                ce= parseInt(r6/100); r7= r6% 100;
+                de= parseInt(r7/10); r8= r7% 10;
+                un= parseInt(r8/1);
+                if (n< 1000000000000 && n>=1000000000){
+                    tmp=n.toString();
+                    s=tmp.length;
+                    tmp1=tmp.slice(0,s-9);
+                    tmp2=tmp.slice(s-9,s);
+                    tmpn1=getNumberLiteral(tmp1);
+                    tmpn2=getNumberLiteral(tmp2);
+                    if(tmpn1.indexOf("Un")>=0)
+                        pred=" Billón ";
+                    else
+                        pred=" Billones ";
+                    return tmpn1+ pred +tmpn2;
+                }
+                if (n<10000000000 && n>=1000000){
+                    mldata=letras(cm,dm,um);
+                    hlp=mldata.replace("Un","*");
+                    if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                        mldata=mldata.replace("Uno","un");
+                        mldata+=" Millones ";
+                    } else {
+                        mldata="Un Millón ";
+                    }
+                    mdata=letras(cmi,dmi,umi);
+                    cdata=letras(ce,de,un);
+                    if(mdata!="	") {
+                        if (n == 1000000) {
+                            mdata=mdata.replace("Uno","un") + "de";
+                        } else {
+                            mdata=mdata.replace("Uno","un")+" mil ";
+                        }
+                    }
+                    return (mldata+mdata+cdata);
+                }
+                if (n<1000000 && n>=1000){
+                    mdata=letras(cmi,dmi,umi);
+                    cdata=letras(ce,de,un);
+                    hlp=mdata.replace("Un","*");
+                    if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                        mdata=mdata.replace("Uno","un");
+                        return (mdata +" mil "+cdata);
+                    }else{
+                        return ("Mil "+ cdata);
+                    }
+                }
+                if (n<1000 && n>=1){
+                    return (letras(ce,de,un));
+                } 
+                if (n==0) {
+                    return " Cero";
+                }
+                return "No disponible"
+            }
+        </script>
+        <%
+                    boolean autorizacion = false;
+                    //Variables de validacion.
+                    String tmp;
+                    /**Para responder reenvíos desde un refresh anterior*/
+                    String moneda = null; /*Moneda, sólo con fines de validacion, no se necesita, ya que se carga a traves de la cuenta persona*/
+                    String submited = null;/*Para responder a la petición de cargar toda la transacion y finalizar la operacion*/
+                    //carga de valores iniciales.
+                    TCuentaPersona tcp;
+                    TPersona tp;
+                    //TRegistroGiro trg;
+                    tmp = request.getParameter("postback");
+                    submited = request.getParameter("submit_bottom");
+                    if (session.getAttributeNames().hasMoreElements()) {
+                        /* not first time */
+                        if (tmp != null && submited != null) {
+                            /* it wasn't a reset */
+                            autorizacion = true;
+                        }
+                    } else {
+                        if (response.isCommitted()) {
+                            out.println("<script language='JavaScript' type='text/javascript'>var pagina='" + request.getContextPath() + "/principal.htm?mensaje=Inicie+una+nueva+sesion.'; "
+                                    + "function redireccionar() {location.href=pagina;} setTimeout ('redireccionar()', 50);</script>");
+                        } else {
+                            response.sendRedirect("principal.htm?mensaje=Inicie+una+nueva+sesion.");
+                        }
+                        if (session.getAttributeNames().hasMoreElements()) {
+                            session.invalidate();
+                        }
+                    }
+        %>
+        <style type="text/css" media="screen">
+            #content{
+                width:1230px;
+            }
+            #sidebar{
+                width:200px;
+            }
+            #main{
+                width:1000px
+            }
+        </style>
+    </head><!-- Header end -->
+    <body onload="document.getElementById('debehaber').focus();">
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "20110228202911466912");
+        %>
+        <%
+                    String mensaje = "";
+                    Set debe = new HashSet();
+                    Set haber = new HashSet();
+                    Set data = new HashSet();
+                    if (autorizacion) {
+                        TMoneda tm = null;
+                        String hqlMonedas = "from TMoneda where estado='ACTIVO' order by codMoneda";
+                        List resultm = d.findAll(hqlMonedas);
+                        Iterator itm = resultm.iterator();
+                        int tcpsizem = resultm.size();
+                        while (itm.hasNext()) {
+                            tm = (TMoneda) itm.next();
+                            data.add(tm);
+                        }
+                        if (tm != null && tcpsizem > 0) {
+                            String hql = "from TPersona p where p.estado='ACTIVO' order by apellidos, nombre";
+                            List result = d.findAll(hql);
+                            Iterator it = result.iterator();
+                            int tpsize = result.size();
+                            if (tpsize > 0) {
+                                while (it.hasNext()) {
+                                    tp = (TPersona) it.next();
+                                    System.out.println("expPer = " + tp.getApellidos());
+                                    Iterator itTCP = tp.getTCuentaPersonas().iterator();
+                                    //Iterator itTRG = tp.getTRegistroGiros().iterator();
+                                    Vector experimentoplus = new Vector();
+                                    Vector experimentonegative = new Vector();
+                                    Vector moneyD = new Vector();
+                                    Vector moneyH = new Vector();
+                                    Set debeTCP = new HashSet();
+                                    Set haberTCP = new HashSet();
+                                    Set debeTRG = new HashSet();
+                                    while (itTCP.hasNext()) {
+                                        tcp = (TCuentaPersona) itTCP.next();
+                                        if ("PRESTAMO".equals(tcp.getEstado()) || "SOBREGIRO".equals(tcp.getEstado()) || ("ACTIVO".equals(tcp.getEstado())) && !tcp.getSaldoSinInteres().equals(BigDecimal.ZERO)) {
+                                            System.out.println("exp = " + tcp.getNumCta() + tcp.getTPersona().getNombre());
+                                            if (tcp.getSaldoSinInteres().doubleValue() > 0.0D) {
+                                                debeTCP.add(tcp);
+                                            } else {
+                                                if (tcp.getSaldoSinInteres().doubleValue() != 0.0D) {
+                                                    haberTCP.add(tcp);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    /*while (itTRG.hasNext()) {
+                                        trg = (TRegistroGiro) itTRG.next();
+                                        try {
+                                            tp = (TPersona) d.load(TPersona.class, trg.getIdUserPkDestino());
+                                        } catch (HibernateException excep) {
+                                        }
+                                        if (("ESPERA".equals(trg.getEstado()) && !trg.getImporte().equals(BigDecimal.ZERO)) || trg.getFpagoComision().equals("PRECEPTOR")) {
+                                            BigDecimal pasivo = trg.getImporte();
+                                            if ((trg.getPagadorComision().equals("PEMISOR") && trg.getFpagoComision().equals("DESCONTAR")) || trg.getPagadorComision().equals("PRECEPTOR")) {
+                                                pasivo = trg.getImporte().subtract(trg.getComision());
+                                            }
+                                            if (pasivo.doubleValue() > 0.0D) {
+                                                debeTRG.add(trg);
+                                            }
+                                        }
+                                    }*/
+                                    int keymoney = data.size();
+                                    int tamaDEBEcp = debeTCP.size();
+                                    int tamaHABERcp = haberTCP.size();
+                                    int tamaDEBErg = debeTRG.size();
+                                    if (tamaDEBEcp > 0 || tamaDEBErg > 0) {
+                                        if (tp.getTCategoriaPersona().getDescripcion().equals("NATURAL")) {
+                                            experimentoplus.add("" + tp.getApellidos() + ", " + tp.getNombre());
+                                        } else {
+                                            experimentoplus.add("" + tp.getNombre());
+                                        }
+                                        for (int im = 0; im < keymoney; im++) {
+                                            moneyD.add(new Double(0D));
+                                        }
+                                        if (tamaDEBEcp > 0) {
+                                            Iterator idebe = debeTCP.iterator();
+                                            while (idebe.hasNext()) {
+                                                tcp = (TCuentaPersona) idebe.next();
+                                                moneda = tcp.getTMoneda().getCodMoneda();
+                                                BigDecimal mont = tcp.getSaldoSinInteres();
+                                                Vector interchanger = new Vector();
+                                                Iterator iteram = data.iterator();
+                                                Iterator iteramontnow = moneyD.iterator();
+                                                if (tcp.getSaldoSinInteres().doubleValue() > 0.0D) {
+                                                    while (iteram.hasNext() && iteramontnow.hasNext()) {
+                                                        TMoneda mo = (TMoneda) iteram.next();
+                                                        Double montNow = (Double) iteramontnow.next();
+                                                        if (moneda.equals(mo.getCodMoneda())) {
+                                                            montNow += mont.doubleValue();
+                                                        }
+                                                        interchanger.add(montNow);
+                                                    }
+                                                    moneyD = interchanger;
+                                                }
+                                            }
+                                        }
+                                        //Iterator idebe = debeTRG.iterator();
+                                        /*if (tamaDEBErg > 0) {
+                                            while (idebe.hasNext()) {
+                                                trg = (TRegistroGiro) idebe.next();
+                                                moneda = trg.getTOperacion().getTMoneda().getCodMoneda();
+                                                BigDecimal mont = trg.getImporte();
+                                                if ((trg.getPagadorComision().equals("PEMISOR") && trg.getFpagoComision().equals("DESCONTAR")) || trg.getPagadorComision().equals("PRECEPTOR")) {
+                                                    mont = trg.getImporte().subtract(trg.getComision());
+                                                }
+                                                Vector interchanger = new Vector();
+                                                Iterator iteram = data.iterator();
+                                                Iterator iteramontnow = moneyD.iterator();
+                                                while (iteram.hasNext() && iteramontnow.hasNext()) {
+                                                    TMoneda mo = (TMoneda) iteram.next();
+                                                    Double montNo = (Double) iteramontnow.next();
+                                                    if (moneda.equals(mo.getCodMoneda())) {
+                                                        montNo += mont.doubleValue();
+                                                    }
+                                                    interchanger.add(montNo);
+                                                }
+                                                moneyD = interchanger;
+                                            }
+                                        }*/
+                                        int charg = moneyD.size();
+                                        if (charg > 0) {
+                                            Iterator itemo = moneyD.iterator();
+                                            while (itemo.hasNext()) {
+                                                Double montF = (Double) itemo.next();
+                                                experimentoplus.add(CurrencyConverter.formatToMoneyUS(montF, 2));
+                                            }
+                                        }
+                                        debe.add(experimentoplus);
+                                    }
+                                    if (tamaHABERcp > 0) {
+                                        Iterator ihaber = haberTCP.iterator();
+                                        for (int im = 0; im < keymoney; im++) {
+                                            moneyH.add(new Double(0D));
+                                        }
+                                        int ash = 0;
+                                        while (ihaber.hasNext()) {
+                                            tcp = (TCuentaPersona) ihaber.next();
+                                            if (ash == 0) {
+                                                if (tcp.getTPersona().getTCategoriaPersona().getDescripcion().equals("NATURAL")) {
+                                                    experimentonegative.add("" + tcp.getTPersona().getApellidos() + ", " + tcp.getTPersona().getNombre());
+                                                } else {
+                                                    experimentonegative.add("" + tcp.getTPersona().getNombre());
+                                                }
+                                            }
+                                            moneda = tcp.getTMoneda().getCodMoneda();
+                                            BigDecimal mont = tcp.getSaldoSinInteres().plus();
+                                            Vector interchanger = new Vector();
+                                            Iterator iteram = data.iterator();
+                                            Iterator iteramontnow = moneyH.iterator();
+                                            if (tcp.getSaldoSinInteres().doubleValue() < 0.0D) {
+                                                while (iteram.hasNext() && iteramontnow.hasNext()) {
+                                                    TMoneda mo = (TMoneda) iteram.next();
+                                                    Double montNow = (Double) iteramontnow.next();
+                                                    if (moneda.equals(mo.getCodMoneda())) {
+                                                        montNow += mont.doubleValue();
+                                                    }
+                                                    interchanger.add(montNow);
+                                                }
+                                                moneyH = interchanger;
+                                            }
+                                            ash++;
+                                        }
+                                        int charg = moneyH.size();
+                                        if (charg > 0) {
+                                            Iterator itemo = moneyH.iterator();
+                                            while (itemo.hasNext()) {
+                                                Double montF = (Double) itemo.next();
+                                                experimentonegative.add(CurrencyConverter.formatToMoneyUS(montF, 2).replace("-", ""));
+                                            }
+                                        }
+                                        haber.add(experimentonegative);
+                                    }
+                                }
+                            } else {
+                                mensaje = "No hay ninguna persona en el sistema para el balance";
+                            }
+                        } else {
+                            mensaje = "No hay ninguna moneda en donde mostrar los datos";
+                        }
+                    }
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset><legend>&nbsp;</legend>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Cuadro de DEBE-HABER POR MONEDAS - financeBank!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="meta">
+                        <p>Casa de cambios Ventura <%=(autorizacion ? "<font color='#FF0000' class='conf'>CONFIDENCIAL</font>" : " <.> Pulse en el Boton generar")%></p>
+                    </div>
+                    <div class="story" style="display:<%=(autorizacion ? "block" : "none")%>">
+                        <form id="formdh" name="formdh" method="post" action="">
+                            <div class="eebuttonbar_top">
+                                <input class="eebuttons" type="button" value="Imprimir" name="print_top" onclick="window.print();">
+                            </div>
+                            <%
+                                        int ndebe = debe.size();
+                                        int nhaber = haber.size();
+                                        int ndata = data.size();
+                                        Vector vtd = new Vector();
+                                        Vector vth = new Vector();
+                                        Vector iniv = new Vector();
+                                        if (ndebe > 0 || nhaber > 0) {
+                                            String mx = "";
+                                            if (ndata > 0) {
+                                                Iterator im = data.iterator();
+                                                while (im.hasNext()) {
+                                                    iniv.add(new Double(0));
+                                                    TMoneda mon = (TMoneda) im.next();
+                                                    mx += "<th class='ee115' width='90px'>";
+                                                    mx += "" + mon.getNombre() + " (" + mon.getSimbolo() + ")";
+                                                    mx += "</th>";
+                                                }
+                                                vtd = iniv;
+                                                vth = iniv;
+                                            }
+                            %>
+                            <div id="panel1"><table><tr><td colspan="2" align="center" valign="top">REPORTE DE DEBE Y HABER</td></tr><tr><td width="50%">
+                                            <table class="tabla" border="1" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+                                                <tr style='height:14pt'>
+                                                    <th class='ee115'>
+                                                        NOMBRES (DEBE)
+                                                    </th>
+                                                    <%=mx%>
+                                                </tr>
+                                                <%
+                                                                                            int tabla = 0;
+                                                                                            if (ndebe > 0) {
+                                                                                                Iterator idebef = debe.iterator();
+                                                                                                while (idebef.hasNext()) {
+                                                                                                    Vector vdebe = (Vector) idebef.next();
+                                                                                                    String mxd = "";
+                                                                                                    Vector interd = new Vector();
+                                                                                                    Iterator imd = vdebe.iterator();
+                                                                                                    Double moneyd = 0D;
+                                                                                                    int fail = 0;
+                                                                                                    Iterator itd = vtd.iterator();
+                                                                                                    while (imd.hasNext()) {
+                                                                                                        String fila = (String) imd.next();
+                                                                                                        if (fail == 0) {
+                                                                                                            mxd += "<td>";
+                                                                                                        } else {
+                                                                                                            mxd += "<td align='right'>";
+                                                                                                        }
+                                                                                                        mxd += "" + fila;
+                                                                                                        mxd += "</td>";
+                                                                                                        if (fail > 0) {
+                                                                                                            moneyd = (Double) itd.next();
+                                                                                                            moneyd += CurrencyConverter.formatMoneyToDoubleUS(fila);
+                                                                                                            interd.add(moneyd);
+                                                                                                        }
+                                                                                                        fail++;
+                                                                                                    }
+                                                                                                    tabla++;
+                                                                                                    vtd = interd;
+                                                                                                    out.write("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'>");
+                                                %>
+                                                <%=mxd%>
+                                                <%
+                                                                                                    out.write("</tr>");
+                                                                                                }
+                                                                                            }
+                                                %>
+                                            </table>
+                                        </td><td valign="top" width="50%">
+                                            <table class="tabla" border="1" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+                                                <tr style='height:14pt'>
+                                                    <th class='ee115'>
+                                                        NOMBRES (HABER)
+                                                    </th>
+                                                    <%=mx%>
+                                                </tr>
+                                                <%
+                                                                                            if (nhaber > 0) {
+                                                                                                tabla = 0;
+                                                                                                Iterator ihaberf = haber.iterator();
+                                                                                                while (ihaberf.hasNext()) {
+                                                                                                    Vector vhaber = (Vector) ihaberf.next();
+                                                                                                    String mxh = "";
+                                                                                                    Iterator imd = vhaber.iterator();
+                                                                                                    Double moneyh = 0D;
+                                                                                                    int fail = 0;
+                                                                                                    Vector interh = new Vector();
+                                                                                                    Iterator ith = vth.iterator();
+                                                                                                    while (imd.hasNext()) {
+                                                                                                        String fila = (String) imd.next();
+                                                                                                        if (fail == 0) {
+                                                                                                            mxh += "<td>";
+                                                                                                        } else {
+                                                                                                            mxh += "<td align='right'>";
+                                                                                                        }
+                                                                                                        mxh += "" + fila;
+                                                                                                        mxh += "</td>";
+                                                                                                        if (fail > 0) {
+                                                                                                            moneyh = (Double) ith.next();
+                                                                                                            moneyh += CurrencyConverter.formatMoneyToDoubleUS(fila);
+                                                                                                            interh.add(moneyh);
+                                                                                                        }//
+                                                                                                        fail++;
+                                                                                                    }
+                                                                                                    tabla++;
+                                                                                                    vth = interh;
+                                                                                                    out.write("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'>");
+                                                %>
+                                                <%=mxh%>
+                                                <%
+                                                                                                    out.write("</tr>");
+                                                                                                }
+                                                                                            }
+                                                %>
+                                            </table></td></tr>
+                                    <tr><td align="right"><table class="tabla" border="1" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+                                                <tr style='height:14pt'>
+                                                    <th class='ee115'>
+                                                        TOTAL EN DEBE
+                                                    </th>
+                                                    <%=mx%>
+                                                </tr>
+                                                <%
+                                                                                            int xtd = vtd.size();
+                                                                                            if (xtd > 0) {
+                                                                                                Iterator itd = vtd.iterator();
+                                                                                                String mtd = "";
+                                                                                                while (itd.hasNext()) {
+                                                                                                    Double filad = (Double) itd.next();
+                                                                                                    mtd += "<td align='right'>";
+                                                                                                    mtd += "" + CurrencyConverter.formatToMoneyUS(filad, 2);
+                                                                                                    mtd += "</td>";
+                                                                                                }
+                                                                                                out.write("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'><td class='ee115'>-----------------></td>");
+                                                %>
+                                                <%=mtd%>
+                                                <%
+                                                                                                out.write("</tr>");
+                                                                                            }
+                                                %>
+                                            </table></td><td align="right">
+                                            <table border="1" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" class="tabla">
+                                                <tr style='height:14pt'>
+                                                    <th class='ee115'>
+                                                        TOTAL EN HABER
+                                                    </th>
+                                                    <%=mx%>
+                                                </tr>
+                                                <%
+                                                                                            int xth = vth.size();
+                                                                                            if (xth > 0) {
+                                                                                                Iterator ith = vth.iterator();
+                                                                                                String mth = "";
+                                                                                                while (ith.hasNext()) {
+                                                                                                    Double filah = (Double) ith.next();
+                                                                                                    mth += "<td align='right'>";
+                                                                                                    mth += "" + CurrencyConverter.formatToMoneyUS(filah, 2);
+                                                                                                    mth += "</td>";
+                                                                                                }
+                                                                                                out.write("<tr><td class='ee115'>-----------------></td>");
+                                                %>
+                                                <%=mth%>
+                                                <%
+                                                                                                out.write("</tr>");
+                                                                                            }
+                                                %>
+                                            </table>
+                                        </td></tr>
+                                </table>
+                            </div>
+                            <%
+                                                                        FileManager fmx = new FileManager();
+                                                                        StringBuffer sb = new StringBuffer();
+                                                                        sb.append("<table><tr><td colspan='2' align='center' valign='top'>REPORTE DE DEBE Y HABER</td></tr><tr><td>"
+                                                                                + "<table class='tabla' border='1' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>"
+                                                                                + "<tr style='height:14pt'>"
+                                                                                + "<th class='ee115'>"
+                                                                                + "NOMBRES (DEBE)"
+                                                                                + "</th>" + mx + "</tr>");
+                                                                        tabla = 0;
+                                                                        vtd = iniv;
+                                                                        vth = iniv;
+                                                                        if (ndebe > 0) {
+                                                                            Iterator idebef = debe.iterator();
+                                                                            while (idebef.hasNext()) {
+                                                                                Vector vdebe = (Vector) idebef.next();
+                                                                                String mxd = "";
+                                                                                Vector interd = new Vector();
+                                                                                Iterator imd = vdebe.iterator();
+                                                                                Double moneyd = 0D;
+                                                                                int fail = 0;
+                                                                                Iterator itd = vtd.iterator();
+                                                                                while (imd.hasNext()) {
+                                                                                    String fila = (String) imd.next();
+                                                                                    if (fail == 0) {
+                                                                                        mxd += "<td>";
+                                                                                    } else {
+                                                                                        mxd += "<td align='right'>";
+                                                                                    }
+                                                                                    if (fail > 0) {
+                                                                                        moneyd = (Double) itd.next();
+                                                                                        moneyd += CurrencyConverter.formatMoneyToDoubleUS(fila);
+                                                                                        interd.add(moneyd);
+                                                                                        mxd += "" + fila.replace(",", "").replace(".", ",");
+                                                                                        mxd += "</td>";
+                                                                                    } else {
+                                                                                        mxd += "" + fila;
+                                                                                        mxd += "</td>";
+                                                                                    }
+                                                                                    fail++;
+                                                                                }
+                                                                                tabla++;
+                                                                                vtd = interd;
+                                                                                sb.append("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'>" + mxd + "</tr>");
+                                                                            }
+                                                                        }
+                                                                        sb.append("</table>"
+                                                                                + "</td><td valign='top'>"
+                                                                                + "<table class='tabla' border='1' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>"
+                                                                                + "<tr style='height:14pt'>"
+                                                                                + "<th class='ee115'>"
+                                                                                + "NOMBRES (HABER)"
+                                                                                + "</th>" + mx + "</tr>");
+                                                                        if (nhaber > 0) {
+                                                                            tabla = 0;
+                                                                            Iterator ihaberf = haber.iterator();
+                                                                            while (ihaberf.hasNext()) {
+                                                                                Vector vhaber = (Vector) ihaberf.next();
+                                                                                String mxh = "";
+                                                                                Iterator imd = vhaber.iterator();
+                                                                                Double moneyh = 0D;
+                                                                                int fail = 0;
+                                                                                Vector interh = new Vector();
+                                                                                Iterator ith = vth.iterator();
+                                                                                while (imd.hasNext()) {
+                                                                                    String fila = (String) imd.next();
+                                                                                    if (fail == 0) {
+                                                                                        mxh += "<td>";
+                                                                                    } else {
+                                                                                        mxh += "<td align='right'>";
+                                                                                    }
+                                                                                    if (fail > 0) {
+                                                                                        moneyh = (Double) ith.next();
+                                                                                        moneyh += CurrencyConverter.formatMoneyToDoubleUS(fila);
+                                                                                        interh.add(moneyh);
+                                                                                        mxh += "" + fila.replace(",", "").replace(".", ",");
+                                                                                        mxh += "</td>";
+                                                                                    } else {
+                                                                                        mxh += "" + fila;
+                                                                                        mxh += "</td>";
+                                                                                    }
+                                                                                    fail++;
+                                                                                }
+                                                                                tabla++;
+                                                                                vth = interh;
+                                                                                sb.append("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'>" + mxh + "</tr>");
+                                                                            }
+                                                                        }
+                                                                        sb.append("</table></td></tr>"
+                                                                                + "<tr><td align='right'><table class='tabla' border='1' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>"
+                                                                                + "<tr style='height:14pt'>"
+                                                                                + "<th class='ee115'>"
+                                                                                + "TOTAL EN DEBE"
+                                                                                + "</th>" + mx + "</tr>");
+                                                                        xtd = vtd.size();
+                                                                        if (xtd > 0) {
+                                                                            Iterator itd = vtd.iterator();
+                                                                            String mtd = "";
+                                                                            while (itd.hasNext()) {
+                                                                                Double filad = (Double) itd.next();
+                                                                                mtd += "<td align='right'>";
+                                                                                mtd += "" + CurrencyConverter.formatToMoneyUS(filad, 2).replace(",", "").replace(".", ",");
+                                                                                mtd += "</td>";
+                                                                            }
+                                                                            sb.append("<tr class='" + (tabla % 2 == 0 ? "modo2" : "modo1") + "'><td class='ee115'>-----------------></td>" + mtd + "</tr>");
+                                                                        }
+                                                                        sb.append("</table></td><td align='right'>"
+                                                                                + "<table border='1' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF' class='tabla'>"
+                                                                                + "<tr style='height:14pt'>"
+                                                                                + "<th class='ee115'>"
+                                                                                + "TOTAL EN HABER"
+                                                                                + "</th>" + mx + "</tr>");
+                                                                        xth = vth.size();
+                                                                        if (xth > 0) {
+                                                                            Iterator ith = vth.iterator();
+                                                                            String mth = "";
+                                                                            while (ith.hasNext()) {
+                                                                                Double filah = (Double) ith.next();
+                                                                                mth += "<td align='right'>";
+                                                                                mth += "" + CurrencyConverter.formatToMoneyUS(filah, 2).replace(",", "").replace(".", ",");
+                                                                                mth += "</td>";
+                                                                            }
+                                                                            sb.append("<tr><td class='ee115'>-----------------></td>" + mth + "</tr>");
+                                                                        }
+                                                                        sb.append("</table> "
+                                                                                + "</td></tr>"
+                                                                                + "</table>");
+                                                                        String pathF = FileUtil.getUniqueFolderId() + ".xls";
+                                                                        String url = getServletContext().getRealPath("/") + "resources/certificados/" + pathF;
+                                                                        File certificado = new File(url);
+                                                                        if (certificado.getParentFile() != null) {
+                                                                            certificado.getParentFile().mkdirs();
+                                                                        }
+                                                                        fmx.saveFile(certificado.getAbsolutePath(), sb.toString(), false);
+                            %>
+                            <div class="eebuttonbar_bottom">
+                                <input class="eebuttons" type="button" value="Imprimir" name="print_bottom" onclick="window.print();">
+                                <input class="eebuttons" type="button" value="Obtener XLS (Excel)" name="print_bottom_xls" onclick="window.open('<%="resources/certificados/" + pathF%>','xls', '');">
+                                <span style="margin-left:1px;"></span>
+                            </div>
+                            <%
+                                        } else {
+                                            out.write("<div>" + mensaje + "</div>");
+                                        }
+                            %>
+                        </form>
+                    </div>
+                </div>
+                <div id="dh">
+                    <blockquote>
+                        <blockquote>
+                            <blockquote>
+                                <blockquote>
+                                    <blockquote>
+                                        <form name="form1" method="post" action="#">
+                                            <input name="sheet_no" id="sheet_no" type="hidden" value="panelpostback">
+                                            <input name="postback" id="postback" type="hidden" value="1">
+                                            <span>
+                                                <input type="hidden" name="submit_bottom" value="1"><input type="submit" id="debehaber" name="submit_bottom1" value="Generar reporte del día" onclick="abrir();this.disabled=true;">
+                                            </span><div id="await"></div>
+                                        </form>
+                                        <p>&nbsp;</p>
+                                    </blockquote>
+                                </blockquote>
+                            </blockquote>
+                        </blockquote>
+                    </blockquote>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+        <noscript>The browser does not support JavaScript. The calculations created using financeBank will not work. Please access the web page using another browser.<p></p></noscript>
+    </body>
+</html>

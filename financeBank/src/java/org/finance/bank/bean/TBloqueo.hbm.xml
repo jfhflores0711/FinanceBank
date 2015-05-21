@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TBloqueo" table="t_bloqueo" schema="public">
+        <id name="idvitory" type="string">
+            <column name="idvitory" length="41" />
+            <generator class="assigned" />
+        </id>
+        <property name="bloquearId" type="string">
+            <column name="bloquear_id" length="41" not-null="true" unique="true" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="65" />
+        </property>
+        <property name="idpersonacaja" type="string">
+            <column name="idpersonacaja" length="41" />
+        </property>
+        <property name="nombretabla" type="string">
+            <column name="nombretabla" length="100" />
+        </property>
+        <property name="prioridad" type="string">
+            <column name="prioridad" length="4" />
+        </property>
+    </class>
+</hibernate-mapping>

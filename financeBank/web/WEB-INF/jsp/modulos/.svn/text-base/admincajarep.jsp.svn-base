@@ -1,0 +1,293 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank - ReporteCajas</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script language="JavaScript" type="text/JavaScript">
+            <!--
+            function MM_reloadPage(init) {  //reloads the window if Nav4 resized
+                if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+                        document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+                else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+            }
+            MM_reloadPage(true);
+            var Aut = false;
+            function ventanaNueva() {
+                if(document.getElementById("chkVerSaldo").checked==true){
+                    document.getElementById("chkVerSaldo").checked=false;
+                    Dialog.confirm($('login').innerHTML,
+                    {   className:"alphacube",
+                        width:400,
+                        okLabel: "login",
+                        title: "Autorizar Usuario",
+                        cancelLabel: "cancel",
+                        onOk:function(){
+                            var user =document.getElementById('user').value
+                            var pass =document.getElementById('passwd').value
+                            document.getElementById('res').innerHTML='';
+                            Autorizar(user,pass);
+                            if(document.getElementById('res').innerHTML==1){
+                                Aut = true;
+                                document.getElementById("chkVerSaldo").checked=true;
+                                consultartasa();
+                                return true;
+                            }else{
+                                document.fcambio.chkVerSaldo.checked=false;
+                                $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                                $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                                new Effect.Shake(Windows.focusedWindow.getId());
+                                return false;
+                            }
+                        }
+                    });
+                } else{
+                    document.getElementById("divSaldos").style.display="none";
+                    document.getElementById("divSaldos2").style.display="none";
+                }
+            }
+
+            function Autorizar(login,contrasenia) {
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesar1;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                    window.alert("DATOS ENVIADOS!!!");
+                }
+            }
+
+            function procesar1(){
+                contenido = document.getElementById('res');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+
+            var req3;
+            function consultartasa(){
+                var numcuentatick;
+                numcuentatick=document.getElementById("tdnumcuenta").innerHTML;
+                req3 = false;
+                if (window.XMLHttpRequest) {
+                    req3 = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    req3 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req3!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SBuscarSaldoCuenta?numcuentatick="+numcuentatick.replace("-", "", "g");
+                    req3.open("GET",url,true);
+                    req3.onreadystatechange = procesar2;
+                    req3.send(null);
+                }
+            }
+
+            function procesar2(){
+                contenido = document.getElementById('divSaldos');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req3.readyState==4 && req3.status==200) {
+                    contenido.innerHTML = req3.responseText;
+                    document.getElementById("divSaldos2").innerHTML=document.getElementById("divSaldos").innerHTML;
+                    document.getElementById("divSaldos2").style.display="";
+                    document.getElementById("divSaldos").style.display="";
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var Aut = false;
+            function ventanaNueva2() {
+                Dialog.confirm($('login').innerHTML,
+                {   className:"alphacube",
+                    width:400,
+                    okLabel: "login",
+                    title: "Autorizar Usuario",
+                    cancelLabel: "cancel",
+                    onOk:function(){
+                        var user =document.getElementById('user').value
+                        var pass =document.getElementById('passwd').value
+                        document.getElementById('res').innerHTML='';
+                        Autorizar(user,pass);
+                        alert('¡¡ DATOS ENVIADOS !!')
+                        if(document.getElementById('res').innerHTML==1){
+                            Aut = true;
+                            extornar();
+                            return true;
+                        }else{
+                            document.fcambio.chkVerSaldo.checked=false;
+                            $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                            $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                            new Effect.Shake(Windows.focusedWindow.getId());
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            var req4;
+            function extornar(){
+                var userAdmin =document.getElementById('user').value
+                var IdOperacion;
+                IdOperacion=document.getElementById("tdIdOperacion").innerHTML;
+                req4 = false;
+                if (window.XMLHttpRequest) {
+                    req4 = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req4!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SExtornarOperacion?IdOperacion="+IdOperacion+"&userAdminExt="+userAdmin;
+                    req4.open("GET",url,true);
+                    req4.onreadystatechange = procesar4;
+                    req4.send(null);
+                }
+            }
+
+            function procesar4(){
+                contenido = document.getElementById('divExtorno');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                    if(document.getElementById("txtExtorno").value=="SI"){
+                        window.alert("EL EXTORNO SE REALIZO CON EXITO");
+                        document.frmFin.submit();
+                    } else {
+                        window.alert("FALLO LA EXTORNACION");
+                    }
+                }
+            }
+        </script>
+        <style type="text/css" media="All">
+            body{
+                font-size:0.9em;
+            }
+            #content {
+                width: 1100px;
+            }
+        </style>
+        <style type="text/css" media="print">
+            #logo{
+                display:none;
+            }
+            #ctrl{
+                display:none;
+            }
+        </style>
+    </head>
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <div id="login" style="display:none">
+            <p>
+                <span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <p>
+                <span class="login_label">Usuario</span>
+                <span class="login_input">
+                    <input type="text" id="user"/>
+                </span>
+            </p>
+            <div style="clear:both"></div>
+            <p>
+                <span class="login_label">Contrase&ntilde;a</span>
+                <span class="login_input">
+                    <input type="password" id="passwd"/>
+                </span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <div id="res" style="display:none">
+            </div>
+        </div>
+        <div id="content">
+            <%
+                        String cajaX = (String) request.getParameter("caja");
+                        if (cajaX == null) {
+                            cajaX = "ERROR";
+                            out.print("ERROR DE PAR&Aacute;METROS!!");
+                        }
+            %>
+            <div class="ticketpago" id="ticketpago">
+                <%
+                            if (cajaX.equals("ERROR")) {
+                                return;
+                            }
+                            List cajas = d.findAll("from TCaja where TFilial.codFilial = '" + cajaX.substring(0, 4) + "' order by codCaja");
+                            if (!cajas.isEmpty()) {
+                                Iterator it = cajas.iterator();
+                                while (it.hasNext()) {
+                                    TCaja xca = (TCaja) it.next();
+                                    List pc = d.findAll("from TPersonaCaja where TCaja.codCaja='" + xca.getCodCaja() + "' and estado = 'ACTIVO'");
+                                    String cajero = "NO IDENTIFICADO";
+                                    if (pc.size() > 0) {
+                                        TPersonaCaja xpc = (TPersonaCaja) pc.iterator().next();
+                                        cajero = xpc.getTPersona().getNombre() + " " + xpc.getTPersona().getApellidos();
+                                    }
+                                    out.print(xca.getNombreCaja() + ": " + cajero + "<br />");
+                                    String reporte = "NO TIENE DATOS";
+                                    List xDetalles = d.findAll("from TDetalleCaja where TCaja.codCaja='" + xca.getCodCaja() + "' and estado = 'ACTIVO' and fecha_transaccion like '" + DateUtil.getDate(new Date()) + "%' order by TMoneda.codMoneda");
+                                    if (xDetalles.size() > 0) {
+                                        Iterator it2 = xDetalles.iterator();
+                                        BigDecimal df = BigDecimal.ZERO;
+                                        reporte = "<table><tr><td>";
+                                        while (it2.hasNext()) {
+                                            TDetalleCaja det = (TDetalleCaja) it2.next();
+                                            reporte += det.getTMoneda().getNombre() + " (" + det.getTMoneda().getSimbolo() + ") </td><td align='right'>";
+                                            reporte += det.getMontoFinal().toString() + "</td></tr><tr><td>";
+                                            if (!det.getTMoneda().getCodMoneda().equals("PEN")) {
+                                                List lt = d.findAll("from TTasa where estado ='ACTIVO' AND TTipoCambio.TMoneda.codMoneda ='" + det.getTMoneda().getCodMoneda() + "' "
+                                                        + " AND tipoTasa ='TASA MERCADO' AND TTipoCambio.codMonedaA ='PEN' ");
+                                                TTasa xTa = (TTasa) lt.get(0);
+                                                df = df.add(det.getMontoFinal().multiply(xTa.getFConversion()));
+                                            } else {
+                                                df = df.add(det.getMontoFinal());
+                                            }
+                                        }
+                                        reporte += "</td></tr><tr><td>Total: </td><td>" + df.setScale(2, RoundingMode.HALF_UP);
+                                        reporte += "</td></tr></table>";
+                                    }
+                                    out.print(reporte + "<br />");
+                                    out.print("-----------------------<br />");
+                                }
+                            }
+                            out.println("<div id='ctrl'>");
+                            out.println("<center>");
+                            out.println("<br>");
+                            out.println("<input name='Submit' id='Submit' type='button' onClick=\"document.title=''; if (window.print)window.print();else alert('Su Navegador no dispone de esta opcion, Actualicelo con una version mas reciente');\" value='Imprimir'");
+                            out.println("<input type='button' value='Cerrar' onclick='window.close();'");
+                            out.println("</center>");
+                            out.println("</div>");
+                %>
+            </div>
+        </div>
+    </body>
+</html>

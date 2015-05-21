@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+    <bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/>
+    <bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.springframework.dao.DataAccessException">
+                    dataAccessFailure
+                </prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                <prop key="index.htm">indexController</prop>
+                <prop key="passwordHint.htm">homeController</prop>
+                <prop key="logout.htm">logoutController</prop>
+                <prop key="principal.htm">principalController</prop>
+                <prop key="menu.htm">menuController</prop>
+                <prop key="manageruser.htm">manageruserController</prop>
+                <prop key="managermodulo.htm">managermoduloController</prop>
+                <prop key="managercaja.htm">managercajaController</prop>
+                <prop key="addGrupo.htm">addGrupoController</prop>
+                <prop key="addUser.htm">addUserController</prop>
+                <prop key="admincatalogos.htm">admincatalogosController</prop>
+                <prop key="managercapital.htm">managercapitalController</prop>
+                <prop key="cambiomoneda.htm">cambiomonedaController</prop>
+                <prop key="cambiomonedauser.htm">cambiomonedauserController</prop>
+                <prop key="cobrogiros.htm">cobrogirosController</prop>
+                <prop key="depositosretiros.htm">depositosretirosController</prop>
+                <prop key="giros.htm">girosController</prop>
+                <prop key="nuevacuenta.htm">nuevacuentaControllerLink</prop>
+                <prop key="nuevacuentaForm.htm">nForm</prop>
+                <prop key="prestamos.htm">prestamosController</prop>
+                <prop key="cobranzas.htm">cobranzasController</prop>
+                <prop key="fechacobranzas.htm">fechacobranzasController</prop>
+                <prop key="contrato.htm">contratoController</prop>
+                <prop key="ticket.htm">ticketController</prop>
+                <prop key="ticketcuenta.htm">ticketcuentaController</prop>
+                <prop key="reportecuenta.htm">reportecuentaController</prop>
+                <prop key="estadodecuenta.htm">estadodecuentaController</prop>
+                <prop key="certificadoplazofijo.htm">certificadoPFController</prop>
+                <prop key="anexoplazofijo.htm">anexoPFController</prop>
+                <prop key="extornar.htm">extornarController</prop>
+                <prop key="subirarchivo.htm">subirarchivoController</prop>
+                <prop key="ventana_confirmacion.htm">ventana_confirmacionController</prop>
+                <prop key="managerdh.htm">managerdhController</prop>
+                <prop key="retirootro.htm">retirootroController</prop>
+                <prop key="comprobantePrestamo.htm">comprobantePrestamoController</prop>
+                <prop key="comprobanteCobranza.htm">comprobanteCobranzaController</prop>
+                <prop key="vercambiomoneda.htm">vercambiomonedaController</prop>
+                <prop key="pruebafeedback.htm">pruebafeedbackController</prop>
+                <prop key="admincuenta.htm">admincuentaController</prop>
+                <prop key="managerop.htm">adminopController</prop>
+                <prop key="managerint.htm">adminintController</prop>
+                <prop key="admincaja.htm">admincajaController</prop>
+                <prop key="admincajarep.htm">admincajarepController</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="viewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+          p:prefix="/WEB-INF/jsp/"
+          p:suffix=".jsp" />
+    <bean id="indexController" class="org.finance.bank.Controller.LoginFormController">
+        <property name="successView" value="modulos/menu"/>
+        <property name="formView" value="principal"/>
+    </bean>
+    <bean id="addGrupoController" class="org.finance.bank.Controller.grupoController">
+        <property name="successView" value="modulos/managermodulo"/>
+    </bean>
+    <bean id="addUserController" class="org.finance.bank.Controller.nuevoUsuarioController">
+        <property name="successView" value="modulos/manageruser"/>
+    </bean>
+    <bean name="homeController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/home" />
+    <bean name="logoutController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="logout" />
+    <bean name="principalController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="principal" />
+    <bean name="menuController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/menu" />
+    <bean name="manageruserController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/manageruser" />
+    <bean name="managermoduloController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managermodulo" />
+    <bean name="managercajaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managercaja" />
+    <bean name="admincatalogosController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/admincatalogos" />
+    <bean name="managercapitalController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managercapital" />
+    <bean name="cambiomonedaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/cambiomoneda" />
+    <bean name="cambiomonedauserController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/cambiomonedauser" />
+    <bean name="cobrogirosController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/cobrogiros" />
+    <bean name="depositosretirosController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/depositosretiros" />
+    <bean name="girosController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/giros" />
+    <bean name="nuevacuentaControllerLink"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/nuevacuenta" />
+    <bean id="nForm" class="org.finance.bank.Controller.nController">
+        <property name="successView" value="modulos/nuevacuenta"/>
+    </bean>
+    <bean name="prestamosController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/prestamos" />
+    <bean name="contratoController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/contrato" />
+    <bean name="cobranzasController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/cobranzas" />
+    <bean name="fechacobranzasController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/fechacobranzas" />
+    <bean name="ticketController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/ticket" />
+    <bean name="ticketcuentaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/ticketcuenta" />
+    <bean name="reportecuentaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/reportecuenta" />
+    <bean name="estadodecuentaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/estadodecuenta"/>
+    <bean name="certificadoPFController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/certificadoplazofijo" />
+    <bean name="anexoPFController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/anexoplazofijo" />
+    <bean name="extornarController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/extornar" />
+    <bean name="subirarchivoController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="principal" />
+    <bean name="ventana_confirmacionController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/ventana_confirmacion" />
+    <bean name="managerdhController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managerdh" />
+    <bean name="retirootroController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/retirootro" />
+    <bean name="comprobantePrestamoController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/comprobantePrestamo" />
+    <bean name="comprobanteCobranzaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/comprobanteCobranza" />
+    <bean name="vercambiomonedaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/vercambiomoneda" />
+    <bean name="pruebafeedbackController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="pruebafeedback" />
+    <bean name="admincuentaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/admincuenta" />
+    <bean name="adminopController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managerop" />
+    <bean name="adminintController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/managerint" />
+    <bean name="admincajaController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/admincaja" />
+    <bean name="admincajarepController"
+          class="org.springframework.web.servlet.mvc.ParameterizableViewController"
+          p:viewName="modulos/admincajarep" />
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="2097152"/>
+    </bean>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="ApplicationResources"/>
+        <property name="useCodeAsDefaultMessage" value="true"/>
+    </bean>
+</beans>

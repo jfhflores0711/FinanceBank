@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TGarantiaCliente" table="t_garantia_cliente" schema="public">
+        <id name="idgarantiacliente" type="string">
+            <column name="idgarantiacliente" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TPersona" class="org.finance.bank.bean.TPersona" fetch="select">
+            <column name="id_user_pk" length="50" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TMoneda" class="org.finance.bank.bean.TMoneda" fetch="select">
+            <column name="cod_moneda" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TTipoGarantia" class="org.finance.bank.bean.TTipoGarantia" fetch="select">
+            <column name="idtipogarantia" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TRegistroPrestamo" class="org.finance.bank.bean.TRegistroPrestamo" fetch="select">
+            <column name="idregistroprestamo" length="41" not-null="true" />
+        </many-to-one>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="250" />
+        </property>
+        <property name="fechaContrato" type="string">
+            <column name="fecha_contrato" length="50" />
+        </property>
+        <property name="montoValorReposicion" type="big_decimal">
+            <column name="monto_valor_reposicion" precision="20" />
+        </property>
+        <property name="montoValorRealizacion" type="big_decimal">
+            <column name="monto_valor_realizacion" precision="20" />
+        </property>
+        <property name="fechaTasacion" type="string">
+            <column name="fecha_tasacion" length="50" />
+        </property>
+        <property name="montoValorComercial" type="big_decimal">
+            <column name="monto_valor_comercial" precision="20" />
+        </property>
+        <property name="nombreTasador" type="string">
+            <column name="nombre_tasador" length="100" />
+        </property>
+        <property name="ubicacionGarantia" type="string">
+            <column name="ubicacion_garantia" length="150" />
+        </property>
+        <property name="montoHipoteca" type="big_decimal">
+            <column name="monto_hipoteca" precision="20" />
+        </property>
+        <property name="fichaRegistroPartida" type="string">
+            <column name="ficha_registro_partida" length="50" />
+        </property>
+        <property name="seguro" type="java.lang.Integer">
+            <column name="seguro" />
+        </property>
+        <property name="montoGarantia" type="big_decimal">
+            <column name="monto_garantia" precision="20" />
+        </property>
+        <property name="montoUtilGarantia" type="big_decimal">
+            <column name="monto_util_garantia" precision="20" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" />
+        </property>
+        <property name="fd" type="timestamp">
+            <column name="fd" length="29" />
+        </property>
+    </class>
+</hibernate-mapping>

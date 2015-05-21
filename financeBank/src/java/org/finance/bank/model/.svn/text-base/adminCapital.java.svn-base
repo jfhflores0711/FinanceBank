@@ -1,0 +1,246 @@
+package org.finance.bank.model;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.finance.bank.bean.TBalancexmoneda;
+import org.finance.bank.bean.TFilial;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TPatrimonio;
+import org.finance.bank.bean.TPersonaCaja;
+import org.finance.bank.bean.TTasa;
+import org.finance.bank.bean.TTipoCambio;
+import org.finance.bank.bean.TUtilidad;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.BeanUtil;
+import org.finance.bank.util.DateUtil;
+
+/**
+ *
+ * @author ronald
+ */
+public final class adminCapital {
+
+    DAOGeneral daoAdminK;
+    String codmoneda;
+    String idUser;
+    String ipUser;
+    TPatrimonio tpatrimonio;
+    String filial;
+
+    public adminCapital(String codmoneda, String id, String ip) {
+        daoAdminK = new DAOGeneral();
+        this.codmoneda = codmoneda;
+        this.idUser = id;
+        this.ipUser = ip;
+        TFilial fi = null;
+        List l = daoAdminK.findAll("from TPersonaCaja where TPersona.idUserPk='" + id + "'");
+        int pe = l.size();
+        if (pe > 0) {
+            Iterator i = l.iterator();
+            if (i.hasNext()) {
+                TPersonaCaja c = (TPersonaCaja) i.next();
+                fi = c.getTCaja().getTFilial();
+            }
+        }
+        if (fi != null) {
+            filial = fi.getCodFilial();
+            String hql = "from TPatrimonio where estado ='ACTIVO" + fi.getCodFilial() + "'"
+                    + " AND TBalancexmoneda.TMoneda.codMoneda ='" + codmoneda + "' ";
+            List lp = daoAdminK.findAll(hql);
+            int lpI = lp.size();
+            if (lpI > 0) {
+                Iterator iP = lp.iterator();
+                if (iP.hasNext()) {
+                    this.tpatrimonio = (TPatrimonio) iP.next();
+                    Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "P = " + new BeanUtil(tpatrimonio).toString());
+                }
+            }
+        }
+    }
+
+    public TPatrimonio ponerAsiento() {
+        return this.tpatrimonio;
+    }
+
+    public double xCalcularUtilidad() throws Exception {
+        Double uAcPEN = 0.0D;//filial !=null
+        if (false) {
+            List xut = daoAdminK.findAll("from TUtilidad");
+            Iterator xi = xut.iterator();
+            while (xi.hasNext()) {
+                TUtilidad u = (TUtilidad) xi.next();
+                daoAdminK.delete(u);
+            }
+            String xf = DateUtil.getNOW_S();
+            String hqlUtilidad = "from TPatrimonio where TBalancexmoneda.estado='ACTIVO'";
+            List l = daoAdminK.findAll(hqlUtilidad);
+            int t = l.size();
+            if (t > 0) {
+                Iterator i = l.iterator();
+                Double k = 0.0D;
+                Double p = 0.0D;
+                Double cc = 0.0D;
+                Double u = 0.0D;
+                int balancer = 0;
+                while (i.hasNext()) {
+                    TPatrimonio xpatrimonio = (TPatrimonio) i.next();
+                    k = xpatrimonio.getPatrimonio().doubleValue();
+                    p = xpatrimonio.getPatrimonioActual().doubleValue();
+                    Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "xpatrimonio " + balancer + "= " + p + " k=" + k + " cc=" + cc);
+                    u = p - k + cc;
+                    TUtilidad xu = new TUtilidad();
+                    xu.setIdutilidad(DateUtil.convertDateId(idUser,adminCapital.class.getSimpleName()));
+                    xu.setFecha(xf);
+                    xu.setIdUser(idUser + " " + xpatrimonio.getIdpatrimonio());
+                    xu.setDateUser(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                    xu.setIpUser(ipUser);
+                    xu.setTBalancexmoneda(xpatrimonio.getTBalancexmoneda());
+                    xu.setUtilidad(new BigDecimal(u));
+                    daoAdminK.persist(xu);
+                }
+                List lMo = daoAdminK.findAll("from TMoneda where estado='ACTIVO'");
+                if (lMo.isEmpty()) {
+                    return 0.0D;
+                } else {
+                    Iterator iMo = lMo.iterator();
+                    while (iMo.hasNext()) {
+                        TMoneda xm = (TMoneda) iMo.next();
+                        Double f = this.utilidad(xm.getCodMoneda());
+                        Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "xm = " + xm.getCodMoneda());
+                        String hqlB = "from TBalancexmoneda where TMoneda.codMoneda='" + xm.getCodMoneda() + "' and estado='ACTIVO'";
+                        List lB = daoAdminK.findAll(hqlB);
+                        int slB = lB.size();
+                        Double correcc = 0.0D;
+                        if (slB > 0) {
+                            TBalancexmoneda xBBB = (TBalancexmoneda) lB.iterator().next();
+                            if (xBBB != null) {
+                                correcc = xBBB.getActivoCuentaxcobrar().doubleValue();
+                                Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "xBBB = " + xBBB);
+                            }
+                        }
+                        if ("PEN".equals(xm.getCodMoneda())) {
+                            uAcPEN += f + correcc;
+                        } else {
+                            TTipoCambio ttc;
+                            Set hm = xm.getTTipoCambios();
+                            int sh = hm.size();
+                            if (sh > 0) {
+                                Iterator ih = hm.iterator();
+                                while (ih.hasNext()) {
+                                    ttc = (TTipoCambio) ih.next();
+                                    if ("PEN".equals(ttc.getCodMonedaA())) {
+                                        Set sTTasa = ttc.getTTasas();
+                                        int sttc = sTTasa.size();
+                                        if (sttc > 0) {
+                                            Iterator ittc = sTTasa.iterator();
+                                            while (ittc.hasNext()) {
+                                                TTasa ta = (TTasa) ittc.next();
+                                                if ("ACTIVO".equals(ta.getEstado()) && "TASA MERCADO".equals(ta.getTipoTasa())) {
+                                                    uAcPEN += (f + correcc) * ta.getFConversion().doubleValue();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                return 0.0D;
+            }
+        } else {
+            return 0.0D;
+        }
+        return uAcPEN;
+    }
+
+    public double utilidad(String codM) {
+        Double uAcM = 0.0D;
+        if (filial != null) {
+            String hqlUtilidad = "from TUtilidad where TBalancexmoneda.TMoneda.codMoneda='" + codM + "' and estado='ACTIVO'";
+            List l = daoAdminK.findAll(hqlUtilidad);
+            int sl = l.size();
+            if (sl > 0) {
+                Iterator il = l.iterator();
+                while (il.hasNext()) {
+                    TUtilidad u = (TUtilidad) il.next();
+                    TBalancexmoneda xb = u.getTBalancexmoneda();
+                    Iterator xi = xb.getTPatrimonios().iterator();
+                    String cod = "";
+                    while (xi.hasNext()) {
+                        TPatrimonio xp = (TPatrimonio) xi.next();
+                        if (xp.getEstado().endsWith("" + filial)) {
+                            cod = xp.getIdpatrimonio();
+                            break;
+                        }
+                    }
+                    if (cod.length() > 0) {
+                        if (u.getIdUser().endsWith(cod)) {
+                            uAcM = u.getUtilidad().doubleValue();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return uAcM;
+    }
+
+    public static boolean estaBalanceado(String codM) {
+        boolean balanceado = true;
+        DAOGeneral d = new DAOGeneral();
+        List l = d.findAll("from TPatrimonio where estado like 'ACTIVO%'");
+        int sl = l.size();
+        if (sl > 0) {
+            Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "sl = " + sl);
+        }
+        TMoneda m = (TMoneda) d.load(TMoneda.class, codM);
+        if (m == null) {
+            Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "moneda no cargada.");
+            return false;
+        }
+        List sb = d.findAll("from TBalancexmoneda where dateUser like '" + DateUtil.getDate(new Date()) + "%' and TMoneda.codMoneda='" + codM + "' and estado ='ACTIVO'");
+        int ssb = sb.size();
+        if (ssb > 0) {
+            Iterator isb = sb.iterator();
+            Double xCyB = 0D;
+            Double xCxC = 0D;
+            Double xKf = 0D;
+            Double xCxP = 0D;
+            Double xSG = 0D;
+            Double xPR = 0D;
+            while (isb.hasNext()) {
+                TBalancexmoneda bm = (TBalancexmoneda) isb.next();
+                xCyB += bm.getActivoCajaybanco().doubleValue();
+                xCxC += bm.getActivoCuentaxcobrar().doubleValue();
+                xCxP += bm.getPasivo().doubleValue();
+                xSG += bm.getEncaje().doubleValue();
+                xPR += bm.getPRespaldo().doubleValue();
+                Set sp = bm.getTPatrimonios();
+                int ssp = sp.size();
+                if (ssp > 0) {
+                    Iterator isp = sp.iterator();
+                    while (isp.hasNext()) {
+                        TPatrimonio p = (TPatrimonio) isp.next();
+                        if (p.getEstado().startsWith("ACTIVO")) {
+                            xKf += p.getPatrimonioActual().doubleValue();
+                        }
+                    }
+                }
+            }
+            Double xA = DateUtil.round(xCyB + xCxC, 2);
+            Double xPyP = DateUtil.round(xCxP + xPR + xSG + xKf, 2);
+            Logger.getLogger(adminCapital.class.getName()).log(Level.INFO, "Eval for " + m.getCodMoneda() + " = " + xA + "=" + xPyP);
+            balanceado = balanceado & xA.equals(xPyP);
+        }
+        return balanceado;
+    }
+}

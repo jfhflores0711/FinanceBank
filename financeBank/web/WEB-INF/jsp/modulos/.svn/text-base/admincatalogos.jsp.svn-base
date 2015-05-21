@@ -1,0 +1,983 @@
+<%--
+    Document   : admincatalogos.jsp
+    Created on : 22/03/2010, 03:43:07 AM
+    Author     : ZAMORA
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8" session="true"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico">
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <script language="javascript" type="text/javascript">
+            var ant;
+            var contenido;
+            function selected(n){
+                if(ant==null){
+                    document.getElementById('a'+n).style.background="#cfe0ff";
+                }else{
+                    document.getElementById('a'+ant).style.background="#FFFFFF";
+                    document.getElementById('a'+n).style.background="#cfe0ff";
+                }
+                ant=n;
+            }
+
+            var req;
+            function mostrarcatalogo(){
+                var catalogo;
+                catalogo=document.getElementById("selcatalogo").value;
+                if (window.XMLHttpRequest) {
+                    req = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req!=null){
+                    req.onreadystatechange = procesarRespuesta;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAdminCatalogo?catalogo="+catalogo+"&cat=MOSTRAR";
+                    req.open("GET",url,true);
+                    req.send(null);
+                }
+            }
+
+            function procesarRespuesta(){
+                contenido = document.getElementById('divCatalogoElements');
+                contenido.innerHTML="Cargando los datos...";
+                if (req.readyState==4 && req.status==200) {
+                    contenido.innerHTML = req.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req2;
+            function verDetalleCatalogo(idcat){
+                var catalogo=document.getElementById("selcatalogo").value;
+                document.getElementById("cmdGuardar").disabled=true;
+                document.getElementById("cmdActualizar").disabled=false;
+                document.getElementById("cmdEliminar").disabled=false;
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesarRespuesta2;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAdminCatalogoDetalle?cat="+idcat+"&catalogo="+catalogo;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function procesarRespuesta2(){
+                contenido = document.getElementById('divCatalogoDetalle');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            function createULfi(codfi){
+                var diUL=document.getElementById("ulfi");
+                var ulfit=document.getElementById("ulfit").value;
+                if(ulfit!="1"){
+                    diUL.innerHTML="<input id='ulfit' type='hidden' value='0'><select disabled id='selfilial' name='selfilial'><option selected value='" + codfi + "'>" + codfi + "</option></select>"
+                }
+            }
+
+            var req1;
+            function mostrarcaja(){
+                ant=null;
+                var codfil
+                codfil=document.getElementById("selmiFilial").value;
+                if(codfil!='0'){
+                    document.getElementById("ulfit").value="0";
+                    createULfi(codfil);
+                    document.getElementById("cmdGuardar").disabled=true;
+                    document.getElementById("cmdEliminar").disabled=true;
+                    document.getElementById("cmdActualizar").disabled=true;
+                    req1 = null;
+                    if (window.XMLHttpRequest) {
+                        req1 = new XMLHttpRequest();
+                    } else if (window.ActiveXObject) {
+                        req1 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req1!=null){
+                        req1.onreadystatechange = procesarRespuesta1;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SMostrarCaja?codfili="+codfil;
+                        req1.open("GET",url,true);
+                        req1.send(null);
+                    }
+                }
+            }
+
+            function procesarRespuesta1(){
+                contenido = document.getElementById('divMisCajas');
+                contenido.innerHTML="Cargando los datos...";
+                if (req1.readyState==4 && req1.status==200) {
+                    contenido.innerHTML = req1.responseText;
+                }
+            }
+
+            var r1;
+            function mostrarpersc(){
+                ant=null;
+                var codfil;
+                var tipoBusqueda,valor;
+                codfil=document.getElementById("selmiFilial").value;
+                tipoBusqueda="_";
+                valor="_";
+                if(codfil!='0'){
+                    req1 = false;
+                    if (window.XMLHttpRequest) {
+                        req1 = new XMLHttpRequest();
+                    } else if (window.ActiveXObject) {
+                        req1 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req1!=null){
+                        req1.onreadystatechange = procesarR1;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SMostrarPersona?catrus="+codfil+"&tipoBusqueda="+tipoBusqueda+"&valor="+valor;
+                        req1.open("GET",url,true);
+                        req1.send(null);
+                    }
+                }
+            }
+
+            function procesarR1(){
+                contenido = document.getElementById('divMisCajas');
+                contenido.innerHTML="Cargando los datos...";
+                if (req1.readyState==4 && req1.status==200) {
+                    contenido.innerHTML = req1.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req2x;
+            function buscarcuenta(parameter,tipoB){
+                req2x = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesarRespuestax;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SNuevaCuenta?parameter="+parameter+"&tipoB="+tipoB;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function procesarRespuestax(){
+                contenido = document.getElementById('divtemporal');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                    var cad;
+                    cad=document.getElementById("divtemporal").innerHTML;
+                    if(cad!="NO ENCONTRADO"){
+                        var tablita = cad.split("/");
+                        var direccion="",celular="",telefono="",ubigeo="",email="",ruc=document.getElementById("txtRUC").value;
+                        document.getElementById('txtId').value=tablita[0];
+                        document.getElementById('txtDNI').value=tablita[1];
+                        if(tablita[2]!=null){
+                            ruc=tablita[2];
+                        }
+                        document.getElementById('txtRUC').value=ruc;
+                        document.getElementById('txtNombre').value=tablita[3];
+                        document.getElementById('txtApellidos').value=tablita[4];
+                        if(tablita[5]!=null){
+                            email=tablita[5];
+                        }
+                        document.getElementById('txtEmail').value=email;
+                        if(tablita[6]!=null){
+                            ubigeo=tablita[6];
+                        }
+                        document.getElementById('txtUbigeo').value=ubigeo;
+                        if(tablita[7]!=null){
+                            telefono=tablita[7];
+                        }
+                        document.getElementById('txtTelefono').value=telefono;
+                        if(tablita[8]!=null){
+                            celular=tablita[8];
+                        }
+                        document.getElementById('txtCelular').value=celular;
+                        if(tablita[9]!=null){
+                            direccion=tablita[9];
+                        }
+                        document.getElementById('txtDireccion').value=direccion;
+                    }else{
+                        document.getElementById('txtId').value="";
+                        document.getElementById('txtRUC').value=document.getElementById("txtRUC").value;
+                        document.getElementById('txtNombre').value="";
+                        document.getElementById('txtApellidos').value="";
+                        document.getElementById('txtEmail').value="";
+                        document.getElementById('txtUbigeo').value="";
+                        document.getElementById('txtTelefono').value="";
+                        document.getElementById('txtCelular').value="";
+                        document.getElementById('txtDireccion').value="";
+                    }
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req7;
+            function mostrarpersona(){
+                ant=null;
+                var tipoBusqueda,valor;
+                tipoBusqueda=document.getElementById("selPersona").value;
+                valor=document.getElementById("txtPersona").value;
+                req7 = false;
+                if (window.XMLHttpRequest) {
+                    req7 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req7 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req7!=null){
+                    req7.onreadystatechange = procesarRespuesta7;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SMostrarPersona?tipoBusqueda="+tipoBusqueda+"&valor="+valor;
+                    req7.open("GET",url,true);
+                    req7.send(null);
+                }
+            }
+
+            function procesarRespuesta7(){
+                contenido = document.getElementById('divMisPersonas');
+                contenido.innerHTML="Cargando los datos...";
+                if (req7.readyState==4 && req7.status==200) {
+                    contenido.innerHTML = req7.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req3;
+            function nuevoCatalogo(){
+                var catalogo;
+                catalogo=document.getElementById("txtcatalogo").value;
+                if(catalogo=="FILIAL"){
+                    document.getElementById("txtCodigo").value="";
+                    document.getElementById("txtNombre").value="";
+                    document.getElementById("txtNombre").disabled=false;
+                    document.getElementById("txtDireccion").value="";
+                    document.getElementById("txtDireccion").disabled=false;
+                    document.getElementById("selEstado").value="ACTIVO";
+                    document.getElementById("txtTelefono").value="";
+                    document.getElementById("txtTelefono").disabled=false;
+                    document.getElementById("txtCodNumCuenta").value="";
+                    document.getElementById("txtCodNumCuenta").disabled=false;
+                    document.getElementById("cmdGuardar").disabled=false;
+                    document.getElementById("cmdEliminar").disabled=true;
+                } else if(catalogo=="CAJA"){
+                    var catalogoF=document.getElementById("selmiFilial").value;
+                    if(catalogoF=='0'){
+                        window.alert("Seleccione un filial");
+                    }else{
+                        createULfi(catalogoF);
+                        document.getElementById("txtCodigo").value="";
+                        document.getElementById("txtNombre").value="";
+                        document.getElementById("txtNombre").disabled=false;
+                        document.getElementById("selTipo").value="";
+                        document.getElementById("selEstado").value="ACTIVO";
+                        document.getElementById("cmdGuardar").disabled=false;
+                        document.getElementById("cmdEliminar").disabled=true;
+                    }
+                } else if(catalogo=="MONEDA"){
+                    document.getElementById("txtCodigo").value="";
+                    document.getElementById("txtNombre").value="";
+                    document.getElementById("txtCodPaNumCuen").value="";
+                    document.getElementById("txtSimbolo").value="";
+                    document.getElementById("txtColor").value="";
+                    document.getElementById("cmdGuardar").disabled=false;
+                    document.getElementById("cmdEliminar").disabled=true;
+                } else if(catalogo=="PERSONA"){
+                    document.getElementById("txtId").value="";
+                    document.getElementById("txtDNI").value="";
+                    document.getElementById("txtDNI").disabled=false;
+                    document.getElementById("txtRUC").value="";
+                    document.getElementById("txtRUC").disabled=false;
+                    document.getElementById("txtNombre").value="";
+                    document.getElementById("txtNombre").disabled=false;
+                    document.getElementById("txtApellidos").value="";
+                    document.getElementById("txtApellidos").disabled=false;
+                    document.getElementById("txtEmail").value="";
+                    document.getElementById("txtEmail").disabled=false;
+                    document.getElementById("txtUbigeo").value="";
+                    document.getElementById("txtUbigeo").disabled=false;
+                    document.getElementById("txtTelefono").value="";
+                    document.getElementById("txtTelefono").disabled=false;
+                    document.getElementById("txtCelular").value="";
+                    document.getElementById("txtCelular").disabled=false;
+                    document.getElementById("txtUrlFoto").value="";
+                    document.getElementById("txtUrlFirma").value="";
+                    document.getElementById("txtDireccion").value="";
+                    document.getElementById("txtDireccion").disabled=false;
+                    document.getElementById("selEstado").value="ACTIVO";
+                    document.getElementById("cmdGuardar").disabled=false;
+                    document.getElementById("cmdEliminar").disabled=true;
+                }
+                document.getElementById("cmdActualizar").disabled=true;
+            }
+
+            var req3;
+            function guardarCatalogo(){
+                var catalogo;
+                catalogo=document.getElementById("txtcatalogo").value;
+                if(catalogo=="FILIAL"){
+                    var txtNombre="",txtDireccion="",selEstado="",txtTelefono="",txtCodNumCuenta="",seldistrito="";
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtDireccion=document.getElementById("txtDireccion").value;
+                    selEstado=document.getElementById("selEstado").value;
+                    txtTelefono=document.getElementById("txtTelefono").value;
+                    txtCodNumCuenta=document.getElementById("txtCodNumCuenta").value;
+                    seldistrito=document.getElementById("seldistrito").value;
+                } else if(catalogo=="CAJA"){
+                    var txtNombre="",selTipo="",selEstado="";
+                    var selfilial="";
+                    txtNombre=document.getElementById("txtNombre").value;
+                    selTipo=document.getElementById("selTipo").value;
+                    var pok=document.getElementById("pok").value;
+                    if(pok=="OK" && selTipo=="PRIMARY"){
+                        window.alert("Ya existe una caja Primaria, no se permite \n más de una caja primaria.")
+                        return;
+                    }
+                    selEstado=document.getElementById("selEstado").value;
+                    selfilial=document.getElementById("selfilial").value;
+                } else if(catalogo=="MONEDA"){
+                    return;
+                    /*var txtNombre="",txtSimbolo="";
+                    var txtColor="";                    
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtSimbolo=document.getElementById("txtSimbolo").value;
+                    txtColor=document.getElementById("txtColor").value="";*/
+                } else if(catalogo=="PERSONA"){
+                    var txtDNI="",txtRUC="",txtNombre="",txtApellidos="",txtEmail="",txtUbigeo="";
+                    var txtTelefono="",txtCelular="",txtUrlFoto="",txtUrlFirma="",txtDireccion="";
+                    var selEstado="",selCategPersona="";
+                    if(document.getElementById("txtId").length>5){
+                        actualizarCatalogo();
+                        return;
+                    }
+                    txtDNI=document.getElementById("txtDNI").value;
+                    txtRUC=document.getElementById("txtRUC").value;
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtApellidos=document.getElementById("txtApellidos").value;
+                    txtEmail=document.getElementById("txtEmail").value;
+                    txtUbigeo=document.getElementById("txtUbigeo").value;
+                    txtTelefono=document.getElementById("txtTelefono").value;
+                    txtCelular=document.getElementById("txtCelular").value;
+                    txtUrlFoto=document.getElementById("txtUrlFoto").value;
+                    txtUrlFirma=document.getElementById("txtUrlFirma").value;
+                    txtDireccion=document.getElementById("txtDireccion").value;
+                    selEstado=document.getElementById("selEstado").value;
+                    selCategPersona=document.getElementById("selCategPersona").value;
+                }
+                if (window.XMLHttpRequest) {
+                    req3 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req3 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req3!=null){
+                    if(catalogo=="FILIAL"){
+                        if(document.getElementById("txtNombre").value!=""){
+                            if(document.getElementById("txtCodNumCuenta").value!=""){
+                                if(document.getElementById("seldepartamento").value!="0"){
+                                    if(document.getElementById("selprovincia").value!="0"){
+                                        if(document.getElementById("seldistrito").value!="0"){
+                                            var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR "+catalogo+"?");
+                                            if (answer){
+                                                req3.onreadystatechange = procesarRespuesta3;
+                                                var PATH = "<%= request.getContextPath()%>";
+                                                var url = PATH + "/SIngresarCatalogo?"+
+                                                    "txtNombre="+txtNombre+"&txtDireccion="+txtDireccion+
+                                                    "&selEstado="+selEstado+"&txtTelefono="+txtTelefono+"&txtCodNumCuenta="+txtCodNumCuenta+
+                                                    "&seldistrito="+seldistrito+"&txtcatalogo="+catalogo;
+                                            }
+                                        }else{
+                                            alert("Seleccione Distrito");
+                                            document.getElementById("seldistrito").focus();
+                                        }
+                                    }else{
+                                        alert("Seleccione Provincia");
+                                        document.getElementById("selprovincia").focus();
+                                    }
+                                }else{
+                                    alert("Seleccione Departamento");
+                                    document.getElementById("seldepartamento").focus();
+                                }
+                            }else{
+                                alert("Ingrese Numero para Cuenta");
+                                document.getElementById("txtCodNumCuenta").focus();
+                            }
+                        }else{
+                            alert("ingrese Nombre Filial");
+                            document.getElementById("txtNombre").focus();
+                        }
+                    } else if(catalogo=="CAJA"){
+                        if(document.getElementById("txtNombre").value!=""){
+                            var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR "+catalogo+"?");
+                            if (answer){
+                                req3.onreadystatechange = procesarRespuesta3;
+                                var PATH = "<%= request.getContextPath()%>";
+                                var url = PATH + "/SIngresarCatalogo?"+
+                                    "txtNombre="+txtNombre+"&selTipo="+selTipo+"&selEstado="+selEstado+
+                                    "&selfilial="+selfilial+"&txtcatalogo="+catalogo;
+                            }
+                        }else{
+                            alert("ingrese Nombre Caja");
+                            document.getElementById("txtNombre").focus();
+                        }
+                    } else if(catalogo=="MONEDA"){
+                        if(document.getElementById("txtNombre").value!=""){
+                            if(document.getElementById("txtSimbolo").value!=""){
+                                var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR "+catalogo+"?");
+                                if (answer) {
+                                    req3.onreadystatechange = procesarRespuesta3;
+                                    var PATH = "<%= request.getContextPath()%>";
+                                    var url = PATH + "/SIngresarCatalogo?txtCodigo="+txtCodigo+
+                                        "&txtNombre="+txtNombre+"&txtCodPaNumCuen="+"&txtSimbolo="+txtSimbolo+
+                                        "&txtcatalogo="+catalogo+"&txtColor="+txtColor;
+                                }
+                            }else{
+                                alert("Ingrese Simbolo Moneda ");
+                                document.getElementById("txtSimbolo").focus();
+                            }
+                        }else{
+                            alert("ingrese Nombre Moneda");
+                            document.getElementById("txtNombre").focus();
+                        }
+                    } else if(catalogo=="PERSONA"){
+                        if(document.getElementById("txtDNI").value!="" || document.getElementById("txtRUC").value!=""){
+                            if(document.getElementById("txtNombre").value!=""){
+                                var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR "+catalogo+"?");
+                                if (answer) {
+                                    req3.onreadystatechange = procesarRespuesta3;
+                                    var PATH = "<%= request.getContextPath()%>";
+                                    var url = PATH + "/SIngresarCatalogo?txtDNI="+txtDNI+"&txtRUC="+txtRUC+
+                                        "&txtNombre="+txtNombre+"&txtApellidos="+txtApellidos+"&txtEmail="+txtEmail+
+                                        "&txtUbigeo="+txtUbigeo+"&txtTelefono="+txtTelefono+"&txtCelular="+txtCelular+
+                                        "&txtUrlFoto="+txtUrlFoto+"&txtUrlFirma="+txtUrlFirma+"&txtDireccion="+txtDireccion+
+                                        "&selEstado="+selEstado+"&selCategPersona="+selCategPersona+
+                                        "&txtcatalogo="+catalogo;
+                                }
+                            }else{
+                                alert("ingrese Nombre o Apellido");
+                                document.getElementById("txtNombre").focus();
+                            }
+                        }else{
+                            alert("ingrese DNI o RUC");
+                            document.getElementById("txtDNI").focus();
+                        }
+                    }
+                    req3.open("GET",url,true);
+                    req3.send(null);
+                }
+            }
+
+            function procesarRespuesta3(){
+                contenido = document.getElementById('divrptaInsertar');
+                contenido.innerHTML="Cargando los datos...";
+                if (req3.readyState==4 && req3.status==200) {
+                    contenido.innerHTML = req3.responseText;
+                    var existe;
+                    existe=document.getElementById("txtExisteCat").value
+                    if (existe=="NO"){
+                        var respuesta;
+                        respuesta=document.getElementById("txtRptaInsertar").value
+                        if(respuesta=="SI"){
+                            alert("El registro se ha realizado SATISFACTORIAMENTE!!!");
+                            document.getElementById("cmdGuardar").disabled=true;
+                            document.getElementById("cmdActualizar").disabled=false;
+                            nuevoCatalogo();
+                        }else{
+                            alert("El registro NO SE HA REALIZADO");
+                        }
+                    } else if(existe=="SI"){
+                        alert("El registro YA EXISTE (el CODIGO, DNI o RUC ya EXISTE)");
+                    }
+                }
+            }
+
+            var req6;
+            function actualizarCatalogo(){
+                var catalogo;
+                catalogo=document.getElementById("txtcatalogo").value;
+                if(catalogo=="FILIAL"){
+                    var txtCodigo="",txtNombre="",txtDireccion="",selEstado="",txtTelefono="";
+                    var txtCodNumCuenta="",seldistrito="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtDireccion=document.getElementById("txtDireccion").value;
+                    selEstado=document.getElementById("selEstado").value;
+                    txtTelefono=document.getElementById("txtTelefono").value;
+                    txtCodNumCuenta=document.getElementById("txtCodNumCuenta").value;
+                    seldistrito=document.getElementById("seldistrito").value;
+                } else if(catalogo=="CAJA"){
+                    var txtCodigo="",txtNombre="",selTipo="",selEstado="";
+                    var selfilial="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                    txtNombre=document.getElementById("txtNombre").value;
+                    selTipo=document.getElementById("selTipo").value;
+                    var pok=document.getElementById("pok").value;
+                    if(pok=="OK"){
+                        window.alert("Ya existe una caja Primaria, no se permite \n más de una caja primaria.")
+                        return;
+                    }
+                    selEstado=document.getElementById("selEstado").value;
+                    selfilial=document.getElementById("selfilial").value;
+                } else if(catalogo=="MONEDA"){
+                    var txtCodigo="",txtNombre="",txtSimbolo="";
+                    var txtColor="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtSimbolo=document.getElementById("txtSimbolo").value;
+                    txtColor=document.getElementById("txtColor").value="";
+                } else if(catalogo=="PERSONA"){
+                    var txtDNI="",txtRUC="",txtNombre="",txtApellidos="",txtEmail="",txtUbigeo="";
+                    var txtTelefono="",txtCelular="",txtUrlFoto="",txtUrlFirma="",txtDireccion="";
+                    var selEstado="",selCategPersona="", txtId="";
+                    txtId=document.getElementById("txtId").value;
+                    if(txtId.length<3){
+                        guardarCatalogo();
+                        return;
+                    }
+                    txtDNI=document.getElementById("txtDNI").value;
+                    txtRUC=document.getElementById("txtRUC").value;
+                    txtNombre=document.getElementById("txtNombre").value;
+                    txtApellidos=document.getElementById("txtApellidos").value;
+                    txtEmail=document.getElementById("txtEmail").value;
+                    txtUbigeo=document.getElementById("txtUbigeo").value;
+                    txtTelefono=document.getElementById("txtTelefono").value;
+                    txtCelular=document.getElementById("txtCelular").value;
+                    txtUrlFoto=document.getElementById("txtUrlFoto").value;
+                    txtUrlFirma=document.getElementById("txtUrlFirma").value;
+                    txtDireccion=document.getElementById("txtDireccion").value;
+                    selEstado=document.getElementById("selEstado").value;
+                    selCategPersona=document.getElementById("selCategPersona").value;
+                }
+                req6 = false;
+                if (window.XMLHttpRequest) {
+                    req6 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req6 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req6!=null){
+                    if(catalogo=="FILIAL"){
+                        if(document.getElementById("txtCodigo").value!=""){
+                            if(document.getElementById("txtNombre").value!=""){
+                                if(document.getElementById("seldepartamento").value!="0"){
+                                    if(document.getElementById("selprovincia").value!="0"){
+                                        if(document.getElementById("seldistrito").value!="0"){
+                                            var answer = confirm ("¿ESTA SEGURO QUE DESEA ACTUALIZAR "+catalogo+"?");
+                                            if (answer) {
+                                                req6.onreadystatechange = procesarRespuesta6;
+                                                var PATH = "<%= request.getContextPath()%>";
+                                                var url = PATH + "/SActualizarCatalogo?txtCodigo="+txtCodigo+
+                                                    "&txtNombre="+txtNombre+"&txtDireccion="+txtDireccion+
+                                                    "&selEstado="+selEstado+"&txtTelefono="+txtTelefono+
+                                                    "&txtCodNumCuenta="+txtCodNumCuenta+
+                                                    "&seldistrito="+seldistrito+"&txtcatalogo="+catalogo;
+                                            }
+                                        }else{
+                                            alert("Seleccione Distrito");
+                                            document.getElementById("seldistrito").focus();
+                                        }
+                                    }else{
+                                        alert("Seleccione Provincia");
+                                        document.getElementById("selprovincia").focus();
+                                    }
+                                }else{
+                                    alert("Seleccione Departamento");
+                                    document.getElementById("seldepartamento").focus();
+                                }
+                            }else{
+                                alert("ingrese Nombre Filial");
+                                document.getElementById("txtNombre").focus();
+                            }
+                        }else{
+                            alert("ingrese Codigo Filial");
+                            document.getElementById("txtCodigo").focus();
+                        }
+                    } else if(catalogo=="CAJA"){
+                        if(document.getElementById("txtCodigo").value!=""){
+                            if(document.getElementById("txtNombre").value!=""){
+                                var answer = confirm ("¿ESTA SEGURO QUE DESEA ACTUALIZAR "+catalogo+"?");
+                                if (answer) {
+                                    req6.onreadystatechange = procesarRespuesta6;
+                                    var PATH = "<%= request.getContextPath()%>";
+                                    var url = PATH + "/SActualizarCatalogo?txtCodigo="+txtCodigo+
+                                        "&txtNombre="+txtNombre+"&selTipo="+selTipo+"&selEstado="+selEstado+
+                                        "&selfilial="+selfilial+"&txtcatalogo="+catalogo;
+                                }
+                            }else{
+                                alert("ingrese Nombre Caja");
+                                document.getElementById("txtNombre").focus();
+                            }
+                        }else{
+                            alert("ingrese Codigo Caja");
+                            document.getElementById("txtCodigo").focus();
+                        }
+                    } else if(catalogo=="MONEDA"){
+                        if(document.getElementById("txtCodigo").value!=""){
+                            if(document.getElementById("txtNombre").value!=""){
+                                if(document.getElementById("txtSimbolo").value!=""){
+                                    var answer = confirm ("¿ESTA SEGURO QUE DESEA ACTUALIZAR "+catalogo+"?");
+                                    if (answer) {
+                                        req6.onreadystatechange = procesarRespuesta6;
+                                        var PATH = "<%= request.getContextPath()%>";
+                                        var url = PATH + "/SActualizarCatalogo?txtCodigo="+txtCodigo+
+                                            "&txtNombre="+txtNombre+"&txtCodPaNumCuen="+"&txtSimbolo="+txtSimbolo+
+                                            "&txtcatalogo="+catalogo+"&txtColor="+txtColor;
+                                    }
+                                }else{
+                                    alert("Ingrese Simbolo Moneda ");
+                                    document.getElementById("txtSimbolo").focus();
+                                }
+                            }else{
+                                alert("ingrese Nombre Moneda");
+                                document.getElementById("txtNombre").focus();
+                            }
+                        }else{
+                            alert("ingrese Codigo Moneda");
+                            document.getElementById("txtCodigo").focus();
+                        }
+                    } else if(catalogo=="PERSONA"){
+                        if(document.getElementById("txtDNI").value!="" || document.getElementById("txtRUC").value!=""){
+                            if(document.getElementById("txtNombre").value!=""){
+                                var answer = confirm ("¿ESTA SEGURO QUE DESEA ACTUALIZAR "+catalogo+"?");
+                                if (answer) {
+                                    req6.onreadystatechange = procesarRespuesta6;
+                                    var PATH = "<%= request.getContextPath()%>";
+                                    var url = PATH + "/SActualizarCatalogo?txtDNI="+txtDNI+"&txtRUC="+txtRUC+
+                                        "&txtNombre="+txtNombre+"&txtApellidos="+txtApellidos+"&txtEmail="+txtEmail+
+                                        "&txtUbigeo="+txtUbigeo+"&txtTelefono="+txtTelefono+"&txtCelular="+txtCelular+
+                                        "&txtUrlFoto="+txtUrlFoto+"&txtUrlFirma="+txtUrlFirma+"&txtDireccion="+txtDireccion+
+                                        "&selEstado="+selEstado+"&selCategPersona="+selCategPersona+
+                                        "&txtcatalogo="+catalogo+"&txtId="+txtId;
+                                }
+                            }else{
+                                alert("ingrese Nombre o Apellido");
+                                document.getElementById("txtNombre").focus();
+                            }
+                        }else{
+                            alert("ingrese DNI o RUC");
+                            document.getElementById("txtDNI").focus();
+                        }
+                    }
+                    req6.open("GET",url,true);
+                    req6.send(null);
+                }
+            }
+
+            function procesarRespuesta6(){
+                contenido = document.getElementById('divrptaInsertar');
+                contenido.innerHTML="Cargando los datos...";
+                if (req6.readyState==4 && req6.status==200) {
+                    contenido.innerHTML = req6.responseText;
+                    var respuesta;
+                    respuesta=document.getElementById("txtRptaInsertar").value
+                    if(respuesta=="SI"){
+                        alert("La Actualizacion se ha realizado SATISFACTORIAMENTE!!!");
+                        document.getElementById("cmdGuardar").disabled=true;
+                        document.getElementById("cmdActualizar").disabled=false;
+                        mostrarcatalogo();
+                    }else{
+                        alert("LA ACTUALIZACION NO SE HA REALIZADO");
+                    }
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req4;
+            function listarProvincia(){
+                var iddep;
+                iddep=document.getElementById("seldepartamento").value;
+                document.getElementById("selprovincia").disabled=false;
+                if(iddep!="(Seleccione Departamento)"){
+                    document.getElementById("seldistrito").disabled=true;
+                    req4 = false;
+                    if (window.XMLHttpRequest) {
+                        req4 = new XMLHttpRequest();
+                    }
+                    else if (window.ActiveXObject) {
+                        req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req4!=null){
+                        req4.onreadystatechange = procesarRespuesta4;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SListarProvincia?iddep="+iddep;
+                        req4.open("GET",url,true);
+                        req4.send(null);
+                    }
+                }else{
+                    document.getElementById("selprovincia").disabled=true;
+                    document.getElementById("seldistrito").disabled=true;
+                }
+            }
+
+            function procesarRespuesta4(){
+                contenido = document.getElementById('divprovincia');
+                contenido.innerHTML="Cargando los datos...";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                }
+                //document.cuadro.submit();
+            }
+
+            var req5;
+            function listarDistrito(){
+                var iddep;
+                iddep=document.getElementById("selprovincia").value;
+                document.getElementById("seldistrito").disabled=false;
+                if (window.XMLHttpRequest) {
+                    req5 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req5 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req5!=null){
+
+                    req5.onreadystatechange = procesarRespuesta5;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SListarDistrito?iddep="+iddep;
+                    req5.open("GET",url,true);
+                    req5.send(null);
+                }
+            }
+
+            function procesarRespuesta5(){
+                contenido = document.getElementById('divDistrito');
+                contenido.innerHTML="Cargando los datos...";
+                if (req5.readyState==4 && req5.status==200) {
+                    contenido.innerHTML = req5.responseText;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req8;
+            function eliminarCatalogo(){
+                var catalogo;
+                catalogo=document.getElementById("txtcatalogo").value;
+                if(catalogo=="FILIAL"){
+                    var txtCodigo="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                } else if(catalogo=="CAJA"){
+                    var txtCodigo="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                } else if(catalogo=="MONEDA"){
+                    var txtCodigo="";
+                    txtCodigo=document.getElementById("txtCodigo").value;
+                } else if(catalogo=="PERSONA"){
+                    var txtId="";
+                    txtId=document.getElementById("txtId").value;
+                }
+                if (window.XMLHttpRequest) {
+                    req8 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req8 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req8!=null){
+                    if(catalogo=="FILIAL"){
+                        var answer = confirm ("¿ESTA SEGURO QUE DESEA ELIMINAR "+catalogo+"?");
+                        if (answer) {
+                            req8.onreadystatechange = procesarRespuesta8;
+                            var PATH = "<%= request.getContextPath()%>";
+                            var url = PATH + "/SEliminarCatalogo?txtCodigo="+txtCodigo+"&txtcatalogo="+catalogo;
+                        }
+                    } else if(catalogo=="CAJA"){
+                        var answer = confirm ("¿ESTA SEGURO QUE DESEA ELIMINAR "+catalogo+"?");
+                        if (answer) {
+                            req8.onreadystatechange = procesarRespuesta8;
+                            var PATH = "<%= request.getContextPath()%>";
+                            var url = PATH + "/SEliminarCatalogo?txtCodigo="+txtCodigo+"&txtcatalogo="+catalogo;
+                        }
+                    } else if(catalogo=="MONEDA"){
+                        var answer = confirm ("¿ESTA SEGURO QUE DESEA ELIMINAR "+catalogo+"?");
+                        if (answer) {
+                            req8.onreadystatechange = procesarRespuesta8;
+                            var PATH = "<%= request.getContextPath()%>";
+                            var url = PATH + "/SEliminarCatalogo?txtCodigo="+txtCodigo+"&txtcatalogo="+catalogo;
+                        }
+                    } else if(catalogo=="PERSONA"){
+                        var answer = confirm ("¿ESTA SEGURO QUE DESEA ELIMINAR "+catalogo+"?");
+                        if (answer) {
+                            req8.onreadystatechange = procesarRespuesta8;
+                            var PATH = "<%= request.getContextPath()%>";
+                            var url = PATH + "/SEliminarCatalogo?txtId="+txtId+"&txtcatalogo="+catalogo;
+                        }
+                    }
+                    req8.open("GET",url,true);
+                    req8.send(null);
+                }
+            }
+
+            function procesarRespuesta8(){
+                //alert('dentro de la funcion procesra respuesta')
+                contenido = document.getElementById('divrptaInsertar');
+                contenido.innerHTML="Cargando los datos...";
+                if (req8.readyState==4 && req8.status==200) {
+                    contenido.innerHTML = req8.responseText;
+                    var respuesta;
+                    respuesta=document.getElementById("txtRptaInsertar").value
+                    if(respuesta=="SI"){
+                        alert("EL Registro fue ELIMINADO Satisfactoriamente!!!");
+                        document.getElementById("cmdGuardar").disabled=true;
+                        document.getElementById("cmdActualizar").disabled=false;
+                        nuevoCatalogo();
+                        mostrarcatalogo();
+                    }else{
+                        alert("LA ELIMINACION NO SE PUDO REALIZAR");
+                    }
+                }
+            }
+        </script>
+        <script type="text/javascript" src="js/validacion.js">
+        </script>
+        <script type="text/javascript" src="js/calendar/popcalendar.js">
+        </script>
+        <script type="text/javascript" language="javascript" src="js/colorPicker.js"></script>
+        <link rel="stylesheet" href="css/colorPicker.css" type="text/css" />
+        <style type="text/css">
+            .tableItems {
+                border: 1px solid #008585;
+                border-spacing: 0px;
+                border-collapse: collapse;
+            }
+            .thItems {
+                background: #008585;
+                font-family: Arial;
+                font-size: 12pt;
+                color: #FFFFFF;
+            }
+            .tdItems {
+                border: 1px solid #008585;
+                font-family: Arial;
+                font-size: 10pt;
+            }
+            .trItems {
+                background: #FFFFFF;
+            }
+            .trItemspar {
+                background: #9BCFCF;
+            }
+            /* aqui stylos para resaltar filas  */
+            .tableRollOverEffect{
+                /*Efecto cuando el mouse pasa por encima*/
+                background-color:#0000FF;
+                color:#FFFFFF;
+            }
+            .tableRowClickEffect{
+                /*Efecto cuando se ha realizado clic*/
+                background-color:#FF0000;
+                color:#FFFFFF;
+            }
+            /*************************************************************************/
+            #menu {
+                margin-bottom: 30px;
+                border-bottom: 4px solid #EBEBEB;
+            }
+            #menu ul {
+                margin: 0;
+                list-style: none;
+                line-height: normal;
+            }
+            #menu li {
+                display: inline;
+            }
+            #menu a {
+                display: block;
+                padding: 10px 0 10px 24px;
+                background: url(images/img05.gif) no-repeat 10px 17px;
+                border-top: 1px solid #EBEBEB;
+                color: #E08934;
+            }
+            #menu .active1 a {
+                background: #d8e2f3;
+                text-decoration: none;
+                font-weight: bold;
+                color: #385B88;
+            }
+            #menu a:hover, #menu .active a {
+                background: #EBEEF3;
+                text-decoration: none;
+                font-weight: bold;
+                color: #385B88;
+            }
+        </style>        <%--****************************************************--%>
+    </head>
+    <body onload="document.getElementById('selcatalogo').focus();">
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "20110228202911495761");
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Modulo de Cat&aacute;logo!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="story">
+                        <table width="100%">
+                            <tr>
+                                <td colspan="3">
+                                    <fieldset   style="border-width:3px">
+                                        <legend><b>CATALOGOS:</b></legend>
+                                        <select id="selcatalogo" name="selcatalogo" onchange="mostrarcatalogo();">
+                                            <option value="0">(Seleccione un Catalogo)</option>
+                                            <option value="CAJA">CAJA</option>
+                                            <option value="FILIAL">FILIAL</option>
+                                            <option value="PERSONA">PERSONAS</option>
+                                            <option value="PERSC">CLIENTES</option>
+                                        </select>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top">
+                                    <div id="divCatalogoElements">&nbsp;</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div style="display: none" id="divCatalogoDetalle">&nbsp;</div><div id="mostrarCuentas">&nbsp;</div><div id="divtemporal" style="display: none"></div></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

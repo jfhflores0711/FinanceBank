@@ -1,0 +1,230 @@
+/*
+ * PARA MANTENER LA AUTOEXTORNACIÓN
+ */
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.finance.bank.bean.TDetalleCaja;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TRegistroCompraVenta;
+import org.finance.bank.bean.TRegistroGiro;
+import org.finance.bank.bean.TTransferenciaCaja;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+import org.finance.bank.util.HibernateUtil;
+
+/**
+ *
+ * @author ronald
+ */
+public class SExtornoOp extends HttpServlet {
+
+    /** ADMIN EXTORNO
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession(true);
+        String idAdminExtorno = (String) session.getAttribute("ID_USER_ADMIN_AUTORIZER");
+        if (idAdminExtorno == null || idAdminExtorno.equals("")) {
+            out.print("ERROR: NO HAY AUTORIZACIÓN!!!<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+            out.close();
+            return;
+        }
+        String caja1 = session.getAttribute("USER_CODCAJA").toString();
+        String idForInitNewestTable = DateUtil.convertDateId(caja1, SExtornoOp.class.getSimpleName());
+        DAOGeneral dao = new DAOGeneral();
+        String relleno = "";
+        try {
+            if (request.getParameter("id") != null || !request.getParameter("id").equals("")) {
+                idForInitNewestTable = request.getParameter("id").toString();
+            } else {
+                out.print("ERROR: NO HAY NADA QUE EXTORNAR!!!<input id='txtExtorno' name='txtExtorno' type='hidden' value='NO'>");
+                out.close();
+                return;
+            }
+            TOperacion op = (TOperacion) dao.load(TOperacion.class, idForInitNewestTable);
+            if (op == null) {
+                out.print("ERROR: NO HAY NADA QUE EXTORNAR!!!<input id='txtExtorno' name='txtExtorno' type='hidden' value='NO'>");
+                out.close();
+                return;
+            } else {
+                op.setEstado("EXTORNADO");
+                op.setFechaExtornacion(DateUtil.getNOW_S());
+                op.setIdAdminExtorno(idAdminExtorno);
+                dao.update();
+            }
+            int chain = (int) Integer.parseInt(op.getTTipoOperacion().getCodigoTipoOperacion().substring(4));
+            boolean estado = false;
+            switch (chain) {
+                case 1:
+                    TRegistroCompraVenta compra = (TRegistroCompraVenta) dao.load(TRegistroCompraVenta.class, idForInitNewestTable);
+                    if (compra.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        out.close();
+                        dao.cerrarSession();
+                        return;
+                    }
+                    compra.setEstado("EXTORNADO");
+                    dao.update();
+//                    String xdetallecaja = iniDetalleCaja.detalleActivaCaja(caja1, op.getTMoneda().getCodMoneda());
+                    TDetalleCaja detallecaja = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + op.getTMoneda().getCodParaNumCuenta() + "00");
+                    detallecaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() - compra.getMontoRecibido().doubleValue()));
+                    dao.update();
+//                    String xdetallecaja2 = iniDetalleCaja.detalleActivaCaja(caja1, "PEN");
+                    TDetalleCaja detallecaja2 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + ((TMoneda) dao.load(TMoneda.class, "PEN")).getCodParaNumCuenta() + "00");
+                    detallecaja2.setMontoFinal(new BigDecimal(detallecaja2.getMontoFinal().doubleValue() + compra.getMontoEntregado().doubleValue()));
+                    dao.update();
+                    estado = true;
+                    relleno = "COMPRA EXTORNADA CORRECTAMENTE!!";
+                    break;
+                case 2:
+                    TRegistroCompraVenta venta = (TRegistroCompraVenta) dao.load(TRegistroCompraVenta.class, idForInitNewestTable);
+                    if (venta.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        dao.cerrarSession();
+                        out.close();
+                        return;
+                    }
+                    venta.setEstado("EXTORNADO");
+                    dao.update();
+//                    String vdetallecaja = iniDetalleCaja.detalleActivaCaja(caja1, op.getTMoneda().getCodMoneda());
+                    TDetalleCaja detallecajav = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + op.getTMoneda().getCodParaNumCuenta() + "00");
+                    detallecajav.setMontoFinal(new BigDecimal(detallecajav.getMontoFinal().doubleValue() + venta.getMontoEntregado().doubleValue()));
+                    dao.update();
+//                    String vdetallecaja2 = iniDetalleCaja.detalleActivaCaja(caja1, "PEN");
+                    TDetalleCaja detallecajav2 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + ((TMoneda) dao.load(TMoneda.class, "PEN")).getCodParaNumCuenta() + "00");
+                    detallecajav2.setMontoFinal(new BigDecimal(detallecajav2.getMontoFinal().doubleValue() - venta.getMontoRecibido().doubleValue()));
+                    dao.update();
+                    estado = true;
+                    relleno = "VENTA EXTORNADA CORRECTAMENTE!!";
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    TRegistroGiro giro = (TRegistroGiro) dao.load(TRegistroGiro.class, idForInitNewestTable);
+                    if (giro.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        out.close();
+                        dao.cerrarSession();
+                        return;
+                    }
+                    giro.setEstado("EXTORNADO");
+                    dao.update();
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    try {
+                        TRegistroGiro giro_cobro = (TRegistroGiro) dao.findAll("TRegistroGiro where idoperacioncobro='" + idForInitNewestTable + "'").get(0);
+                        giro_cobro.setEstado("ESPERA");
+                        dao.update();
+                    } catch (Exception ex) {
+                        out.print("FALLO DEL OBJETO!!!");
+                    }
+                    break;
+                case 9:
+                    TTransferenciaCaja ttc = (TTransferenciaCaja) dao.load(TTransferenciaCaja.class, idForInitNewestTable);
+                    if (ttc.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        dao.cerrarSession();
+                        out.close();
+                        return;
+                    }
+                    String first = ttc.getEstado();
+                    ttc.setEstado("EXTORNADO");
+                    ttc.setFecha(DateUtil.getNOW_S());
+                    dao.update();
+//                    String dca = iniDetalleCaja.detalleActivaCaja(ttc.getTCaja().getCodCaja(), ttc.getTOperacion().getTMoneda().getCodMoneda());
+                    TDetalleCaja xCaja1 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + ttc.getTCaja().getCodCaja() + ttc.getTOperacion().getTMoneda().getCodParaNumCuenta() + "00");
+                    xCaja1.setMontoFinal(xCaja1.getMontoFinal().add(ttc.getMonto()));
+                    dao.update();
+                    if (!first.equals("ABORTED")) {
+                        TOperacion op2 = (TOperacion) dao.load(TOperacion.class, ttc.getIdope());
+                        op2.setEstado("EXTORNADO");
+                        op2.setIdAdminExtorno(idAdminExtorno);
+                        op2.setFechaExtornacion(DateUtil.getNOW_S());
+                        dao.update();
+                        TDetalleCaja desca = (TDetalleCaja) dao.load(TDetalleCaja.class, ttc.getCodCajaDestino());
+                        if (ttc.getTipo().equals("911")) {
+                            desca.setMontoInicial(desca.getMontoInicial().subtract(ttc.getMonto()));
+                        }
+                        desca.setMontoFinal(desca.getMontoFinal().subtract(ttc.getMonto()));
+                        dao.update();
+                    }
+                    break;
+                case 10:
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
+                    break;
+                default:
+                    relleno = "ERROR: NO hay NADA que extornar!!!";
+            }
+        } finally {
+            dao.cerrarSession();
+            out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>"
+                    + relleno);
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

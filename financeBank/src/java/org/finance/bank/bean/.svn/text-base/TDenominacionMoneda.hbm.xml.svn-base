@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TDenominacionMoneda" table="t_denominacion_moneda" schema="public">
+        <id name="iddenominacionmoneda" type="string">
+            <column name="iddenominacionmoneda" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TMoneda" class="org.finance.bank.bean.TMoneda" fetch="select">
+            <column name="cod_moneda" length="41" not-null="true" />
+        </many-to-one>
+        <property name="tipo" type="string">
+            <column name="tipo" length="50" not-null="true" />
+        </property>
+        <property name="monto" type="string">
+            <column name="monto" length="20" not-null="true" />
+        </property>
+        <property name="imagen" type="string">
+            <column name="imagen" length="500" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="orden" type="java.lang.Integer">
+            <column name="orden" precision="6" scale="0" />
+        </property>
+        <set name="TDetalleSumas" inverse="true">
+            <key>
+                <column name="iddenominacionmoneda" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetalleSuma" />
+        </set>
+    </class>
+</hibernate-mapping>

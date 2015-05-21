@@ -1,0 +1,72 @@
+/* 
+    Document   : admCatalogo
+    Created on : 09/02/2013, 12:07:46 PM
+    Author     : admin
+    Description: Catalogos
+*/
+
+.tableItems {
+    border: 1px solid #008585;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+.thItems {
+    background: #008585;
+    font-family: Arial;
+    font-size: 12pt;
+    color: #FFFFFF;
+}
+.tdItems {
+    border: 1px solid #008585;
+    font-family: Arial;
+    font-size: 10pt;
+}
+.trItems {
+    background: #FFFFFF;
+}
+.trItemspar {
+    background: #9BCFCF;
+}
+/* aqui stylos para resaltar filas  */
+.tableRollOverEffect{
+    /*Efecto cuando el mouse pasa por encima*/
+    background-color:#0000FF;
+    color:#FFFFFF;
+}
+.tableRowClickEffect{
+    /*Efecto cuando se ha realizado clic*/
+    background-color:#FF0000;
+    color:#FFFFFF;
+}
+/*************************************************************************/
+#menu {
+    margin-bottom: 30px;
+    border-bottom: 4px solid #EBEBEB;
+}
+#menu ul {
+    margin: 0;
+    list-style: none;
+    line-height: normal;
+}
+#menu li {
+    display: inline;
+}
+#menu a {
+    display: block;
+    padding: 10px 0 10px 24px;
+    background: url(images/img05.gif) no-repeat 10px 17px;
+    border-top: 1px solid #EBEBEB;
+    color: #E08934;
+}
+#menu .active1 a {
+    background: #d8e2f3;
+    text-decoration: none;
+    font-weight: bold;
+    color: #385B88;
+}
+#menu a:hover, #menu .active a {
+    background: #EBEEF3;
+    text-decoration: none;
+    font-weight: bold;
+    color: #385B88;
+}

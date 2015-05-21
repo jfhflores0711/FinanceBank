@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TCuentaPersona" table="t_cuenta_persona" schema="public">
+        <id name="idcuentapersona" type="string">
+            <column name="idcuentapersona" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TTipoCuenta" class="org.finance.bank.bean.TTipoCuenta" fetch="select">
+            <column name="codigo_cuenta" length="10" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TPersona" class="org.finance.bank.bean.TPersona" fetch="select">
+            <column name="id_user_pk" length="50" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TMoneda" class="org.finance.bank.bean.TMoneda" fetch="select">
+            <column name="cod_moneda" length="41" not-null="true" />
+        </many-to-one>
+        <property name="numCta" type="string">
+            <column name="num_cta" length="50" not-null="true" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" not-null="true" />
+        </property>
+        <property name="observaciones" type="string">
+            <column name="observaciones" length="500" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="interes" type="big_decimal">
+            <column name="interes" precision="20" />
+        </property>
+        <property name="saldo" type="big_decimal">
+            <column name="saldo" precision="20" />
+        </property>
+        <property name="saldoSinInteres" type="big_decimal">
+            <column name="saldo_sin_interes" precision="20" />
+        </property>
+        <property name="fechaActualizacion" type="string">
+            <column name="fecha_actualizacion" length="50" />
+        </property>
+        <property name="fechaCap" type="string">
+            <column name="fecha_cap" length="50" />
+        </property>
+        <set name="TDetalleIntereseses" inverse="true">
+            <key>
+                <column name="idcuentapersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetalleIntereses" />
+        </set>
+        <set name="TDetalleCuentaPersonas" inverse="true">
+            <key>
+                <column name="idcuentapersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetalleCuentaPersona" />
+        </set>
+        <set name="TSobregiros" inverse="true">
+            <key>
+                <column name="idcuentapersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TSobregiro" />
+        </set>
+        <set name="TRegistroPrestamos" inverse="true">
+            <key>
+                <column name="idcuentapersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TRegistroPrestamo" />
+        </set>
+        <set name="TRegistroDepositoRetiros" inverse="true">
+            <key>
+                <column name="idcuentapersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TRegistroDepositoRetiro" />
+        </set>
+    </class>
+</hibernate-mapping>

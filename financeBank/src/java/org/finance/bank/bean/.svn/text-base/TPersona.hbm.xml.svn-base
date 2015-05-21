@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TPersona" table="t_persona" schema="public">
+        <id name="idUserPk" type="string">
+            <column name="id_user_pk" length="50" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCategoriaPersona" class="org.finance.bank.bean.TCategoriaPersona" fetch="select">
+            <column name="idcategoriapersona" length="41" not-null="true" />
+        </many-to-one>
+        <property name="docIdentidad" type="string">
+            <column name="doc_identidad" length="10" />
+        </property>
+        <property name="nombre" type="string">
+            <column name="nombre" length="60" not-null="true" />
+        </property>
+        <property name="apellidos" type="string">
+            <column name="apellidos" length="60" not-null="true" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" length="50" />
+        </property>
+        <property name="ubigeo" type="string">
+            <column name="ubigeo" length="10" />
+        </property>
+        <property name="telefono" type="string">
+            <column name="telefono" length="100" />
+        </property>
+        <property name="celular" type="string">
+            <column name="celular" length="100" />
+        </property>
+        <property name="urlFoto" type="string">
+            <column name="url_foto" length="200" />
+        </property>
+        <property name="urlFirma" type="string">
+            <column name="url_firma" length="200" />
+        </property>
+        <property name="direccion" type="string">
+            <column name="direccion" length="100" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="ruc" type="string">
+            <column name="ruc" length="50" />
+        </property>
+        <set name="TCuentaPersonas" inverse="true">
+            <key>
+                <column name="id_user_pk" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCuentaPersona" />
+        </set>
+        <set name="TControlTipos" inverse="true">
+            <key>
+                <column name="id_user_pk" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TControlTipo" />
+        </set>
+        <set name="TCuentaAccesos" inverse="true">
+            <key>
+                <column name="id_user_pk" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCuentaAcceso" />
+        </set>
+        <set name="TRegistroGiros" inverse="true">
+            <key>
+                <column name="id_user_pk_origen" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TRegistroGiro" />
+        </set>
+        <set name="TPersonaCajas" inverse="true">
+            <key>
+                <column name="id_user_pk" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TPersonaCaja" />
+        </set>
+    </class>
+</hibernate-mapping>

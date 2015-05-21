@@ -1,0 +1,877 @@
+<%-- 
+    Document   : Prestamos.jsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : Oscar
+--%>
+<%@page session="true" import="java.util.Iterator,java.util.List,org.hibernate.Query,org.hibernate.Session,org.hibernate.SessionFactory,org.hibernate.Transaction,org.finance.bank.util.HibernateUtil"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title><%=(DateUtil.getDateTime("yyyyMMddHHmmssS", new Date()))%>|financeBank! Prestamos</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <!-- WIN PROTOTYPE -->
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script language="JavaScript" type="text/JavaScript">
+            <!--
+            function MM_reloadPage(init) {  //reloads the window if Nav4 resized
+                if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+                        document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+                else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+            }
+            MM_reloadPage(true);
+            var Aut = false;
+            var req2;
+            function ventanaNuevap() {
+                if(document.getElementById("chkVerSaldo").checked==true){
+                    document.getElementById("chkVerSaldo").checked=false;
+                    Dialog.confirm($('login').innerHTML,
+                    {   className:"alphacube",
+                        width:400,
+                        okLabel: "login",
+                        title: "Autorizar Usuario",
+                        cancelLabel: "cancel",
+                        onOk:function(){
+                            var user =document.getElementById('user').value;
+                            var pass =document.getElementById('passwd').value;
+                            document.getElementById('res').innerHTML='';
+                            Autorizar(user,pass);
+                            alert('¡¡ DATOS ENVIADOS !!');
+                            if(document.getElementById('res').innerHTML==1){
+                                Aut = true;
+                                //document.getElementById("trSaldo").style.display="block";
+                                //document.getElementById("trSaldo").style.display="";
+                                //document.fcambio.chkVerSaldo.checked=true;
+                                //alert("si encontro");
+                                document.getElementById("chkVerSaldo").checked=true;
+                                //consultartasa();
+                                return true;
+                            }else{
+                                document.formPrestamo.chkVerSaldo.checked=false;
+                                $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                                $('login_error_msg').show();
+                                Windows.focusedWindow.updateHeight();
+                                new Effect.Shake(Windows.focusedWindow.getId());
+                                return false;
+                            }
+                        }
+                    });
+                } else {
+                    window.alert("No se autoriza la acción");
+                }
+            }
+            function Autorizar(login,contrasenia) {
+                //req2=false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesar1;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+            function procesar1(){
+                var contenido = document.getElementById('res');
+                //contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="<img src='images/ajax/ajax-loader1.gif' alt='Cargando los datos...'>";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+            //-->
+        </script>
+        <script type="text/javascript">
+            <%@include file="/js/funciones.js" %>
+        </script>
+        <script type="text/javascript" src="js/validacion.js"> </script>
+        <script type="text/JavaScript" src="js/numpad.js" language="JavaScript"></script>
+        <script type="text/JavaScript" src="js/cmas_method.js" language="JavaScript"></script>
+        <script type="text/JavaScript" language="JavaScript">
+            <!--//Inicio
+            function cleanP(){
+                document.getElementById('montoPrestamo').value='0.00';
+                document.getElementById('tasaInteres').value='0.00';
+                document.getElementById('tasaMoras').value='0.00';
+                document.getElementById('plazos').value='1';
+            }
+            function buscarP(){
+                //var tf;
+                if(document.formPrestamo.txtBuscar.value==""){
+                    window.alert("Ingrese algún texto a buscar!");
+                }else{
+                    document.formPrestamo.action='prestamos.htm';
+                    document.formPrestamo.onsubmit='';
+                    document.formPrestamo.submit();
+                    document.formPrestamo.BUSCAR.value='buscando';
+                    document.formPrestamo.BUSCAR.disabled=true;
+                    document.getElementById("ajaximgo").style.display='block';
+                }
+            }
+            //Fin-->
+        </script>
+        <script type="text/javascript">
+            function rebusquedap(){
+                var seltipo=document.getElementById("cuentadr")[document.getElementById("cuentadr").selectedIndex].value;
+                document.getElementById("selTipoBus")[document.getElementById("selTipoBus").selectedIndex].value="dni_ruc";
+                document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='"+seltipo+"' onfocus='blur();' />";
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            <%-- locale defs --%>
+                var eeisus=0;
+                var eetrue="VERDADERO";
+                var eefalse="FALSO";
+                var eedec=".";
+                var eeth=" ";
+                var eedecreg=new RegExp("\\.","g");
+                var eethreg=new RegExp(" ","g");
+                var eecurrencyreg=new RegExp("€","g");
+                var eepercentreg=new RegExp("%","g");
+                var fmtdaynamesshort=new Array("dom","lun","mar","mié","jue","vie","sáb");
+                var fmtdaynameslong=new Array("domingo","lunes","martes","miércoles","jueves","viernes","sábado");
+                var fmtmonthnamesshort=new Array("ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic");
+                var fmtmonthnameslong=new Array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+                var fmtstrings=new Array(","," ","S/.","pta","€","/","$");
+                var fmtdate6=new Array(34,33,25,2);
+                var fmtdate7=new Array(25,2,33,35);
+                var fmtdate8=new Array(25,2,33,36);
+                var fmtdate9=new Array(7,37,3,37,11);
+                var fmtdate10=new Array(38,25,2);
+            <%-- library --%>
+                function myIsNaN(x){
+                    return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+                }
+                function round(n,nd){
+                    if(isFinite(n)&&isFinite(nd)){
+                        var sign_n=(n<0)?-1:1;
+                        var abs_n=Math.abs(n);
+                        var factor=Math.pow(10,nd);
+                        return sign_n*Math.round(abs_n*factor)/factor;
+                    }else{
+                        return NaN;
+                    }
+                }
+                function b2s(b){
+                    return b?eetrue:eefalse;
+                }
+                function eeparseFloat(str){
+                    str=String(str).replace(eedecreg,".");
+                    var res=parseFloat(str);
+                    if(isNaN(res)){
+                        return 0;
+                    }else{
+                        return res;
+                    }
+                }
+                function eeparsePercent(str){
+                    var parts=String(str).split('%');
+                    var tmp=String(parts[0]).replace(eedecreg,".");
+                    var res=parseFloat(tmp)/100;if(isNaN(res)){
+                        return 0;
+                    }else{
+                        return res;
+                    }
+                }
+                var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+                function eedisplayFloat(x){
+                    if(myIsNaN(x)){
+                        return Number.NaN;
+                    }else{
+                        var str=String(x);
+                        if(near0RegExp.test(str)){
+                            x=round(x,8);
+                            str=String(x);
+                        }
+                        return str.replace(/\./g,eedec);
+                    }
+                }
+                function eedisplayFloatV(x){
+                    if(x=="")return x;
+                    if(isFinite(x)){
+                        return eedisplayFloat(x);
+                    }else{
+                        return x;
+                    }
+                }
+                function eedisplayFloatND(x,nd){
+                    if(myIsNaN(x)){
+                        return Number.NaN;
+                    }else{
+                        var res=round(x,nd);
+                        if(nd>0){
+                            var str=String(res);
+                            if(str.indexOf('e')!=-1)
+                                return str;
+                            if(str.indexOf('E')!=-1)
+                                return str;
+                            var parts=str.split('.');
+                            if(parts.length<2){
+                                var decimals=('00000000000000').substring(0,nd);
+                                return(parts[0]).toString()+eedec+decimals;
+                            }else{
+                                var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                                return(parts[0]).toString()+eedec+decimals;
+                            }
+                        }else{
+                            return res;
+                        }
+                    }
+                }
+                function eedisplayPercentND(x,nd){
+                    if(myIsNaN(x)){
+                        return Number.NaN;
+                    }else{
+                        return eedisplayFloatND(x*100,nd)+'%';
+                    }
+                }
+                function eeparseFloatTh(str){
+                    str=String(str).replace(eethreg,"");
+                    str=String(str).replace(eedecreg,".");
+                    var res=parseFloat(str);
+                    if(isNaN(res)){
+                        return 0;
+                    }else{
+                        return res;
+                    }
+                }
+                function eedisplayFloatNDTh(x,nd){
+                    if(myIsNaN(x)){
+                        return Number.NaN;
+                    }else{
+                        var res=round(x,nd);
+                        if(nd>0){
+                            var str=String(res);
+                            if(str.indexOf('e')!=-1)
+                                return str;
+                            if(str.indexOf('E')!=-1)
+                                return str;
+                            var parts=str.split('.');
+                            var res2=eeinsertThousand(parts[0].toString());
+                            if(parts.length<2){
+                                var decimals=('00000000000000').substring(0,nd);
+                                return(res2+eedec+decimals);
+                            }else{
+                                var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                                return(res2+eedec+decimals);
+                            }
+                        }else{
+                            return(eeinsertThousand(res.toString()));
+                        }
+                    }
+                }
+                var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+                function eeparseFloatV(str){
+                    if(str=="")
+                        return str;
+                    str=String(str).replace(eedecreg,".");
+                    if(!eeparseFloatVreg.test(str)){
+                        return str;
+                    }
+                    var res=parseFloat(str);
+                    if(isNaN(res)){
+                        return str;
+                    }else{
+                        return res;
+                    }
+                }
+                function eeinsertThousand(whole){
+                    if(whole==""||whole.indexOf("e")>=0){
+                        return whole;
+                    }else{
+                        var minus_sign="";
+                        if(whole.charAt(0)=="-"){
+                            minus_sign="-";
+                            whole=whole.substring(1);
+                        }
+                        var res="";
+                        var str_length=whole.length-1;
+                        for(var ii=0;ii<=str_length;ii++){
+                            if(ii>0&&ii%3==0){
+                                res=eeth+res;
+                            }
+                            res=whole.charAt(str_length-ii)+res;
+                        }
+                        return minus_sign+res;
+                    }
+                }
+        </script>
+        <script type="text/javascript" language="JavaScript"><!--
+            /* form*/
+            function evaluar(){
+                if(document.getElementById("nombrers").value.length==0){
+                    document.formPrestamo.action='prestamos.htm';
+                    return true;
+                }
+                var cuenta=document.getElementById("cuentaCte")[document.getElementById("cuentaCte").selectedIndex].value;
+                if(cuenta=="SELECCIONE:"){
+                    window.alert("Seleccione una cuenta");
+                    return false;
+                }
+                if(document.formPrestamo.XLEW_1_3_2.value==""){
+                    window.alert("Ingrese la tasa de Interés!");
+                    return false;
+                }
+                if(document.formPrestamo.MORA.value==""){
+                    window.alert("Ingrese la tasa de Moras!");
+                    return false;
+                }
+                if(document.formPrestamo.XLEW_1_2_2.value==""){
+                    window.alert("Ingrese los plazos en meses!");
+                    return false;
+                }
+                if(document.getElementById("montoPrestamo").value==""){
+                    window.alert("Ingrese el monto a habilitar!");
+                    return false;
+                }else{
+                    var mm=document.getElementById("montoPrestamo").value;
+                    var m=parseFloat(mm.replace(" ", "","gi"));
+                    var c;
+                    var cXm;
+                    var cXc;
+                    var xm=0;
+                    var cuenta=document.getElementById("cuentaCte")[document.getElementById("cuentaCte").selectedIndex].value;
+                    if(cuenta!="sinSeleccion"){
+                        c=cuenta.split(" ", 1);
+                        cXm=cuenta.split("(");
+                        cXc=cXm[1].substring(0, cXm[1].indexOf(")"));
+                        xm=document.getElementById("xM"+cXc).value;
+                        if(xm==null){
+                            window.alert("La caja no maneja ese tipo de moneda, seleccione otra cuenta");
+                            return false;
+                        }
+                        xm=converseS2N(xm);
+                    }else{
+                        window.alert("Seleccione una cuenta válida!");
+                        return false;
+                    }
+                    if(m>xm){
+                        window.alert("No hay suficiente dinero en esta caja");
+                        return false;
+                    }else if(c[0].indexOf("N", 1)>0){
+                        if(!document.getElementById("chkVerSaldo").checked){
+                            window.alert("La cuenta tiene un saldo negativo y \nnecesita autorización del administrador \npara este préstamo");
+                            return false;
+                        }
+                    }else{
+                        window.alert("El monto actual a entregar es " + mm );
+                    }
+                }
+                var tf = window.confirm("Está seguro de que desea grabar los datos?")
+                if (tf == true){
+                    return true;
+                }
+                return false
+            }//--->
+        </script>
+        <script type="text/javascript">
+            function validar(e){
+                var obj=e.srcElement || e.target;
+                var tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo==8)return true;
+                var patron =/[\d.]/;
+                var tecla_valor = String.fromCharCode(tecla_codigo);
+                var control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true
+                return patron.test(tecla_valor) &&  control;
+            };
+            function actualiza(tipo){
+                if('Natural'==tipo){
+                    document.getElementById("rbPersona").value=tipo;
+                }else if('Juridica'==tipo){
+                    document.getElementById("rbJuridica").value=tipo;
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function habilitarPrestamo(){
+                var cuenta=document.getElementById("cuentaCte")[document.getElementById("cuentaCte").selectedIndex].value;
+                if(cuenta!="sinSeleccion"){
+                    var xMc=cuenta.split("(")
+                    var sSt=xMc[0].substring(xMc[0].indexOf(" "), xMc[0].length);
+                    document.getElementById("monedasP").innerHTML="<select name='MONEDA'><option value='"+xMc[1].substring(0,xMc[1].indexOf(")"))+"' selected>"+sSt+"</option></select>";
+                    document.getElementById("prestamofill").style.display="block";
+                    document.getElementById("submitPrestamo").style.display="block";
+                }else{
+                    document.getElementById("monedasP").innerHTML="";
+                    window.alert("Seleccione una cuenta válida!");
+                    document.getElementById("prestamofill").style.display="none";
+                    document.getElementById("submitPrestamo").style.display="none";
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function validartxtBusquedap(){
+                var seltipo;
+                seltipo=document.getElementById("selTipoBus")[document.getElementById("selTipoBus").selectedIndex].value;
+                if(seltipo=="ncta"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return soloNumeroTelefonico(event);' tabindex='1' />";
+                }else if(seltipo=="dni_ruc"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return solonumeros(event);' tabindex='1' />";
+                }else if(seltipo=="ape" || seltipo=="nom"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' tabindex='1' />";
+                }else{
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='No se puede realizar la búsqueda' readonly tabindex='1' />";
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function tea(){
+                var va=document.getElementById("tasaInteres").value;
+                document.getElementById("tea").innerHTML=round(100*(Math.pow(1+eeparseFloat(va)/1200,12)-1), 2);
+            }
+            function taem(){
+                var va=document.getElementById("tasaMoras").value;
+                document.getElementById("taem").innerHTML=round(100*(Math.pow(1+eeparseFloat(va)/1200,12)-1), 2);
+            }
+        </script>
+        <style type="text/css">
+            .Estilo1 {
+                font-size: 18px;
+                font-weight: bold;
+            }
+            .Estilo4 {
+                color: #FF0000;
+                font-weight: bold;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+        </style>
+        <style type="text/css" media="print">
+            *{
+                visibility:hidden;
+            }
+        </style>
+    </head>
+    <body onload="document.getElementById('rbPersona').focus();">
+        <%
+                    request.setAttribute("idmenu", "20110228202911550727");
+        %>
+        <%@include file="../common/header.jsp" %>
+        <%
+                    String tmp;
+                    String dato1[] = null;
+                    String dato2[] = null;
+                    String dato3[] = null;
+                    String many = "";
+                    String mensaje = "Carga Completada";
+                    String dato4[] = null;
+                    String np = "";
+                    tmp = request.getParameter("xl_postback");
+                    if (tmp != null) {
+                        mensaje = "";
+                        tmp = request.getParameter("selTipoBus");
+                        String texto = request.getParameter("txtBuscar");
+                        String tipopersona = request.getParameter("radioPersona");
+                        boolean ejecutar = true;
+                        if (texto == null || texto.length() == 0) {
+                            ejecutar = false;
+                            mensaje = "No introdujo ningún texto a buscar";
+                        }
+                        if (tmp == null || tmp.length() == 0) {
+                            ejecutar = false;
+                            mensaje += "\nSe produjo un error, vuelva a intentar";
+                        }
+                        if (ejecutar) {
+                            String hql = "";
+                            np = PrestamoUtil.nextNumberPrestamo("" + session.getAttribute("USER_CODFILIAL"));
+                            texto = ConvertUtil.prepareStringParameter(texto);
+                            if ("ncta".equals(tmp)) {
+                                hql = "from TCuentaPersona where numCta like '%" + texto + "%' and estado='ACTIVO'";
+                                List result = d.findAll(hql);
+                                Iterator it = result.iterator();
+                                int tcpsize = result.size();
+                                if (tcpsize > 0) {
+                                    if (tcpsize < 10) {
+                                        Set data = new HashSet();
+                                        int tcps = 0;
+                                        while (it.hasNext()) {
+                                            TCuentaPersona tcp = (TCuentaPersona) it.next();
+                                            if ("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) || "CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) {
+                                                data.add(tcp);
+                                            }
+                                        }
+                                        int xData = data.size();
+                                        if (xData > 0) {
+                                            many = "yes";
+                                            dato1 = new String[xData];
+                                            dato2 = new String[xData];
+                                            dato3 = new String[xData];
+                                            dato4 = new String[xData];
+                                            Iterator itDat = data.iterator();
+                                            while (itDat.hasNext()) {
+                                                TCuentaPersona tcp = (TCuentaPersona) itDat.next();
+                                                if ("Juridica".equals(tipopersona)) {
+                                                    dato1[tcps] = tcp.getTPersona().getRuc();
+                                                } else {
+                                                    dato1[tcps] = tcp.getTPersona().getDocIdentidad();
+                                                }
+                                                dato2[tcps] = tcp.getTPersona().getNombre();
+                                                dato3[tcps] = tcp.getTPersona().getApellidos();
+                                                dato4[tcps] = tcp.getNumCta() + (tcp.getSaldo().doubleValue() < 0.0 ? "N" : "") + " " + tcp.getTMoneda().getNombre() + " (" + tcp.getTMoneda().getCodMoneda() + ")";
+                                                tcps++;
+                                            }
+                                        } else {
+                                            mensaje += "Cuenta del cliente no apta para préstamos";
+                                        }
+                                    } else {
+                                        mensaje += "Se encontraron muchas coincidencias, ajuste más los parámetros";
+                                    }
+                                } else {
+                                    mensaje += "No se ha encontrado a ninguna entidad por su cuenta corriente.";
+                                }
+                            } else {
+                                if ("dni_ruc".equals(tmp)) {
+                                    if ("Juridica".equals(tipopersona)) {
+                                        hql = "from TPersona where ruc like '%" + texto + "%' and estado='ACTIVO'";
+                                    } else {
+                                        hql = "from TPersona where docIdentidad like '%" + texto + "%' and estado='ACTIVO'";
+                                    }
+                                } else {
+                                    if ("nom".equals(tmp)) {
+                                        hql = "from TPersona where nombre like '%" + texto.toUpperCase() + "%' and estado='ACTIVO'";
+                                    } else {
+                                        hql = "from TPersona where apellidos like '%" + texto.toUpperCase() + "%' and estado='ACTIVO'";
+                                    }
+                                }
+                                List result = d.findAll(hql);
+                                Iterator it = result.iterator();
+                                int tpsize = result.size();
+                                if (tpsize > 0) {
+                                    if (tpsize < 10) {
+                                        Set datPer = new HashSet();
+                                        while (it.hasNext()) {
+                                            TPersona p = (TPersona) it.next();
+                                            Iterator itera = p.getTCuentaPersonas().iterator();
+                                            boolean buscando = true;
+                                            while (itera.hasNext() && buscando) {
+                                                TCuentaPersona tcp = (TCuentaPersona) itera.next();
+                                                if (("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) && "ACTIVO".equals(tcp.getEstado())) || ("CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) && "ACTIVO".equals(tcp.getEstado())) {
+                                                    datPer.add(p);
+                                                    buscando = false;
+                                                }
+                                            }
+                                        }
+                                        Iterator idataTP = datPer.iterator();
+                                        int xDaPer = datPer.size();
+                                        if (xDaPer > 0) {
+                                            if (xDaPer == 1) {
+                                                TPersona tp = (TPersona) idataTP.next();
+                                                Iterator iteral = tp.getTCuentaPersonas().iterator();
+                                                dato1 = new String[xDaPer];
+                                                dato2 = new String[xDaPer];
+                                                dato3 = new String[xDaPer];
+                                                if ("Juridica".equals(tipopersona)) {
+                                                    dato1[0] = tp.getRuc();
+                                                } else {
+                                                    dato1[0] = tp.getDocIdentidad();
+                                                }
+                                                dato2[0] = tp.getNombre();
+                                                dato3[0] = tp.getApellidos();
+                                                Set datal = new HashSet();
+                                                int tcps = 0;
+                                                while (iteral.hasNext()) {
+                                                    TCuentaPersona tcp = (TCuentaPersona) iteral.next();
+                                                    if (("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) && "ACTIVO".equals(tcp.getEstado())) || ("CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) && "ACTIVO".equals(tcp.getEstado())) {
+                                                        datal.add(tcp);
+                                                    }
+                                                }
+                                                int xData = datal.size();
+                                                if (xData > 0) {
+                                                    many = "many";
+                                                    dato4 = new String[xData];
+                                                    Iterator itDat = datal.iterator();
+                                                    while (itDat.hasNext()) {
+                                                        TCuentaPersona tcp = (TCuentaPersona) itDat.next();
+                                                        dato4[tcps] = tcp.getNumCta() + (tcp.getSaldo().doubleValue() < 0.0 ? "N" : "") + " " + tcp.getTMoneda().getNombre() + " (" + tcp.getTMoneda().getCodMoneda() + ")";
+                                                        tcps++;
+                                                    }
+                                                } else {
+                                                    mensaje += "Cuenta del cliente no encontrada";
+                                                }
+                                            } else {
+                                                dato1 = new String[xDaPer];
+                                                dato2 = new String[xDaPer];
+                                                dato3 = new String[xDaPer];
+                                                int q = 0;
+                                                while (idataTP.hasNext()) {
+                                                    TPersona tp = (TPersona) idataTP.next();
+                                                    if ("Juridica".equals(tipopersona)) {
+                                                        dato1[q] = tp.getRuc();
+                                                    } else {
+                                                        dato1[q] = tp.getDocIdentidad();
+                                                    }
+                                                    dato2[q] = tp.getNombre();
+                                                    dato3[q] = tp.getApellidos();
+                                                    q++;
+                                                }
+                                                many = "manymuch";
+                                            }
+                                        } else {
+                                            mensaje += "Cuenta del cliente no apta para préstamos, créalo uno nuevo";
+                                        }
+                                    } else {
+                                        many = "no";
+                                        mensaje += "Se encontraron muchas entidades/personas, ajuste más los parámetros";
+                                    }
+                                } else {
+                                    mensaje += "No se ha encontrado a ninguna entidad/persona en la búsqueda o existe cuentas hábiles con préstamos.";
+                                }
+                            }
+                        } else {
+                            mensaje = "\nLa busqueda no tuvo resultado o existe cuentas hábiles con préstamos.";
+                        }
+                        //  }
+                    } else {
+                        mensaje = "Seleccione un tipo y realice su búsqueda.";
+                    }
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" style="display:none">
+                    <p><span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span></p>
+                    <div style="clear:both"></div>
+                    <p><span class="login_label">Usuario</span><span class="login_input"><input type="text" id="user"/></span></p>
+                    <div style="clear:both"></div>
+                    <p><span class="login_label">Contrase&ntilde;a</span><span class="login_input"><input type="password" id="passwd"/></span></p>
+                    <div style="clear:both"></div>
+                    <div id="res" style="display:none"></div>
+                </div>
+                <div id="loginx" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset><legend>
+                                    <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                                </legend>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Préstamos y cobranzas -- Créditos!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="meta">
+                        <table border="0" cellpadding="0" cellspacing="0">
+                            <!--DWLayoutTable-->
+                            <tr>
+                                <td valign="top"><blockquote>
+                                        <p><span class="Estilo1" style="background:url(images/bg_glossaryButton.png) repeat-x">PR&Eacute;STAMOS! </span></p>
+                                    </blockquote></td>
+                                <td>&nbsp;<strong><a href="cobranzas.htm" title="COBRANZA DE CUOTAS">Ir a COBRANZA DE CUOTAS</a></strong></td><td></td>
+                            </tr>
+                            <tr><td colspan="2"><div id="Layer1" style="z-index:1">
+                                        <p class="Estilo4"><%=mensaje%></p>
+                                        <form name="formPrestamo" method="post" action="fechacobranzas.htm" onsubmit="return evaluar();">
+                                            <div style="display:none">
+                                                <input name="xl_sheet_no" id="xl_sheet_no" type="hidden" value="panel1">
+                                                <input name="xl_postback" id="xl_postback" type="hidden" value="1">
+                                                <input type="xl_callback" id="xl_callback" type="hidden" value="0">
+                                            </div>
+                                            <blockquote><table border="0">
+                                                    <tr>
+                                                        <td><p>DATOS DEL CLIENTE:</p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><table border="0" width="400">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td> <p><strong> Escoja: </strong></p></td>
+                                                                        <td colspan="2">
+                                                                            <strong><a onclick="document.getElementById('rbPersona').click();" style="cursor: default;">Persona Natural&nbsp;</a>
+                                                                                <input type="radio" onclick="actualiza('Natural');" value="Natural" checked="checked" name="radioPersona" id="rbPersona"></strong>
+                                                                            <strong><a onclick="document.getElementById('rbJuridica').click();" style="cursor: default;">Persona Juridica&nbsp;</a>
+                                                                                <input type="radio" onclick="actualiza('Juridica');" value="Juridica" name="radioPersona" id="rbJuridica"></strong></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong> <select id="selTipoBus" name="selTipoBus" onchange="validartxtBusquedap();">
+                                                                                        <option selected value="noSelB">Seleccione:</option>
+                                                                                        <option value="dni_ruc">DNI/RUC:</option>
+                                                                                        <option value="nom">NOMBRES:</option>
+                                                                                        <option value="ape">APELLIDOS:</option>
+                                                                                        <option value="ncta">Num. Cuenta:</option>
+                                                                                    </select>
+                                                                                </strong></p></td>
+                                                                        <td><div id="divtxtBuscar"><input id="txtBuscar" type="text" value="Busqueda" name="txtBuscar" readonly></div></td>
+                                                                        <td><input type="button" name="BUSCAR" value="BUSCAR" tabindex="2" onclick="buscarP();"><br><div id="ajaximgo" style="display:none"><img alt="Cargando..." src="images/ajax/ajax-loader1.gif"></div></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>DNI/RUC:
+                                                                                </strong></p></td>
+                                                                        <td>
+                                                                            <%
+                                                                                        String js = "";
+                                                                                        if ("manymuch".equals(many)) {
+                                                                                            js = "onclick=\"rebusquedap();\"";
+                                                                                            mensaje += "Seleccione un DNI/RUC y volver a realizar otra búsqueda más";
+                                                                                        }
+                                                                                        out.write("<select name=\"cuentadr\" id=\"cuentadr\" size=\"1\" " + js + "/>");
+                                                                                        if (dato1 != null) {
+                                                                                            for (int i = 0; i < dato1.length; i++) {
+                                                                                                out.write("<option value='" + dato1[i] + "'>" + dato1[i] + "</option>");
+                                                                                            }
+                                                                                            out.write("</select>");
+                                                                                        } else {
+                                                                                            out.write("<option value='sinSeleccion'>No hay Entidad/Persona o tienen cuentas hábiles con préstamos</option></select>");
+                                                                                        }
+                                                                            %>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>NOMBRES/Razon Social:
+                                                                                </strong></p></td>
+                                                                        <td><input type="text" name="textfield2" id="nombrers" value="<%=(dato2 != null ? dato2[0] : "")%>" readonly></td>
+                                                                        <td rowspan="3"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>APELLIDOS/Representante:
+                                                                                </strong></p></td>
+                                                                        <td><input type="text" name="textfield3" id="aperep" value="<%=(dato3 != null ? dato3[0] : "")%>"  readonly></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>CUENTA DEL CLIENTE.:
+                                                                                </strong></p></td>
+                                                                        <td><select name="cuentaCte" id="cuentaCte" size="1" onchange="habilitarPrestamo();" onclick="if(document.getElementById('cuentaCte')[document.getElementById('cuentaCte').selectedIndex].value!='sinSeleccion')habilitarPrestamo();">
+                                                                                <option value="sinSeleccion" selected >SELECCIONE:</option>
+                                                                                <%
+                                                                                            if (dato4 != null) {
+                                                                                                if ("yes".equals(many)) {
+                                                                                                    out.write("<script> var data1=new Array(" + dato1.length + "); var data2=new Array(" + dato2.length + "); var data2=new Array(" + dato3.length + ");");
+                                                                                                    for (int i = 0; i < dato1.length; i++) {
+                                                                                                        out.write("data1[" + i + "]='" + dato1[i] + "';");
+                                                                                                        out.write("data2[" + i + "]='" + dato2[i] + "';");
+                                                                                                        out.write("data3[" + i + "]='" + dato3[i] + "';");
+                                                                                                        out.write("data4[" + i + "]='" + dato4[i] + "';");
+                                                                                                    }
+                                                                                                    out.write("</script>");
+                                                                                                }
+                                                                                                for (int i = 0; i < dato4.length; i++) {
+                                                                                                    out.write("<option value='" + dato4[i] + "'>" + dato4[i] + "</option>");
+                                                                                                }
+                                                                                            }
+                                                                                %>
+                                                                            </select></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><table id="prestamofill" border="0" style="display:none">
+                                                                <tbody><tr>
+                                                                        <td colspan="3"><p>DATOS DEL PR&Eacute;STAMO N&ordm; <span id="numeroPrestamo"><%=np%></span>></p></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>MONTO:
+                                                                                </strong></p></td>
+                                                                        <td> <input id="montoPrestamo" type="text" name="XLEW_1_1_2" value="0.00" tabindex="4" onkeypress="return validar(event);" onblur="this.value=eedisplayFloatNDTh(eeparseFloatTh(this.value),2);" onfocus="this.select();"></td>
+                                                                        <td>&nbsp;</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>MONEDA:
+                                                                                </strong></p></td>
+                                                                        <td><div id="monedasP"></div></td>
+                                                                        <td>&nbsp;</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>TASA DE INTER&Eacute;S:
+                                                                                </strong></p></td>
+                                                                        <td><strong>
+                                                                                <input id="tasaInteres" type="text" name="XLEW_1_3_2" tabindex="5" onfocus="this.select()" onkeypress="return validar(event);" onkeyup="tea();" onchange="validaFT(this);">
+                                                                                %&nbsp; </strong><input type="checkbox" name="sinInteres" value="" onclick="document.getElementById('tasaInteres').disabled=!document.getElementById('tasaInteres').disabled;
+                                                                                    document.getElementById('tasaInteres').value='0.00';">Sin interés. </td>
+                                                                        <td class="ee109">TEA:<span id="tea">0.00</span>% </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>TASA DE MORAS:
+                                                                                </strong></p></td>
+                                                                        <td><strong>
+                                                                                <input id="tasaMoras" type="text" name="MORA" tabindex="6" onkeypress="return validar(event);" onkeyup="taem();" onfocus="this.select()" onchange="validaFT(this);">
+                                                                                %&nbsp; </strong><input type="checkbox" id="sinMoras" name="sinMoras" value="" onclick="document.getElementById('tasaMoras').disabled=!document.getElementById('tasaMoras').disabled;
+                                                                                    document.getElementById('tasaMoras').value='0.00';" >Sin Moras.</td><td class="ee109">TAEM:<span id="taem">0.00</span>% </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>PLAZO:
+                                                                                </strong></p></td>
+                                                                        <td><strong>
+                                                                                <input name="XLEW_1_2_2" id="plazos" tabindex="7" value="1" onfocus="this.select()" onkeypress="return solonumeros(event);" onblur="this.value=eedisplayFloat(eeparseFloat(this.value));">
+                                                                                MESES</strong></td><td>PERIODO:<input type="text" id="periodo" name="periodo" value="30" size="3" onkeypress="return solonumeros(event);" disabled="disabled" />días.<input type="checkbox" id="conperiodo" name="conperiodo" checked value="" onclick="document.getElementById('periodo').disabled=!document.getElementById('periodo').disabled;
+                                                                                    document.getElementById('periodo').value='30';" >Def.</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>SEG. DESGRAVAMEN:
+                                                                                </strong></p></td>
+                                                                        <td colspan="2"><strong>
+                                                                                <input id="tasaSegDes" type="text" name="SEGDES" tabindex="8" onkeypress="return validar(event);" onfocus="this.select()" onchange="validaFT(this);" disabled>
+                                                                                %&nbsp; </strong><input type="checkbox" id="conSegDes" name="conSegDes" checked value="" onclick="document.getElementById('tasaSegDes').disabled=!document.getElementById('tasaSegDes').disabled;
+                                                                                    document.getElementById('tasaSegDes').value='0.00';" >Sin Seg. Des.</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>COMISION Y OTROS:
+                                                                                </strong></p></td>
+                                                                        <td colspan="2"><strong>
+                                                                                <input id="tasaCOM" type="text" name="COM" tabindex="9" onkeypress="return validar(event);" onfocus="this.select()" onchange="validaFT(this);" disabled>
+                                                                                %&nbsp; </strong><input type="checkbox" id="conCOM" name="conCOM" value="" checked onclick="document.getElementById('tasaCOM').disabled=!document.getElementById('tasaCOM').disabled;
+                                                                                    document.getElementById('tasaCOM').value='0.00';" >Sin Comision</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><p><strong>ITF:
+                                                                                </strong></p></td>
+                                                                        <td colspan="2"><strong>
+                                                                                <input id="tasaITF" type="text" name="ITF" tabindex="10" onkeypress="return validar(event);" onfocus="this.select()" onchange="validaFT(this);" disabled>
+                                                                                %&nbsp; </strong><input type="checkbox" id="conITF" name="conITF" value="" checked onclick="document.getElementById('tasaITF').disabled=!document.getElementById('tasaITF').disabled;
+                                                                                    document.getElementById('tasaITF').value='0.05';" >Sin ITF</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td><td></td></tr>
+                                                    <tr id="submitPrestamo" style="display:none"><td><blockquote><blockquote><blockquote><blockquote>
+                                                                            <p>
+                                                                                <input type="checkbox" name="autorizar" id="chkVerSaldo" value="Autorizar Préstamo." onclick="ventanaNuevap();">Autorizado.
+                                                                                <input type="submit" name="xl_submit_bottom" tabindex="11" onkeypress="" value="GRABAR">&nbsp;&nbsp;
+                                                                                <input type="button" name="limpiar" value="LIMPIAR" onclick="cleanP();" >
+                                                                            </p>
+                                                                        </blockquote></blockquote></blockquote></blockquote></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </blockquote>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="story">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

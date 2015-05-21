@@ -1,0 +1,376 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.finance.bank.bean.TCertificado;
+import org.finance.bank.bean.TCuentaPersona;
+import org.finance.bank.bean.TDetalleCaja;
+import org.finance.bank.bean.TDetalleCuentaPersona;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TPersonaCaja;
+import org.finance.bank.bean.TRegistroDepositoRetiro;
+import org.finance.bank.bean.TSobregiro;
+import org.finance.bank.bean.TTipoOperacion;
+import org.finance.bank.util.CurrencyConverter;
+import org.finance.bank.util.DateUtil;
+import org.finance.bank.util.NumberUtil;
+import org.finance.bank.util.PrestamoUtil;
+import org.finance.bank.util.numeroOperacion;
+import org.finance.bank.model.dao.DAOGeneral;
+
+/**
+ *
+ * @author roger
+ */
+public class SRegistrarDepositoRetiro extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession(true);
+        DAOGeneral dao = new DAOGeneral();
+        String id_user = (String) session.getAttribute("USER_ID");
+        String idForInitNewestTable = DateUtil.convertDateId(id_user, SRegistrarDepositoRetiro.class.getSimpleName());
+        String idForInitNewestTable2 = DateUtil.convertDateId(id_user, SRegistrarDepositoRetiro.class.getSimpleName());
+        try {
+            String idCuenta = request.getParameter("miIdCuenPersona");
+            String tipoTransaccion = request.getParameter("TipTrans");
+            String numCuenta = request.getParameter("NumCuentaDep");
+            String Knegativo = request.getParameter("Knegativo");
+            String PCobroPF = request.getParameter("PCobroPF");
+            String xMActual = (String) session.getAttribute("xM" + request.getParameter("miIdMoney").toString());
+            String monedaCaja = NumberUtil.converseS2N(xMActual);
+            if (monedaCaja.equals("")) {
+                monedaCaja = "0.00";
+            }
+            Double montoenCaja = Double.parseDouble(monedaCaja);
+            session.setAttribute("knegativo", "NO");
+            List result1 = dao.findAll("from TCuentaPersona where idcuentapersona='" + idCuenta + "'");
+            int cuentas = result1.size();
+            if (cuentas != 1) {
+                out.print("ERROR: no se puede realizar ninguna transaccion");
+                out.close();
+                return;
+            }
+            Iterator it1 = result1.iterator();
+            BigDecimal misaldo = BigDecimal.ZERO;
+            BigDecimal miSaldoSinInt = BigDecimal.ZERO;
+            if (it1.hasNext()) {
+                TCuentaPersona cu = (TCuentaPersona) it1.next();
+                misaldo = cu.getSaldo();
+                miSaldoSinInt = cu.getSaldoSinInteres();
+            }
+            String importeString = request.getParameter("miImporte");
+            if (importeString == null) {
+                out.print("Error al procesar la transaccion NO SE HACE NADA");
+                out.close();
+                return;
+            }
+            importeString = importeString.replace(",", "").replace(" ", "");
+            BigDecimal importe = new BigDecimal(importeString);
+            Double doubmisaldosinInt = miSaldoSinInt.doubleValue();
+            Double doubimporte = importe.doubleValue();
+            if (montoenCaja >= doubimporte || tipoTransaccion.equals("DEPOSITO")) {
+                if (doubmisaldosinInt >= doubimporte || tipoTransaccion.equals("DEPOSITO") || Knegativo.equals("SI")) {
+                    //String miIdCupe = idCuenta;
+                    String codM = request.getParameter("miIdMoney");
+                    String codCaja = (String) session.getAttribute("USER_CODCAJA");
+                    TCuentaPersona cupe = (TCuentaPersona) dao.load(TCuentaPersona.class, idCuenta);
+                    String f = "";
+                    String fechapf = "";
+                    String fec = "";
+                    if (cupe.getTTipoCuenta().getCodigoCuenta().equals("CPF")) {
+                        String hql = "from TDetalleCuentaPersona deta where deta.TCuentaPersona='" + cupe.getIdcuentapersona() + "'";
+                        TDetalleCuentaPersona detacupe = (TDetalleCuentaPersona) dao.findAll(hql).get(0);
+                        f = Double.toString(DateUtil.today());
+                        fechapf = detacupe.getFechaPlazo();
+                        fec = PrestamoUtil.eedatefmt(PrestamoUtil.fmtdate9, Double.parseDouble(fechapf));
+                    }
+                    if ((cupe.getTTipoCuenta().getCodigoCuenta().equals("CPF") && tipoTransaccion.equals("RETIRO") && Double.parseDouble(fechapf) < Double.parseDouble(f))
+                            || (cupe.getTTipoCuenta().getCodigoCuenta().equals("CPF") && tipoTransaccion.equals("RETIRO") && PCobroPF.equals("2649232134"))
+                            || (cupe.getTTipoCuenta().getCodigoCuenta().equals("CPF") && tipoTransaccion.equals("DEPOSITO"))
+                            || (cupe.getTTipoCuenta().getCodigoCuenta().equals("CCO"))
+                            || (cupe.getTTipoCuenta().getCodigoCuenta().equals("CAH"))) {
+                        TOperacion operacion = new TOperacion();
+                        operacion.setIdOperacion(idForInitNewestTable);
+                        if (tipoTransaccion.equals("DEPOSITO")) {
+                            operacion.setDescripcion(DateUtil.getDate(new Date()) + " DEPOSITO");
+                        } else {
+                            operacion.setDescripcion(DateUtil.getDate(new Date()) + " RETIRO");
+                        }
+                        DateFormat df4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        operacion.setFecha(df4.format(new Date()));
+                        operacion.setEstado("ACTIVO");
+                        operacion.setIdUser(id_user);
+                        operacion.setIpUser((String) session.getAttribute("USER_IP"));
+                        operacion.setDateUser(df4.format(new Date()));
+                        TPersonaCaja pcaja = (TPersonaCaja) dao.load(TPersonaCaja.class, session.getAttribute("USER_ID_PERSONA_CAJA").toString());
+                        TTipoOperacion tipoOperacion;
+                        if (tipoTransaccion.equals("DEPOSITO")) {
+                            tipoOperacion = (TTipoOperacion) dao.load(TTipoOperacion.class, "TIPC3");
+                        } else {
+                            tipoOperacion = (TTipoOperacion) dao.load(TTipoOperacion.class, "TIPC4");
+                        }
+                        operacion.setTTipoOperacion(tipoOperacion);
+                        TMoneda mimoneda = (TMoneda) dao.load(TMoneda.class, codM);
+                        operacion.setTMoneda(mimoneda);
+                        operacion.setTPersonaCaja(pcaja);
+                        operacion.setNumeroOperacion(numeroOperacion.getNumber(session.getAttribute("USER_CODFILIAL").toString(), session.getAttribute("USER_CODCAJA").toString()));
+                        operacion.setFd(new Date());
+                        dao.persist(operacion);
+                        TRegistroDepositoRetiro RegistroDepRet = new TRegistroDepositoRetiro();
+                        session.setAttribute("idDepositoRetiro", idForInitNewestTable);
+                        RegistroDepRet.setIddepositoretiro(idForInitNewestTable);
+                        df4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        RegistroDepRet.setFecha(df4.format(new Date()));
+                        RegistroDepRet.setNumCta(numCuenta);
+                        RegistroDepRet.setImporte(importe);
+                        String nombreDepositante = request.getParameter("nombreDeposit");
+                        RegistroDepRet.setNombreRepresentante(nombreDepositante.toUpperCase().replaceAll(";", "&"));
+                        String apellidosDepositante = request.getParameter("apellidosDeposit");
+                        RegistroDepRet.setApellidosRepresentante(apellidosDepositante.toUpperCase().replaceAll(";", "&"));
+                        RegistroDepRet.setEstado("ACTIVO");
+                        RegistroDepRet.setNumeroCheque(request.getParameter("miNumCheque"));
+                        RegistroDepRet.setIdUser(id_user);
+                        RegistroDepRet.setIpUser((String) session.getAttribute("USER_IP"));
+                        df4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        RegistroDepRet.setDateUser(df4.format(new Date()));
+                        TCuentaPersona cuenPer = (TCuentaPersona) dao.load(TCuentaPersona.class, idCuenta);
+                        RegistroDepRet.setTCuentaPersona(cuenPer);
+                        TOperacion operacion1 = (TOperacion) dao.load(TOperacion.class, idForInitNewestTable);
+                        RegistroDepRet.setTOperacion(operacion1);
+                        dao.persist(RegistroDepRet);
+                        List result = dao.findAll("from TCuentaPersona where idcuentapersona='" + idCuenta + "'");
+                        Iterator it = result.iterator();
+                        BigDecimal misaldos = BigDecimal.ZERO;
+                        BigDecimal misaldosSinInteres = BigDecimal.ZERO;
+                        if (it.hasNext()) {
+                            TCuentaPersona cu = (TCuentaPersona) it.next();
+                            misaldos = cu.getSaldo();
+                            misaldosSinInteres = cu.getSaldoSinInteres();
+                        }
+                        boolean sobregiro = false;
+                        if (Knegativo.equals("SI") && tipoTransaccion.equals("RETIRO")) {
+                            Double saldo = misaldosSinInteres.doubleValue();
+                            Double saldoSinInteres = misaldosSinInteres.doubleValue();
+                            Double Importess = doubimporte;
+                            if (Importess > saldoSinInteres) {
+                                sobregiro = true;
+                                Double prestamo = Importess - saldo;
+                                Double prestamoSinInteres = Importess - saldoSinInteres;
+                                String ip_User = (String) session.getAttribute("USER_IP");
+                                session.setAttribute("knegativo", "SI");
+                                TSobregiro sobreGiro = new TSobregiro();
+                                sobreGiro.setIdsobregiro(idForInitNewestTable);
+                                sobreGiro.setMontoActual(new BigDecimal(prestamo));
+                                sobreGiro.setMontoSinInteres(new BigDecimal(prestamoSinInteres));
+                                sobreGiro.setInteressg(new BigDecimal((Double.parseDouble(request.getParameter("interesKnegativo")))));
+                                sobreGiro.setFechaPago(request.getParameter("fechaCobroKnegativo"));
+                                sobreGiro.setEstado("ACTIVO");
+                                sobreGiro.setIdUser(id_user);
+                                sobreGiro.setIpUser(ip_User);
+                                sobreGiro.setFechaActualizacion(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                sobreGiro.setFechaCap(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                sobreGiro.setDateUser(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                sobreGiro.setIdRegistro(RegistroDepRet.getIddepositoretiro());
+                                TCuentaPersona cuentaper = (TCuentaPersona) dao.load(TCuentaPersona.class, idCuenta);
+                                sobreGiro.setTCuentaPersona(cuentaper);
+                                dao.persist(sobreGiro);
+                            }
+                        }
+                        TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, idCuenta);
+                        cuenta.setObservaciones(request.getParameter("observacion"));
+                        if (tipoTransaccion.equals("DEPOSITO")) {
+                            misaldos = misaldos.add(importe);
+                            misaldosSinInteres = misaldosSinInteres.add(importe);
+                            if (misaldosSinInteres.doubleValue() > 0.0D) {
+                                cuenta.setEstado("ACTIVO");
+                            } else {
+                                List l2 = dao.findAll("from TSobregiro where estado='ACTIVO' and TCuentaPersona.idcuentapersona='" + cuenta.getIdcuentapersona() + "' order by dateUser");
+                                int s = l2.size();
+                                Double i1 = importe.doubleValue();
+                                for (int i = 0; i < s; i++) {
+                                    TSobregiro s1 = (TSobregiro) l2.get(i);
+                                    if (s1.getMontoSinInteres().doubleValue() > i1) {
+                                        s1.setMontoSinInteres(s1.getMontoSinInteres().subtract(new BigDecimal(i1)));
+                                        dao.update();
+                                        break;
+                                    } else {
+                                        i1 = i1 - s1.getMontoSinInteres().doubleValue();
+                                        s1.setMontoSinInteres(BigDecimal.ZERO);
+                                        s1.setEstado("CANCELADO");
+                                        dao.update();
+                                    }
+                                }
+                            }
+                        } else {
+                            misaldos = misaldos.subtract(importe);
+                            misaldosSinInteres = misaldosSinInteres.subtract(importe);
+                            if (sobregiro == true) {
+                                cuenta.setEstado("SOBREGIRO");
+                            } else if (misaldosSinInteres.compareTo(BigDecimal.ZERO) == 0) {
+                                cuenta.setEstado("ACTIVO");
+                            }
+                        }
+                        cuenta.setSaldo(misaldos);
+                        cuenta.setSaldoSinInteres(misaldosSinInteres);
+                        dao.update();
+                        TOperacion operacion2 = (TOperacion) dao.load(TOperacion.class, idForInitNewestTable);
+                        operacion2.setSaldofinal(misaldosSinInteres);
+                        dao.update();
+                        String numCertificado = "";
+                        if (tipoTransaccion.equals("DEPOSITO") && cupe.getTTipoCuenta().getCodigoCuenta().equals("CPF")) {
+                            TCertificado tcertificado = new TCertificado();
+                            tcertificado.setIdcertificado(idForInitNewestTable);
+                            tcertificado.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                            numCertificado = PrestamoUtil.nextNumberCertificado(session.getAttribute("USER_CODFILIAL").toString());
+                            tcertificado.setNumCertificado(numCertificado);
+                            tcertificado.setDniRuc(cupe.getTPersona().getDocIdentidad());
+                            tcertificado.setNombre(cupe.getTPersona().getNombre());
+                            tcertificado.setNombreRep(cupe.getTPersona().getApellidos());
+                            tcertificado.setDescripcion(new String("nonurl"));
+                            tcertificado.setTipo("CERTIFICADO");
+                            tcertificado.setTRegistroDepositoRetiro(RegistroDepRet);
+                            dao.persist(tcertificado);
+                            TCertificado tcertificadoAnexo = new TCertificado();
+                            tcertificadoAnexo.setIdcertificado(idForInitNewestTable2);
+                            tcertificadoAnexo.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                            tcertificadoAnexo.setNumCertificado(" ");
+                            tcertificadoAnexo.setDniRuc(cupe.getTPersona().getDocIdentidad());
+                            tcertificadoAnexo.setNombre(cupe.getTPersona().getNombre());
+                            tcertificadoAnexo.setNombreRep(cupe.getTPersona().getApellidos());
+                            tcertificadoAnexo.setDescripcion(new String("nonurl"));
+                            tcertificadoAnexo.setTipo("ANEXO");
+                            tcertificadoAnexo.setTRegistroDepositoRetiro(RegistroDepRet);
+                            dao.persist(tcertificadoAnexo);
+                        }
+//                        TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, iniDetalleCaja.detalleActivaCaja(codCaja, codM));
+                        TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(new Date()).replaceAll("/", "") + codCaja + mimoneda.getCodParaNumCuenta() + "00");
+                        if (tipoTransaccion.equals("DEPOSITO")) {
+                            dep.setMontoFinal(dep.getMontoFinal().add(importe));
+                            dep.setMontoRecibido(dep.getMontoRecibido().add(importe));
+                        } else {
+                            dep.setMontoFinal(dep.getMontoFinal().subtract(importe));
+                            dep.setMontoRecibido(dep.getMontoRecibido().subtract(importe));
+                        }
+                        dep.setDateUser(DateUtil.getNOW_S());
+                        dao.update();
+                        TRegistroDepositoRetiro regDepRet = (TRegistroDepositoRetiro) dao.findAll("from TRegistroDepositoRetiro where iddepositoretiro='" + idForInitNewestTable + "'").get(0);
+                        Map ticket = new HashMap();
+                        ticket.put("RUC", regDepRet.getTCuentaPersona().getTPersona().getRuc());
+                        ticket.put("DNI", regDepRet.getTCuentaPersona().getTPersona().getDocIdentidad());
+                        ticket.put("TIPOPERSONA", regDepRet.getTCuentaPersona().getTPersona().getTCategoriaPersona().getDescripcion());
+                        ticket.put("TIPOOPERACION", regDepRet.getTOperacion().getTTipoOperacion().getNombre());
+                        ticket.put("IDOPERACION", regDepRet.getTOperacion().getIdOperacion());
+                        ticket.put("NUMEROOPERACION", regDepRet.getTOperacion().getNumeroOperacion());
+                        ticket.put("CODIGOCAJA", regDepRet.getTOperacion().getTPersonaCaja().getTCaja().getCodCaja());
+                        String Filial = regDepRet.getTOperacion().getTPersonaCaja().getTCaja().getTFilial().getNombre();
+                        Filial = Filial.replace("FILIAL", "OFICINA");
+                        ticket.put("FILIAL", Filial);
+                        ticket.put("MONEDA", regDepRet.getTCuentaPersona().getTMoneda().getNombre());
+                        ticket.put("FECHA", operacion.getFecha().substring(8, 10) + "/" + operacion.getFecha().substring(5, 8) + operacion.getFecha().substring(0, 4));
+                        ticket.put("HORA", operacion.getFecha().substring(11));
+                        ticket.put("NOMBRE", regDepRet.getTCuentaPersona().getTPersona().getNombre());
+                        ticket.put("APELLIDOS", regDepRet.getTCuentaPersona().getTPersona().getApellidos());
+                        ticket.put("NOMBREREPRESENTANTE", regDepRet.getNombreRepresentante());
+                        ticket.put("APELLIDOSPRESENTANTE", regDepRet.getApellidosRepresentante());
+                        String c = regDepRet.getTCuentaPersona().getNumCta();
+                        ticket.put("NUMEROCUENTA", c.substring(0, 5) + "-" + c.substring(5, 6) + "-" + c.substring(6));
+                        ticket.put("CODTIPOCUENTA", regDepRet.getTCuentaPersona().getTTipoCuenta().getCodigoCuenta());
+                        ticket.put("TIPOCUENTA", regDepRet.getTCuentaPersona().getTTipoCuenta().getDescripcion());
+                        ticket.put("MON", regDepRet.getTCuentaPersona().getTMoneda().getSimbolo());
+                        ticket.put("MONTO", CurrencyConverter.formatToMoneyUS(regDepRet.getImporte().doubleValue(), 2));
+                        ticket.put("IMPORTE", CurrencyConverter.formatToMoneyUS(regDepRet.getImporte().doubleValue(), 2));
+                        ticket.put("CATEGORIAPERSONA", regDepRet.getTCuentaPersona().getTPersona().getTCategoriaPersona().getDescripcion());
+                        ticket.put("IDCERTIFICADO", idForInitNewestTable);
+                        ticket.put("NUMEROCERTIFICADO", numCertificado);
+                        ticket.put("IDANEXO", idForInitNewestTable2);
+                        if (regDepRet.getTCuentaPersona().getTTipoCuenta().getCodigoCuenta().equals("CPF")) {
+                            TDetalleCuentaPersona detalleCuentPers = (TDetalleCuentaPersona) dao.findAll("from TDetalleCuentaPersona detcuenper where detcuenper.TCuentaPersona='" + regDepRet.getTCuentaPersona().getIdcuentapersona() + "'").get(0);
+                            ticket.put("INTERES", detalleCuentPers.getInteres());
+                            ticket.put("NUMERODIASPF", detalleCuentPers.getNumDias());
+                            ticket.put("FECHAPF", DateUtil.eedatefmt(DateUtil.fmtdate24, Double.parseDouble(detalleCuentPers.getFechaPlazo())).replace(",", ""));
+                        } else {
+                            ticket.put("INTERES", regDepRet.getTCuentaPersona().getInteres());
+                        }
+                        ticket.put("SALDO", CurrencyConverter.formatToMoneyUS(regDepRet.getTCuentaPersona().getSaldo().doubleValue(), 2));
+                        session.setAttribute("ticket", ticket);
+                        out.println("<input id='txtRespReg' name='txtRespReg' type='text' style='display:none' value='OK'>");
+                        out.println("<input id='txtExisteMontoCaja' name='txtExisteMontoCaja' type='text' style='display:none' value='OK'>");
+                        out.println("<input id='txtVanPF' name='txtVanPF' type='text' style='display:none' value=''>");
+                        out.print("<input id='txtCobroPF' name='txtCobroPF' type='text' style='display:none' value='x'>");
+                    } else {
+                        out.println("<input id='txtRespReg' name='txtRespReg' type='text' style='display:none' value='OK'>");
+                        out.println("<input id='txtVanPF' name='txtVanPF' type='text' style='display:none' value='" + fec.replace(",", "") + "'>");
+                        out.println("<input id='txtExisteMontoCaja' name='txtExisteMontoCaja' type='text' style='display:none' value='OK'>");
+                        out.print("<input id='txtCobroPF' name='txtCobroPF' type='text' style='display:none' value='x'>");
+                    }
+                } else {
+                    out.println("<input id='txtRespReg' name='txtRespReg' type='text' style='display:none' value='NO HAY DINERO SUFICIENTE'>");
+                    out.println("<input id='txtExisteMontoCaja' name='txtExisteMontoCaja' type='text' style='display:none' value='OK'>");
+                    out.println("<input id='txtVanPF' name='txtVanPF' type='text' style='display:none' value=''>");
+                    out.print("<input id='txtCobroPF' name='txtCobroPF' type='text' style='display:none' value='x'>");
+                }
+            } else {
+                out.println("<input id='txtRespReg' name='txtRespReg' type='text' style='display:none' value=''>");
+                out.println("<input id='txtExisteMontoCaja' name='txtExisteMontoCaja' type='text' style='display:none' value='NO HAY DINERO EN CAJA'>");
+                out.println("<input id='txtVanPF' name='txtVanPF' type='text' style='display:none' value=''>");
+                out.print("<input id='txtCobroPF' name='txtCobroPF' type='text' style='display:none' value='x'>");
+            }
+        } finally {
+            out.close();//dao.cerrarSession();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

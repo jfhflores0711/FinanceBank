@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TCaja" table="t_caja" schema="public">
+        <id name="codCaja" type="string">
+            <column name="cod_caja" length="10" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TFilial" class="org.finance.bank.bean.TFilial" fetch="select">
+            <column name="cod_filial" length="10" not-null="true" />
+        </many-to-one>
+        <property name="nombreCaja" type="string">
+            <column name="nombre_caja" length="50" not-null="true" />
+        </property>
+        <property name="tipo" type="string">
+            <column name="tipo" length="20" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <set name="TPersonaCajas" inverse="true">
+            <key>
+                <column name="cod_caja" length="10" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TPersonaCaja" />
+        </set>
+        <set name="TDetalleCajas" inverse="true">
+            <key>
+                <column name="cod_caja" length="10" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetalleCaja" />
+        </set>
+        <set name="TTransferenciaCajas" inverse="true">
+            <key>
+                <column name="cod_caja" length="10" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TTransferenciaCaja" />
+        </set>
+    </class>
+</hibernate-mapping>

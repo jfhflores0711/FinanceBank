@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TCertificado" table="t_certificado" schema="public">
+        <id name="idcertificado" type="string">
+            <column name="idcertificado" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TRegistroDepositoRetiro" class="org.finance.bank.bean.TRegistroDepositoRetiro" fetch="select">
+            <column name="iddepositoretiro" length="41" not-null="true" />
+        </many-to-one>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" />
+        </property>
+        <property name="numCertificado" type="string">
+            <column name="num_certificado" length="40" />
+        </property>
+        <property name="dniRuc" type="string">
+            <column name="dni_ruc" length="20" />
+        </property>
+        <property name="nombre" type="string">
+            <column name="nombre" length="120" />
+        </property>
+        <property name="nombreRep" type="string">
+            <column name="nombre_rep" length="100" />
+        </property>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="4000" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="20" />
+        </property>
+        <property name="tipo" type="string">
+            <column name="tipo" length="20" />
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TLogFinance" table="t_log_finance" schema="public">
+        <id name="idlogfinance" type="string">
+            <column name="idlogfinance" length="50" />
+            <generator class="assigned" />
+        </id>
+        <property name="tipoOperacion" type="string">
+            <column name="tipo_operacion" length="50" not-null="true" />
+        </property>
+        <property name="referencia" type="string">
+            <column name="referencia" length="250" />
+        </property>
+        <property name="monto" type="big_decimal">
+            <column name="monto" precision="10" scale="4" not-null="true" />
+        </property>
+        <property name="patrimonio" type="big_decimal">
+            <column name="patrimonio" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="activoCajaybanco" type="big_decimal">
+            <column name="activo_cajaybanco" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="activoCuentaxcobrar" type="big_decimal">
+            <column name="activo_cuentaxcobrar" precision="20" scale="4" />
+        </property>
+        <property name="pasivo" type="big_decimal">
+            <column name="pasivo" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="encaje" type="big_decimal">
+            <column name="encaje" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="PRespaldo" type="big_decimal">
+            <column name="p_respaldo" precision="20" scale="4" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" />
+        </property>
+        <property name="cajero" type="string">
+            <column name="cajero" length="50" />
+        </property>
+        <property name="observacion" type="string">
+            <column name="observacion" length="50" />
+        </property>
+        <property name="filial" type="string">
+            <column name="filial" length="50" />
+        </property>
+    </class>
+</hibernate-mapping>

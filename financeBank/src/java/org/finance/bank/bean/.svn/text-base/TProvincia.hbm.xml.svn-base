@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TProvincia" table="t_provincia" schema="public">
+        <id name="idprovincia" type="string">
+            <column name="idprovincia" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TDepartamento" class="org.finance.bank.bean.TDepartamento" fetch="select">
+            <column name="iddepartamento" length="41" not-null="true" />
+        </many-to-one>
+        <property name="codigo" type="string">
+            <column name="codigo" length="50" not-null="true" />
+        </property>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="200" />
+        </property>
+        <set name="TDistritos" inverse="true">
+            <key>
+                <column name="idprovincia" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDistrito" />
+        </set>
+    </class>
+</hibernate-mapping>

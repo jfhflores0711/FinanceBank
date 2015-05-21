@@ -1,0 +1,285 @@
+<%-- 
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : ronald
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8" session="true"%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <script type="text/javascript" src="js/validacion.js"></script>
+        <script type="text/javascript">
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i = 0,j = 0;
+                var len = 0,len2 = 0;
+                var strCheck = '0123456789';
+                var aux = '',aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode <= 13) return true;  // Enter
+                //if (whichCode == 8) return true;  // Delete
+                key = String.fromCharCode(whichCode);  // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false;  // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+
+            function procesar() {
+                var importe =document.getElementById("monto").value;
+                if(importe==""){importe="0";}else{importe = importe.replace(/,/gi, "")}
+                var cod_moneda = document.f1.moneda[document.f1.moneda.selectedIndex].value;
+                var lugar_ret = document.f1.lugarR[document.f1.lugarR.selectedIndex].value;
+                var motivo_ret =document.getElementById("motivo").value;
+                if(importe==0){window.alert("¡¡EL MONTO A RETIRAR DEBE SER MAYO A CERO!!") }else{
+                    var answer = window.confirm ("¿ESTA SEGURO REALIZAR EL RETIRO?");
+                    if (answer){
+                        req2 = null;
+                        if (window.XMLHttpRequest) {
+                            req2 = new XMLHttpRequest();
+                        }else if (window.ActiveXObject) {
+                            req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+                        if(req2!=null){
+                            var PATH = "<%= request.getContextPath()%>";
+                            var url = PATH + "/SRetiroOtro?"+
+                                "importe="+importe +
+                                "&lugar_ret="+lugar_ret +
+                                "&motivo_ret="+motivo_ret +
+                                "&cod_moneda="+cod_moneda;
+                            req2.open("GET",url,true);
+                            req2.send(null);
+                            window.alert('¡¡SE REALIZO EL RETIRO CON EXITO!!');
+                            document.f1.submit();
+                        }
+                    }
+                }
+            }
+
+            function val_monto(){
+                var disp =document.getElementById('disponible').value
+                disp = disp.replace(/,/gi, "");
+                disp = parseFloat (disp);
+                var dispc =document.getElementById('diaponibleCaja').value
+                dispc = dispc.replace(/,/gi, "");
+                dispc = parseFloat (dispc);
+                var mont =document.getElementById('monto').value;
+                if(mont=='')mont='0.00';
+                mont = mont.replace(/,/gi, "");
+                mont = parseFloat (mont);
+                if(mont<=disp && mont <= dispc){
+                }else{
+                    window.alert('NO DISPONE DE ESTA CANTIDAD');
+                    document.getElementById('monto').value = '0.00';
+                }
+            }
+        </script>
+    </head>
+    <body onload="document.getElementById('monto').focus();">
+        <%
+                    request.setAttribute("idmenu", "20110228202911555566");
+        %>
+        <%@include file="../common/header.jsp" %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <%
+                        //sess = sessFact.openSession();
+                        String codigo = request.getParameter("moneda");
+                        List result = d.findAll("from TMoneda where estado ='ACTIVO'");
+                        //Query query= query.list();
+                        Iterator itMONEDA = result.iterator();
+                        String sel = "";
+                        TDetalleCaja tdetallecaja = new TDetalleCaja();
+                        TPatrimonio tpatrimonio = new TPatrimonio();
+                        String det = "";
+                        while (itMONEDA.hasNext()) {
+                            TMoneda Moneda = (TMoneda) itMONEDA.next();
+                            if (codigo == null) {
+                                if (Moneda.getCodMoneda().equals("PEN")) {
+                                    sel = "selected";
+                                    codigo = "PEN";
+                                    String hql = "from TPatrimonio where estado ='ACTIVO" + session.getAttribute("USER_CODFILIAL").toString() + "'"
+                                            + " AND TBalancexmoneda.TMoneda.codMoneda ='" + codigo + "' ";
+                                    System.out.println("HQL>" + hql);//from TPatrimonio where estado ='ACTIVO0501' AND TBalancexmoneda.TMoneda.codMoneda ='PEN'
+                                    tpatrimonio = (TPatrimonio) d.findAll(hql).get(0);
+                                    String hqlm = "from TDetalleCaja where estado ='ACTIVO' "
+                                            + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+                                            + " AND TMoneda.estado ='ACTIVO'"
+                                            + " AND TMoneda.codMoneda ='" + codigo + "'";
+                                    tdetallecaja = (TDetalleCaja) d.findAll(hqlm).get(0);
+                                } else {
+                                    sel = "";
+                                }
+                            } else {
+                                if (Moneda.getCodMoneda().equals(codigo)) {
+                                    sel = "selected";
+                                    String hql = "from TPatrimonio where estado ='ACTIVO" + session.getAttribute("USER_CODFILIAL").toString() + "'"
+                                            + " AND TBalancexmoneda.TMoneda.codMoneda ='" + codigo + "' ";
+                                    System.out.println("HQL>" + hql);
+                                    tpatrimonio = (TPatrimonio) d.findAll(hql).get(0);
+                                    String hqlm = "from TDetalleCaja where estado ='ACTIVO' "
+                                            + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+                                            + " AND TMoneda.estado ='ACTIVO'"
+                                            + " AND TMoneda.codMoneda ='" + codigo + "'";
+                                    tdetallecaja = (TDetalleCaja) d.findAll(hqlm).get(0);
+                                } else {
+                                    sel = "";
+                                }
+                            }
+                            det += "<option label='" + Moneda.getSimbolo() + "'  value='" + Moneda.getCodMoneda() + "' " + sel + ">" + Moneda.getSimbolo() + "</option>";
+                        }
+                        adminCapital ak = new adminCapital(codigo, session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+            %>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">RETIROS EXTRAS</h2>
+                    <div class="story">
+                        <form id="f1" name="f1" method="post" action="">
+                            <fieldset>
+                                <legend><b>Datos del Retiro</b></legend>
+                                <table  border="0"  cellpadding="10" cellspacing="10" width="100%">
+                                    <tr>
+                                        <td colspan="5" align="center">Utilidad total:
+                                            <input type="text" value="<%=fm.formatMoneda(ak.xCalcularUtilidad())%>" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th align="center" style="font-size:10px;color:#ffffff" bgcolor="#ECB784" >
+                                            Moneda
+                                        </th>
+                                        <th align="center" style="font-size:10px;color:#ffffff" bgcolor="#ECB784">
+                                            Lugar de retiro
+                                        </th>
+                                        <th align="center" style="font-size:10px;color:#ffffff" bgcolor="#ECB784">
+                                            Disponible
+                                        </th>
+                                        <th align="center" style="font-size:10px;color:#ffffff" bgcolor="#ECB784">
+                                            Disponible en caja
+                                        </th>
+                                        <th align="center" style="font-size:10px;color:#ffffff" bgcolor="#ECB784">
+                                            Monto a Retirar
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="moneda" style="font-size:14px"  onchange="document.f1.submit()" >
+                                                <%=det%>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="lugarR" style="font-size:14px" onchange="document.f1.submit()">
+                                                <%
+                                                            String sel1 = "";
+                                                            String sel2 = "";
+                                                            Double Disponible = 0.00;
+                                                            String lugarR = request.getParameter("lugarR");
+                                                            if (request.getParameter("lugarR") == null) {
+                                                                sel1 = "selected";
+                                                                Disponible = ak.utilidad(codigo);
+                                                            } else {
+                                                                if (lugarR.equals("UTILIDAD")) {
+                                                                    Disponible = ak.utilidad(codigo);
+                                                                    sel1 = "selected";
+                                                                } else {
+                                                                    Disponible = tpatrimonio.getPatrimonio().doubleValue();
+                                                                    sel2 = "selected";
+                                                                }
+                                                            }
+                                                            out.println("<option  value='UTILIDAD' " + sel1 + "> UTILIDAD </option>");
+                                                            out.println("<option  value='PATRIMONIO' " + sel2 + "> PATRIMONIO </option>");
+                                                %>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input id="disponible" type="text" style="font-size:14px;width:140px;color:#018d00;background:transparent;text-align:right" readonly='true' name="giro_neto"
+                                                   value="<%=fm.formatMoneda(Disponible)%>" />
+                                        </td>
+                                        <td>
+                                            <input id="diaponibleCaja" type="text" style="font-size:14px;width:140px;color:#018d00;background:transparent;text-align:right" readonly='true' name="giro_neto"
+                                                   value="<%=fm.formatMoneda(tdetallecaja.getMontoFinal().doubleValue())%>" />
+                                        </td>
+                                        <td>
+                                            <input id="monto" type="text" style="font-size:14px;width:140px;text-align:right" name="monto" value="0.00"  onKeyPress="return(currencyFormat(this,',','.',event))"  onkeyup="val_monto()" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" align="center">
+                                            <table>
+                                                <tr>
+                                                    <td valign="top">
+                                                        <font color="#385B88" style="font-size:12px">MOTIVO DE RETIRO</font>
+                                                    </td>
+                                                    <td>
+                                                        <textarea id="motivo" name="motivo" rows="3" cols="40"
+                                                                  onkeydown="if(this.value.length >= 100){ window.alert('Has superado el tama&ntilde;o m&aacute;ximo permitido');this.value=this.value.substring(0,99); return false; }"
+                                                                  ></textarea>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" align="center">
+                                            <input id="inputsubmit1" type="button" name="inputsubmit1" onclick="procesar();" value="PROCESAR" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

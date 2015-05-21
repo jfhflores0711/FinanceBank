@@ -1,0 +1,559 @@
+<%--
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : ronald
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <script type="text/javascript">
+            var ant;
+            var idPesonaSelect;
+            function  select(n,idp){
+                if(ant==null){
+                    document.getElementById('a'+n).style.background="#cfe0ff";
+                }else{
+                    document.getElementById('a'+ant).style.background="#FFFFFF";
+                    document.getElementById('a'+n).style.background="#cfe0ff";
+                }
+                ant=n;
+                idPesonaSelect = idp;
+            }
+
+            var req2;
+            function  funcion(id){
+                req2=null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesarRespuesta2;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SDetallePersona?idpersona="+id;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function procesarRespuesta2(){
+                contenido = document.getElementById('Detalle');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+
+            function Actualizar(){
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var i;
+                    for (i=0;i<document.fDetalle.estado.length;i++){
+                        if (document.fDetalle.estado[i].checked)
+                            break;
+                    }
+                    var estado = document.fDetalle.estado[i].value;
+                    var dni = document.fDetalle.dni.value;
+                    var ruc = document.fDetalle.ruc.value;
+                    var nombres = document.fDetalle.nombres.value;
+                    var apellidos = document.fDetalle.apellidos.value;
+                    var email = document.fDetalle.email.value;
+                    var ubigeo = document.fDetalle.ubigeo.value;
+                    var telefono = document.fDetalle.telefono.value;
+                    var celular = document.fDetalle.celular.value;
+                    var direccion = document.fDetalle.direccion.value;
+                    var login = document.fDetalle.login.value;
+                    var contrasenia = document.fDetalle.contrasenia.value;
+                    var ipacceso = document.fDetalle.ipacceso.value;
+                    var grupo = document.fDetalle.grupo[document.fDetalle.grupo.selectedIndex].value;
+                    var caja = document.fDetalle.caja[document.fDetalle.caja.selectedIndex].value;
+                    var j;
+                    for (j=0;j<document.fDetalle.categoria.length;j++){
+                        if (document.fDetalle.categoria[j].checked)
+                            break;
+                    }
+                    var categoria = document.fDetalle.categoria[j].value;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SActualizarPersona?idpersona="+idPesonaSelect+
+                        "&estado="+estado+
+                        "&dni="+dni+
+                        "&ruc="+ruc+
+                        "&nombres="+nombres+
+                        "&apellidos="+apellidos+
+                        "&email="+email+
+                        "&ubigeo="+ubigeo+
+                        "&telefono="+telefono+
+                        "&celular="+celular+
+                        "&direccion="+direccion+
+                        "&login="+login+
+                        "&contrasenia="+contrasenia+
+                        "&ipacceso="+ipacceso+
+                        "&grupo="+grupo+
+                        "&caja="+caja+
+                        "&categoria="+categoria;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function nuevo(){
+                this.document.getElementById('guardar').disabled=false;
+                this.document.getElementById('actualizar').disabled=true;
+                this.document.fDetalle.dni.value="";
+                this.document.fDetalle.ruc.value="";
+                this.document.fDetalle.nombres.value="";
+                this.document.fDetalle.apellidos.value="";
+                this.document.fDetalle.email.value="";
+                this.document.fDetalle.ubigeo.value="";
+                this.document.fDetalle.telefono.value="";
+                this.document.fDetalle.celular.value="";
+                this.document.fDetalle.direccion.value="";
+                this.document.fDetalle.login.value="";
+                this.document.fDetalle.contrasenia.value="";
+                this.document.fDetalle.ipacceso.value="*";
+            }
+
+            function actualizar(){
+                this.document.getElementById('guardar').disabled=true;
+                this.document.getElementById('actualizar').disabled=false;
+            }
+
+            var req1;
+            function mostrarcaja(){
+                var codfil
+                codfil=document.getElementById("selmiFilial").value;
+                if(codfil!='0'){
+                    req1 = null;
+                    if (window.XMLHttpRequest) {
+                        req1 = new XMLHttpRequest();
+                    } else if (window.ActiveXObject) {
+                        req1 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req1!=null){
+                        req1.onreadystatechange = procesarRespuesta1;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SMostrarCaja?inselect=ok&codfili="+codfil;
+                        req1.open("GET",url,true);
+                        req1.send(null);
+                    }
+                }
+            }
+
+            function procesarRespuesta1(){
+                contenido = document.getElementById('fiCaja');
+                contenido.innerHTML="Cargando los datos...";
+                if (req1.readyState==4 && req1.status==200) {
+                    contenido.innerHTML = req1.responseText;
+                }
+            }
+        </script>
+        <script type="text/javascript" src="js/validacion.js">
+        </script></head>
+        <body onload="document.getElementById('xli').focus();">
+            <%
+                    request.setAttribute("idmenu", "20110228202911478860");
+        %>
+        <% //****** buscar persona ****
+                    String TBuscar = "sistema";
+                    if (request.getParameter("buscar") != null) {
+                        TBuscar = request.getParameter("buscar").toString();
+                    }
+                    String dni = "SELECCIONE NUEVO";
+                    if (request.getParameter("dni") != null) {
+                        dni = request.getParameter("dni").toString();
+                    }
+                    String ruc = "";
+                    if (request.getParameter("ruc") != null) {
+                        ruc = request.getParameter("ruc").toString();
+                    }
+                    String nombres = "";
+                    if (request.getParameter("nombres") != null && !request.getParameter("nombres").equals("")) {
+                        nombres = request.getParameter("nombres").toString();
+                    }
+                    String apellidos = "";
+                    if (request.getParameter("apellidos") != null && !request.getParameter("apellidos").equals("")) {
+                        apellidos = request.getParameter("apellidos").toString();
+                    }
+                    String email = "";
+                    if (request.getParameter("email") != null && !request.getParameter("email").equals("")) {
+                        email = request.getParameter("email").toString();
+                    }
+                    String ubigeo = "";
+                    if (request.getParameter("ubigeo") != null && !request.getParameter("ubigeo").equals("")) {
+                        ubigeo = request.getParameter("ubigeo").toString();
+                    }
+                    String telefono = "";
+                    if (request.getParameter("telefono") != null && !request.getParameter("telefono").equals("")) {
+                        telefono = request.getParameter("telefono").toString();
+                    }
+                    String celular = "";
+                    if (request.getParameter("celular") != null && !request.getParameter("celular").equals("")) {
+                        celular = request.getParameter("celular").toString();
+                    }
+                    String direccion = "";
+                    if (request.getParameter("direccion") != null && !request.getParameter("direccion").equals("")) {
+                        direccion = request.getParameter("direccion").toString();
+                    }
+        %>
+        <%@include file="../common/header.jsp" %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">MANAGER USER</h2><div class="story">
+                        <form id="f1"  name="f1" method="post" action="">
+                            <table  width="100%" cellpadding='5' cellspacing='5' border="0" class="tabla" style='border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;border-top:1px solid #000;'>
+                                <tr>
+                                    <td  width="50%" >
+                                        <font color="#385B88" style="font-size:12px"><b>Usuario de Sistema&nbsp;</b></font>
+                                        <input id="xli" type="radio" name="buscar" value="sistema"
+                                               <% if (TBuscar.equals("sistema")) {
+                                                               out.println("checked");
+                                                           }%>
+                                               onclick='document.f1.submit();' />
+                                        <font color="#385B88" style="font-size:12px"><b>Todos&nbsp;</b></font>
+                                        <input type="radio" name="buscar" value="todo"
+                                               <% if (TBuscar.equals("todo")) {
+                                                               out.println("checked");
+                                                           }%>
+                                               onclick='document.f1.submit();'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                        <table border="0" width="100%">
+                            <tr>
+                                <td width="45%" valign="top">
+                                    <fieldset>
+                                        <legend><b>LISTA PERSONAS</b></legend>
+                                        <table width="100%">
+                                            <tr>
+                                                <td>
+                                                    <div id="menu" style="overflow-y:auto; height:450px" >
+                                                        <ul>
+                                                            <%
+                                                                        String sql_todos = "from TPersona p where not ( p.docIdentidad ='DISABLED') and not(p.ruc='DISABLED')";
+                                                                        List result = d.findAll(sql_todos);
+                                                                        // Query query = query.list();
+                                                                        if (TBuscar.equals("todo")) {
+                                                                            Iterator it = result.iterator();
+                                                                            int i = 0;
+                                                                            while (it.hasNext()) {
+                                                                                TPersona persona = (TPersona) it.next();
+                                                                                out.println("<li id='li" + i + "' value='" + persona.getIdUserPk() + "' ><a id='a" + i + "'  onclick=\"select('" + i + "');funcion('" + persona.getIdUserPk() + "')\"  >" + persona.getNombre() + " " + persona.getApellidos() + "</a></li>");
+                                                                                i++;
+                                                                            }
+                                                                        } else {
+                                                                            String sql = "from TCuentaAcceso ca where ca.estado='ACTIVO' and not ( ca.login ='DISABLED')";
+                                                                            result = d.findAll(sql);
+                                                                            //query= query.list();
+                                                                            Iterator ite = result.iterator();
+                                                                            int i = 0;
+                                                                            while (ite.hasNext()) {
+                                                                                TCuentaAcceso cuenta = (TCuentaAcceso) ite.next();
+                                                                                TPersona persona = (TPersona) d.load(TPersona.class, cuenta.getTPersona().getIdUserPk());
+                                                                                out.println("<li id='li" + i + "' value='" + persona.getIdUserPk() + "' ><a id='a" + i + "'  onclick=\"select('" + i + "','" + persona.getIdUserPk() + "');funcion('" + persona.getIdUserPk() + "');actualizar()\"   >" + persona.getNombre() + " " + persona.getApellidos() + "</a></li>");
+                                                                                i++;
+                                                                            }
+                                                                        }
+                                                            %>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br>
+                                    </fieldset>
+                                </td>
+                                <td width="10%" align="center">
+                                    <input id="nuevo" type="button" name="nuevo" value="NUEVO" onclick="nuevo();" /><br>
+                                    <input id="actualizar" type="button" name="actualizar" value="ACTUALIZAR"  onclick="Actualizar();alert('¡¡SE ACTUALIZARON LOS DATOS CON EXITO!!')" disabled='true'/><br>
+                                    <input id="guardar" type="button" name="guardar" value="GUARDAR"  onclick="document.fDetalle.submit()" disabled='true'/><br>
+                                </td>
+                                <td width="45%" valign="top">
+                                    <fieldset>
+                                        <legend><b>DETALLE</b></legend>
+                                        <center>
+                                            <font color="red" style="font-size:10px">
+                                                <b>
+                                                    <c:forEach var="mensaje" items="${mensaje}">
+                                                        <c:out value="${mensaje}" />
+                                                    </c:forEach>
+                                                </b>
+                                            </font>
+                                        </center>
+                                        <table width="100%">
+                                            <tr>
+                                                <td>
+                                                    <div id="menu" style="overflow-y:auto; height:450px" >
+                                                        <form id="fDetalle" name="fDetalle" method="post" action="addUser.htm">
+                                                            <div id="Detalle">
+                                                                <table border='0' width='100%'>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Estado&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            Activo<input type="radio" name="estado" value="ACTIVO" checked />
+                                                                            Inactivo<input type="radio" name="estado" value="INACTIVO" />
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>D.N.I&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input  value="<%=dni%>" id='dni' type='text' name='dni' value=''  onkeypress='return soloNumeroTelefonico(event);' maxlength="8"/><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>R.U.C&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input  value="<%=ruc%>" id='ruc' type='text' name='ruc' value=''  onkeypress='return soloNumeroTelefonico(event);' maxlength="11"/>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Nombres&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input  value="<%=nombres%>" id='nombres' type='text' name='nombres' maxlength="50" /><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Apellidos&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input  value="<%=apellidos%>" id='apellidos' type='text' name='apellidos' maxlength="50" /><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td  colspan='2'>
+                                                                            <b>&nbsp;</b>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Email&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='email' type='text' name='email'  value="<%=email%>"  maxlength="50"/>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Ubigeo&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='ubigeo' type='text' name='ubigeo'  value="<%=ubigeo%>" onkeypress='return soloNumeroTelefonico(event);' maxlength="10"/><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Tel&eacute;fono&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='telefono' type='text' name='telefono'  value="<%=telefono%>"  onkeypress='return soloNumeroTelefonico(event);' maxlength="10"  />
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Celular&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='celular' type='text' name='celular'  value="<%=celular%>" onkeypress='return soloNumeroTelefonico(event);' maxlength="12" />
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Direccion&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='direccion' type='text' name='direccion' value="<%=direccion%>"  maxlength="100"/><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <br>
+                                                                <hr>
+                                                                <br>
+                                                                <table border='0' width='100%'>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Usuario&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='login' type='text' name='login'  value=""  maxlength="10" /><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Contrase&ntilde;a&nbsp;</b></font>
+
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='contrasenia' type='password' name='contrasenia'  value=""  maxlength="10" /><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>IP Acceso</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <input id='ipacceso' type='text' name='ipacceso'  value="*"  /><font color='red'>*</font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right' colspan="2">
+                                                                            <font color="#385B88" style="font-size:9px"><b>Ejem: 192.168.0.XX,*,etc</b></font>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td  colspan='2'>
+                                                                            <b>&nbsp;</b>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Grupo&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <select name="grupo">
+                                                                                <%
+                                                                                            //sess = sessFact.openSession();
+                                                                                            result = d.findAll("from TTipoPersona");
+                                                                                            //query  = query.list();
+                                                                                            Iterator it2 = result.iterator();
+                                                                                            while (it2.hasNext()) {
+                                                                                                TTipoPersona grupo = (TTipoPersona) it2.next();
+                                                                                                out.println("<option value='" + grupo.getIdtipopersona() + "' >" + grupo.getDescripcion() + "</option>");
+                                                                                            }
+                                                                                %>
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Filial&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <select id="selmiFilial" name="filial" onchange='mostrarcaja();'>
+                                                                                <%
+                                                                                            String codfilial = "";
+                                                                                            //sess = sessFact.openSession();
+                                                                                            result = d.findAll("from TFilial where estado='ACTIVO'");
+                                                                                            //query  = query.list();
+                                                                                            Iterator it4 = result.iterator();
+                                                                                            int ii = 0;
+                                                                                            while (it4.hasNext()) {
+                                                                                                TFilial fi = (TFilial) it4.next();
+                                                                                                out.println("<option value='" + fi.getCodFilial() + "' >" + fi.getNombre() + "</option>");
+                                                                                                if (ii == 0) {
+                                                                                                    codfilial = fi.getCodFilial();
+                                                                                                }
+                                                                                                ii++;
+                                                                                            }
+                                                                                %>
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Caja&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'><div id="fiCaja">
+                                                                                <select id="selcaja" name="caja">
+                                                                                    <%
+                                                                                                //sess = sessFact.openSession();
+                                                                                                result = d.findAll("from TCaja ca where ca.TFilial='" + codfilial + "' and ca.estado='ACTIVO' order by codCaja");
+                                                                                                //query  = query.list();
+                                                                                                if (result.size() > 0) {
+                                                                                                    Iterator it3 = result.iterator();
+                                                                                                    while (it3.hasNext()) {
+                                                                                                        TCaja caja3 = (TCaja) it3.next();
+                                                                                                        out.println("<option value='" + caja3.getCodCaja() + "' >" + caja3.getNombreCaja() + "</option>");
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    out.println("<option value='0'>(NO HAY CAJA ACTIVA)</option>");
+                                                                                                }
+                                                                                    %>
+                                                                                </select></div>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align='right'>
+                                                                            <font color="#385B88" style="font-size:12px"><b>Categoria&nbsp;</b></font>
+                                                                        </td>
+                                                                        <td align='left'>
+                                                                            <%
+                                                                                        //sess = sessFact.openSession();
+                                                                                        result = d.findAll("from TCategoriaPersona");
+                                                                                        //query = query.list();
+                                                                                        Iterator it5 = result.iterator();
+                                                                                        int j = 0;
+                                                                                        String check = "";
+                                                                                        while (it5.hasNext()) {
+                                                                                            if (j == 0) {
+                                                                                                check = "checked";
+                                                                                            } else {
+                                                                                                check = "";
+                                                                                            }
+                                                                                            TCategoriaPersona cate = (TCategoriaPersona) it5.next();
+                                                                                            out.println(cate.getDescripcion() + "<input type='radio' name='categoria' value='" + cate.getIdcategoriapersona() + "' " + check + " />");
+                                                                                            j++;
+                                                                                        }
+                                                                            %>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

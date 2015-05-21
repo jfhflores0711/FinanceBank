@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TDetalleSuma" table="t_detalle_suma" schema="public">
+        <id name="iddetallesuma" type="string">
+            <column name="iddetallesuma" length="50" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TDenominacionMoneda" class="org.finance.bank.bean.TDenominacionMoneda" fetch="select">
+            <column name="iddenominacionmoneda" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TSumaMoneda" class="org.finance.bank.bean.TSumaMoneda" fetch="select">
+            <column name="idsumamoneda" length="50" not-null="true" />
+        </many-to-one>
+        <property name="cantidad" type="java.lang.Integer">
+            <column name="cantidad" precision="6" scale="0" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="50" />
+        </property>
+    </class>
+</hibernate-mapping>

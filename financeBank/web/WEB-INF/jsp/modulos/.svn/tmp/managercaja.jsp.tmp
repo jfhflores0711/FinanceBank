@@ -1,0 +1,972 @@
+<%--
+    Document   : cobrogiros.jsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : oscar
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+<<<<<<< .mine
+        <style type="text/css" media="print">
+            #sidebar{
+                display: none;
+            }
+            #logo{
+                display: none;
+            }
+            .story{
+                display:none;
+            }
+            #frmOperaciones{
+                display: none;
+            }
+            #main{
+                width:940px;
+            }
+            #Submit{
+                display: none;
+            }
+            #btnRegresar{
+                display: none;
+            }
+            #footer{
+                display: none;
+            }
+        </style>
+=======
+>>>>>>> .r80
+        <script type="text/javascript" src="js/validacion.js"></script>
+        <script type="text/javascript" src="js/calendar/popcalendar.js"></script>
+        <script>
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i =0, j = 0;
+                var len =0, len2 = 0;
+                var strCheck = '0123456789';
+                var aux ='', aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode == 13) return true;  // Enter
+                if (whichCode == 8) return true;  // Delete
+                key = String.fromCharCode(whichCode);  // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false;  // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+
+            function currencyFormat2(fld, milSep, decSep) {
+                var key = '';
+                var i = 0,j = 0;
+                var len = 0,len2 = 0;
+                var strCheck = '0123456789';
+                var aux = '',aux2 = '';
+                len = fld.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.charAt(i) != '0') && (fld.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.charAt(i))!=-1) aux += fld.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld = '';
+                if (len == 1) fld = '0'+ decSep + '0' + aux;
+                if (len == 2) fld = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld += aux2.charAt(i);
+                    fld += decSep + aux.substr(len - 2, len);
+                    //alert('fld ='+fld+' len ='+len)
+                }
+                return fld;
+            }
+
+            function mTotalCajas(cod,num){
+                var Stotal=0;
+                for(var i=0;i<TotalCaja;i++){
+                    var monto=document.getElementById('monto'+cod+i).value
+                    monto = monto.replace(/,/gi, "")
+                    var res =parseFloat (monto)
+                    //SOLO SUMA LOS DISPONIBLES
+                    if(document.getElementById('btn_tranferir'+i).disabled){
+                        //alert('button '+i+' dehabilitado')
+                    }else{
+                        //alert('button '+i+' ok')
+                        Stotal=Stotal+res
+                    }
+
+                }
+                //alert('Stotal='+Stotal)
+                return Stotal;
+            }
+
+            function actSaldo(cod,num){
+
+                var valor =mTotalCajas(cod,num)
+
+                var valor1 =document.getElementById('mDisponible'+num).innerHTML
+                valor1 = valor1.replace(/,/gi, "")
+
+
+                var res =parseFloat (valor1)-parseFloat (valor)
+                if(res<0){
+                    alert('NO DISPONE DE DINERO SUFICIENTE')
+                    document.getElementById('montoMoneda'+num).value='0.00';
+                }else{
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+
+                    document.getElementById('saldo'+num).innerHTML=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            function aMoneda(cod,num){
+                // alert("todocaja es="+TotalCaja);
+                // var codmon =document.getElementById('PEN').name
+                for(var i=0;i<TotalCaja;i++){
+                    this.document.getElementById('monto'+cod+i).value=document.getElementById('montoMoneda'+num).value
+                }
+                // valor actual
+                // var valor =document.getElementById('montoMoneda'+num).value
+                //     valor = valor.replace(/,/gi, "")
+                var valor =mTotalCajas(cod,num)
+
+                var valor1 =document.getElementById('mDisponible'+num).innerHTML
+                valor1 = valor1.replace(/,/gi, "")
+
+
+                var res =parseFloat (valor1)-parseFloat (valor)
+                if(res<0){
+                    alert('NO DISPONE DE DINERO SUFICIENTE')
+                    document.getElementById('montoMoneda'+num).value='0.00'
+                }else{
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    document.getElementById('saldo'+num).innerHTML=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            var TotalCaja
+            var TotalMoneda
+            function numeroTcajas(n){
+                this.TotalCaja=n;
+                for(var h=0;h<n;h++){
+                    if(document.getElementById('btn_tranferir'+h).disabled){
+                        //PARA OCULTAR EL MARCO
+                    }
+                }
+            }
+
+            function numeroTmonedas(m){
+                this.TotalMoneda=m;
+                for(var w=0;w<m;w++){
+                    var mDisp = document.getElementById('mDisponible'+w).innerHTML
+                    var res =parseFloat (mDisp)
+                    res=res.toFixed(2);
+<<<<<<< .mine
+=======
+
+>>>>>>> .r80
+                    document.getElementById('mDisponible'+w).innerHTML=currencyFormat2(res,',','.');
+                    document.getElementById('saldo'+w).innerHTML=currencyFormat2(res,',','.');
+                }
+            }
+
+            function abilitarTxt(idTxt){
+                this.document.getElementById(idTxt).disabled=false;
+            }
+
+            function Transferir(n){
+                var codCaja = document.getElementById('caja'+n).innerHTML
+                var codM =""
+                var codD =""
+                for(var i=0;i<TotalMoneda;i++){
+                    var cod =document.getElementById('montoMoneda'+i).name
+                    var monto =document.getElementById('monto'+cod+n).value
+                    monto = monto.replace(/,/gi, "")
+                    codM = document.getElementById('montoMoneda'+i).name+"="+monto+"wxw"+codM;
+                    var mDisp = document.getElementById('mDisponible'+i).innerHTML
+                    mDisp = mDisp.replace(/,/gi, "")
+                    var res =parseFloat (mDisp)-parseFloat (monto)
+                    codD = document.getElementById('montoMoneda'+i).name+"="+res+"wxw"+codD;
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    document.getElementById('mDisponible'+i).innerHTML=currencyFormat2(Sres,',','.');
+<<<<<<< .mine
+                }           
+                req2 = null;
+=======
+                }
+
+
+                //alert('codCaja='+codCaja+" codM="+codM)
+
+                req2 = false;
+
+>>>>>>> .r80
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH +"/SGrabarMonto"+
+                        "?codCaja="+codCaja+
+                        "&codM="+codM+
+                        "&codD="+codD;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+                document.getElementById('btn_tranferir'+n).disabled=true;
+                document.getElementById('marco'+n).style.display='none';
+                for(var i=0;i<TotalMoneda;i++){
+                    var cod =document.getElementById('montoMoneda'+i).name
+                    var valor1 =document.getElementById('mDisponible'+i).innerHTML
+                    valor1 = valor1.replace(/,/gi, "")
+                    var valor =mTotalCajas(cod,i)
+                    var res =parseFloat (valor1)-parseFloat (valor)
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    document.getElementById('saldo'+i).innerHTML=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            function TransAll(){
+                for(var j=0;j<TotalCaja;j++){
+                    if(document.getElementById('btn_tranferir'+j).disabled){
+
+                    }else{
+                        Transferir(j)
+                    }
+                }
+            }
+
+            function catualizarM(i){
+                var valor1 =document.getElementById('montoActual'+i).innerHTML
+                valor1 = valor1.replace(/,/gi, "")
+                var valor =document.getElementById('montoTranferir'+i).value
+                valor = valor.replace(/,/gi, "")
+                var res =parseFloat (valor1)-parseFloat (valor)
+                if(res<0){
+                    alert('NO DISPONE DE DINERO SUFICIENTE')
+                    document.getElementById('montoTranferir'+i).value='0.00'
+                }else{
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    document.getElementById('montoSaldo'+i).innerHTML=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            function TransferirMonto(n){
+                var CodigoMoneda=document.getElementById('CodigoMoneda'+n).innerHTML
+                var MontoTransferir =document.getElementById('montoTranferir'+n).value
+                MontoTransferir = MontoTransferir.replace(/,/gi, "")
+                var MontoSaldo =document.getElementById('montoSaldo'+n).innerHTML
+                MontoSaldo = MontoSaldo.replace(/,/gi, "")
+                var CajaDestino = document.getElementById('Caja'+n)[document.getElementById('Caja'+n).selectedIndex].value;
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH +"/STransferirEntreCajas"+
+                        "?CodigoMoneda="+CodigoMoneda+
+                        "&MontoTransferir="+MontoTransferir+
+                        "&MontoSaldo="+MontoSaldo+
+                        "&CajaDestino="+CajaDestino;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+<<<<<<< .mine
+=======
+                    alert('¡¡SE REALIZO LA TRANSFERENCIA CON EXITO!!');
+                    document.f1.submit();
+                    window.location="SReciboTransferencia";
+
+>>>>>>> .r80
+                }
+                //document.foper.submit();
+            }
+
+            function CerrarCaja(){
+                var answer = confirm ("¿ESTA SEGURO?")
+                if (answer){
+                    req2 = null;
+                    if (window.XMLHttpRequest) {
+                        req2 = new XMLHttpRequest();
+                    }else if (window.ActiveXObject) {
+                        req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req2!=null){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH +"/SCerrarCaja";
+                        req2.open("GET",url,true);
+                        req2.send(null);
+                    }
+                    document.foper.submit();
+                }
+            }
+
+            function formaterMontos(m){
+                this.TotalMoneda=m;
+                for(var w=0;w<m;w++){
+                    var montoActual = document.getElementById('montoActual'+w).innerHTML;
+                    var resMontoActual =parseFloat (montoActual);
+                    if(resMontoActual==0){
+                        document.getElementById('montoActual'+w).innerHTML="0.00";
+                        document.getElementById('montoSaldo'+w).innerHTML="0.00";
+                    }else{
+                        resMontoActual=resMontoActual.toFixed(2);
+                        resMontoActual=resMontoActual+"";
+                        document.getElementById('montoActual'+w).innerHTML=currencyFormat2(resMontoActual,',','.');
+                        document.getElementById('montoSaldo'+w).innerHTML=currencyFormat2(resMontoActual,',','.');
+<<<<<<< .mine
+                    }                
+=======
+                    }
+
+>>>>>>> .r80
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req;
+            function buscarOperacione(){
+                var tipoOperacion,numOP,tipoOp;
+                tipoOperacion=document.getElementById("selTipoOperacion").value;
+                if(tipoOperacion=="COMPRA"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="VENTA"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="DEPOSITO O RETIRO"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="GIRO"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="COBROGIRO"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="PRESTAMO"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="COBRANZA"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else if(tipoOperacion=="RETIRO OTRO"){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else{
+                    numOP="";
+                }
+                if(numOP!="" || tipoOperacion=="TODO"){
+                    req = null;
+                    if (window.XMLHttpRequest) {
+                        req = new XMLHttpRequest();
+                    }else if (window.ActiveXObject) {
+                        req = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req!=null){
+                        req.onreadystatechange = pprocesar;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SBuscarOp?numOP="+numOP+"&tipoOperacion="+tipoOperacion;
+                        req.open("GET",url,true);
+                        req.send(null);
+                    }
+                }else{alert("ingrese numero de operacion");}
+            }
+
+            function transferir(n){
+            //var CodigoMoneda=document.getElementById('CodigoMoneda'+n).innerHTML
+
+             //   var MontoTransferir =document.getElementById('montoTranferir'+n).value
+             //   MontoTransferir = MontoTransferir.replace(/,/gi, "")
+
+             //   var MontoSaldo =document.getElementById('montoSaldo'+n).innerHTML
+             //   MontoSaldo = MontoSaldo.replace(/,/gi, "")
+                //var caja_destino = document.fDetalle.caja[document.fDetalle.caja.selectedIndex].value;
+             //   var CajaDestino = document.getElementById('Caja'+n)[document.getElementById('Caja'+n).selectedIndex].value;
+
+                //alert(' CodigoMoneda='+ CodigoMoneda+' MontoTransferir ='+ MontoTransferir+' CajaDestino ='+ CajaDestino);
+
+                req21 = false;
+
+                if (window.XMLHttpRequest) {
+                    req21 = new XMLHttpRequest();
+                }
+                else if (window.ActiveXObject) {
+                    req21 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req21!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH +"/SRecepcion"+
+                        "?idTransferencia="+n;
+                    req21.open("GET",url,true);
+                    //req2.onreadystatechange = procesarRes;
+                    req21.send(null);
+                    alert('¡¡SE REALIZO LA RECEPCION CON EXITO!!');
+                    document.f1.submit();
+                    window.location="SReciboRecepcion?idTransferencia="+n;
+
+                }
+            }
+
+            function pprocesar(){
+                contenido = document.getElementById('divOperacion');
+                contenido.innerHTML="Cargando los datos...";
+                if (req.readyState==4 && req.status==200) {
+                    contenido.innerHTML = req.responseText;
+                    var tamTabla;
+                    tamTabla=document.getElementById("tablaOperacion").rows.length
+                    if(tamTabla>=15){
+                        contenido = document.getElementById('divOperacion').style.overflow="auto";
+                        contenido = document.getElementById('divOperacion').style.height="600px";
+                    }else{
+                        contenido = document.getElementById('divOperacion').style.overflow="";
+                        contenido = document.getElementById('divOperacion').style.height="";
+                    }
+                }
+            }
+        </script>
+
+
+    </head>
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="logout.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">ADMINISTRACION DE CAJA</h2>
+                    <div class="story">
+<<<<<<< .mine
+=======
+                        <form id="f1" name="f1" method="post" action=""></form>
+                        <fieldset>
+                            <legend style="font-size:8px"><b>Recepción de Transferencia</b></legend>
+                            <table border="0" class='tabla' width="100%" cellpadding="5" cellspacing="5">
+                                <tr>
+                                    <th width="23%" align="center" style="font-size:10px;color:#000000">Fecha</th>
+                                    <th  width="20%" align="center" style="font-size:10px;color:#000000">Operacion</th>
+                                    <th  width="20%" align="center" style="font-size:10px;color:#000000">Monto</th>
+                                    <th  width="20%" align="center" style="font-size:10px;color:#000000">Moneda</th>
+                                    <th  width="15%" align="center" style="font-size:10px;color:#000000">&nbsp;</th>
+                                    <td  width="1%" align="center" style="font-size:10px;color:#000000">&nbsp;</th>
+                                </tr>
+                            </table>
+                            <div id='extorno' style='overflow-y:auto; height:50px;width:100%' >
+
+                                <table border="0" class='tabla' width="100%" cellpadding="2" cellspacing="2">
+                                    <%
+                                                sess = sessFact.openSession();
+
+>>>>>>> .r80
+                                                String hql1 = "from TTransferenciaCaja  where codCajaDestino='" + session.getAttribute("USER_CODCAJA") + "' "
+                                                        + "  AND tipo ='ESPERA_BETWEEN'";
+                                                //System.out.println("HQL>" + hql);
+                                                Query queryTrans = sess.createQuery(hql1);
+                                                List resultTrans = queryTrans.list();
+                                                Iterator itTrans = resultTrans.iterator();
+                                                Double Monto1 = 0.00;
+
+                                                int k1 = 0;
+                                                while (itTrans.hasNext()) {
+                                                    TTransferenciaCaja trans = (TTransferenciaCaja) itTrans.next();
+                                                    Monto1 = trans.getMonto().doubleValue();
+                                                    if (k1 % 2 == 0) {
+                                                        out.println("<tr class='modo1'>");
+                                                    } else {
+                                                        out.println("<tr class='modo2'>");
+                                                    }
+                                    %>
+                                    <td width="25%" style="font-size:10px;"><%=trans.getFecha()%></td>
+                                    <td width="20%" style="font-size:10px;">TRANSFERENCIA</td>
+                                    <td width="20%" style="font-size:10px;"><%=fm.formatMoneda(Monto1)%></td>
+                                    <td width="20%" style="font-size:10px;"><%=trans.getTMoneda().getNombre()%></td>
+                                    <td width="19%" style="font-size:10px; text-align: right;"><input type="button" value="Recepcionar" onclick="transferir('<%=trans.getIdtransferenciacaja().toString()%>')" /></td>
+                                        <%  out.println("</tr>");
+                                                        k1++;
+                                                    }%>
+                                </table>
+                            </div>
+                        </fieldset>
+                        <form id="foper" name="foper" method="post" action="">
+                            <fieldset>
+                                <legend style="font-size:8px"><b>Operaciones Entre Cajas</b></legend>
+                                <table border='0' cellpadding='5' cellspacing='5' class='tabla'  width='100%'>
+                                    <tr>
+                                        <th style='display:none'>&nbsp;</th><th>MONEDA</th>
+                                        <th>SIMBOLO</th>
+                                        <th>MONTO ACTUAL</th>
+                                        <th>MONTO</th>
+                                        <th>SALDO</th>
+                                        <th>CAJA</th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                    <%
+                                                iniDetalleCaja iniCaja = new iniDetalleCaja();
+                                                iniCaja.comprobarIni(session.getAttribute("USER_CODCAJA").toString());
+                                                sess = sessFact.openSession();
+                                                String hqlm = "from TDetalleCaja where estado ='ACTIVO' "
+                                                        + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+                                                        + " AND TMoneda.estado ='ACTIVO'"
+                                                        + " ";
+                                                System.out.println("HQL>" + hqlm);
+                                                Query query = sess.createQuery(hqlm);
+                                                List result = query.list();
+                                                Iterator MONE_DC = result.iterator();
+                                                int j2 = 0;
+                                                while (MONE_DC.hasNext()) {
+                                                    TDetalleCaja detCaja = (TDetalleCaja) MONE_DC.next();
+                                                    TMoneda Moneda = detCaja.getTMoneda();
+                                                    if (j2 % 2 == 0) {
+                                                        out.println("<tr class='modo1'>");
+                                                    } else {
+                                                        out.println("<tr class='modo2'>");
+                                                    }
+
+                                    %>
+
+                                    <td id="CodigoMoneda<%=j2%>" style='display:none' >
+                                        <%= Moneda.getCodMoneda()%>
+                                    </td>
+                                    <td >
+                                        <%= Moneda.getNombre()%>
+                                    </td>
+                                    <td style='font-size:20px' >
+                                        <center>
+                                            <%= Moneda.getSimbolo()%>
+                                        </center>
+                                    </td>
+                                    <td  id="montoActual<%=j2%>" style='text-align:right;'>
+                                        <%=detCaja.getMontoFinal()%>
+                                    </td>
+                                    <td  >
+                                        <input id="montoTranferir<%=j2%>" type="text" name="" value='0.00'
+                                               onKeyPress="return(currencyFormat(this,',','.',event))"
+                                               style='font-size:20px;width:150px;text-align:right;'
+                                               onkeyup="catualizarM('<%= j2%>')"
+                                               />
+                                    </td>
+                                    <td id="montoSaldo<%=j2%>" style='text-align:right;' >
+                                        <%=detCaja.getMontoFinal()%>
+                                    </td>
+                                    <td>
+                                        <select id="Caja<%=j2%>" name="Caja<%=j2%>">
+<<<<<<< .mine
+                                        <td id="CodigoMoneda<%=j2%>" style='display:none' >
+                                            <%= Moneda.getCodMoneda()%>
+                                        </td>
+                                        <td >
+                                            <%= Moneda.getNombre()%>
+                                        </td>
+                                        <td style='font-size:20px' >
+                                            <center>
+                                                <%= Moneda.getSimbolo()%>
+                                            </center>
+                                        </td>
+                                        <td  id="montoActual<%=j2%>" style='text-align:right;'>
+                                            <%=detCaja.getMontoFinal()%>
+                                        </td>
+                                        <td>
+                                            <input id="montoTranferir<%=j2%>" type="text" name="" value='0.00'
+                                                   onKeyPress="return(currencyFormat(this,',','.',event))"
+                                                   style='font-size:20px;width:150px;text-align:right;'
+                                                   onkeyup="catualizarM('<%= j2%>')"
+                                                   />
+                                        </td>
+                                        <td id="montoSaldo<%=j2%>" style='text-align:right;' >
+                                            <%=detCaja.getMontoFinal()%>
+                                        </td>
+                                        <td>
+                                            <select id="Caja<%=j2%>" name="Caja<%=j2%>">
+=======
+                                            <%
+>>>>>>> .r80
+                                                                                                sess = sessFact.openSession();
+                                                                                                Query que = sess.createQuery("from TCaja where estado ='ACTIVO' "
+                                                                                                        + " AND TFilial.codFilial ='" + session.getAttribute("USER_CODFILIAL").toString() + "' ");
+                                                                                                List res = que.list();
+                                                                                                Iterator in = res.iterator();
+                                                                                                while (in.hasNext()) {
+                                                                                                    TCaja caja3 = (TCaja) in.next();
+                                                                                                    if (!session.getAttribute("USER_CODCAJA").toString().equals(caja3.getCodCaja())) {
+                                                                                                        out.println("<option value='" + caja3.getCodCaja() + "' >" + caja3.getNombreCaja() + "</option>");
+                                                                                                    }
+                                                                                                }
+                                            %>
+                                        </select>
+                                    </td>
+                                    <td
+                                        <input type="button" value="TRANSFERIR" onclick="TransferirMonto(<%=j2%>)"  />
+                                    </td>
+                                    <%
+                                                    j2++;
+                                                }
+                                                out.println("<script language='JavaScript'>");
+                                                out.print("formaterMontos(" + j2 + ")");
+                                                out.println("</script>");
+                                    %>
+                                    </tr>
+                                    <tr class='modo2'>
+                                        <td colspan="7" align="center">
+                                            <input type="button" value="CERRAR CAJA"  onclick="CerrarCaja()"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                        </form>
+                        <%  if (session.getAttribute("USER_TIPOCAJA").toString().equals("PRIMARY")) {%>
+                        <br>
+                        <br>
+                        <legend style="font-size:12px" ><b>CAJA PRIMARIA</b></legend>
+                        <hr>
+                        <center>
+                            <form id="form1" method="post" action="menu.htm">
+                                <table  border="0" width="50%">
+                                    <tr>
+                                        <td colspan="2">
+                                            <fieldset>
+                                                <legend style="font-size:8px" ><b>APERTURA DE CAJA</b></legend>
+                                                <table border='0' cellpadding='10' cellspacing='10' class='tabla'  width='100%'>
+                                                    <tr>
+                                                        <td colspan="4">
+                                                            <font color="#385B88" style="font-size:12px"><b>MONTOS INICIALES PARA TODAS LAS CAJAS</b></font>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style='display:none' >
+                                                            &nbsp;
+                                                        </th>
+                                                        <th align="left" style="color:#000000" >
+                                                            MONEDA
+                                                        </th>
+                                                        <th align="left" style="color:#000000">
+                                                            SIMBOLO
+                                                        </th>
+                                                        <th align="left" style="color:#000000">
+                                                            MONTO APERTURA
+                                                        </th>
+                                                        <th align="left" style="color:#000000">
+                                                            MONTO DISPONIBLE
+                                                        </th>
+                                                        <th align="left" style="color:#000000">
+                                                            SALDO
+                                                        </th>
+                                                    </tr>
+                                                    <%
+                                                          sess = sessFact.openSession();
+                                                          String hqlp = "from TDetalleCaja where estado ='ACTIVO' "
+                                                                  + " AND TCaja.tipo='PRIMARY' "
+                                                                  + " AND TMoneda.estado ='ACTIVO'"
+                                                                  + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+                                                                  + "";
+                                                          query = sess.createQuery(hqlp);
+                                                          result = query.list();
+                                                          Iterator itMONEDA = result.iterator();
+                                                          int j = 0;
+                                                          while (itMONEDA.hasNext()) {
+                                                              TDetalleCaja detCajaPrimary = (TDetalleCaja) itMONEDA.next();
+                                                              TMoneda Moneda = detCajaPrimary.getTMoneda();
+                                                              if (j % 2 == 0) {
+                                                                  out.println("<tr class='modo1'>");
+                                                              } else {
+                                                                  out.println("<tr class='modo2'>");
+                                                              }
+                                                              out.println("<td style='display:none' >" + Moneda.getCodMoneda() + "</td>");
+                                                              out.println("<td >" + Moneda.getNombre() + "</td>");
+                                                              out.println("<td style='font-size:20px' ><center>" + Moneda.getSimbolo() + "</center></td>");
+                                                              out.println("<td ><input id='montoMoneda" + j + "'  style='text-align:right;font-size:20px;width:150px;' type='text' "
+                                                                      + " name='" + Moneda.getCodMoneda() + "' value='0.00' "
+                                                                      + " onKeyPress=\"return(currencyFormat(this,',','.',event))\" "
+                                                                      + " onkeyup=\"aMoneda('" + Moneda.getCodMoneda() + "','" + j + "')\"  /></td>");
+                                                              out.println("<td style='text-align:right;' id='mDisponible" + j + "'>" + detCajaPrimary.getMontoFinal() + "</td>");
+                                                              out.println("<td style='text-align:right;' id='saldo" + j + "'>" + detCajaPrimary.getMontoFinal() + "</td>");
+                                                              out.println("</tr>");
+                                                              j++;
+
+                                                          }
+                                                          out.println("<script language='JavaScript'>");
+                                                          out.print("numeroTmonedas(" + j + ")");
+                                                          out.println("</script>");
+                                                    %>
+                                                </table>
+                                            </fieldset>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </center>
+                        <table width="100%">
+                            <tr>
+                                <td align="right">
+                                    <input id="btn_tranferir"  type="button" name="btn_tranferir"  onclick="TransAll()" value="TRANSFERIR TODO" />
+                                </td>
+                            </tr>
+                        </table>
+                        <%
+                              int contador = 0;
+                              sess = sessFact.openSession();
+                              Query queryC = sess.createQuery("from TCaja where tipo='SECONDARY' "
+                                      + " AND TFilial.codFilial ='" + session.getAttribute("USER_CODFILIAL").toString() + "' ");
+                              result = queryC.list();
+                              Iterator itCaja = result.iterator();
+                              while (itCaja.hasNext()) {
+                                  TCaja tcaja = (TCaja) itCaja.next();
+                                  System.out.println("=>");
+                                  iniCaja.comprobarIni(tcaja.getCodCaja());
+                                  System.out.println("<=");
+                                  out.println("<div id='caja" + contador + "'style='display:none' >" + tcaja.getCodCaja() + "</div>");
+                        %>
+                        <fieldset id="marco<%=contador%>"  >
+                            <legend style="font-size:8px"><b>APERTURA DE CAJA</b></legend>
+                            <table  border='0' cellpadding='5' cellspacing='5' width="100%">
+                                <tr>
+                                    <td>
+                                        <font color="#385B88" style="font-size:12px"><b>Montos iniciales a asignar a la caja  :</b></font>
+                                        <font color="#E08934" style="font-size:15px"><b><%=tcaja.getNombreCaja()%></b></font>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <table border='0' cellpadding='0' cellspacing='0' class='tabla'  width='100%'>
+                                            <tr>
+                                                <th style='display:none'>&nbsp;</th>
+                                                <th align="center" style="font-size:10px;color:#000000">MONEDA</th>
+                                                <th align="center" style="font-size:10px;color:#000000">SIMBOLO</th>
+                                                <th align="center" style="font-size:10px;color:#000000">MONTO APERTURA</th>
+                                                <th align="center" style="font-size:10px;color:#000000">ULTIMO CIERRE <br> DE CAJA</th>
+                                                <th align="center" style="font-size:10px;color:#000000">MONTO ACTUAL</th>
+                                                <th>&nbsp;</th>
+                                            </tr>
+                                            <%
+                                                                              String deshabilitado = "";
+                                                                              sess = sessFact.openSession();
+                                                                              query = sess.createQuery("from TMoneda where estado ='ACTIVO'");
+                                                                              result = query.list();
+                                                                              Iterator itx = result.iterator();
+                                                                              int k = 0;
+                                                                              while (itx.hasNext()) {
+                                                                                  deshabilitado = "";
+                                                                                  TMoneda Moneda = (TMoneda) itx.next();
+                                                                                  String fch = formatFecha.get();
+                                                                                  fch = fch.substring(0, 10);
+                                                                                  System.out.println("fch" + fch);
+                                                                                  String hql = "from TDetalleCaja where estado='ACTIVO' "
+                                                                                          + " AND TMoneda.codMoneda='" + Moneda.getCodMoneda() + "'"
+                                                                                          + " AND TCaja.codCaja='" + tcaja.getCodCaja() + "' "
+                                                                                          + " AND EXISTS(from TTransferenciaCaja where  TMoneda.codMoneda='" + Moneda.getCodMoneda() + "'"
+                                                                                          + " AND codCajaDestino='" + tcaja.getCodCaja() + "'"
+                                                                                          + " AND tipo='FIRST'"
+                                                                                          + " AND fecha LIKE '" + fch + "%')";
+                                                                                  System.out.println("HQL>" + hql);
+                                                                                  Query queryW = sess.createQuery(hql);
+                                                                                  List resultW = queryW.list();
+                                                                                  String hql3 = "from TDetalleCaja where estado='ACTIVO' "
+                                                                                          + " AND TMoneda.codMoneda='" + Moneda.getCodMoneda() + "'"
+                                                                                          + " AND TCaja.codCaja='" + tcaja.getCodCaja() + "' ";
+                                                                                  System.out.println("HQL3>" + hql3);
+                                                                                  Query queryW3 = sess.createQuery(hql3);
+                                                                                  List resultW3 = queryW3.list();
+                                                                                  TDetalleCaja tdc = (TDetalleCaja) resultW3.get(0);
+                                                                                  for (int g = 0; g < resultW.size(); g++) {
+                                                                                      System.out.println("EXISTE ");
+                                                                                      deshabilitado = "disabled";
+                                                                                  }
+                                                                                  if (k % 2 == 0) {
+                                                                                      out.println("<tr class='modo1'>");
+                                                                                  } else {
+                                                                                      out.println("<tr class='modo2'>");
+                                                                                  }
+                                                                                  TTransferenciaCaja ttcaja = new TTransferenciaCaja();
+                                                                                  try {
+                                                                                      String sqlTrans = "from TTransferenciaCaja  where TCaja.codCaja='" + tdc.getTCaja().getCodCaja() + "' AND tipo='END' AND TMoneda.codMoneda='" + Moneda.getCodMoneda() + "'  order by  fecha desc ";
+                                                                                      System.out.println("Sql>" + sqlTrans);
+                                                                                      ttcaja = (TTransferenciaCaja) sess.createQuery(sqlTrans).list().get(0);
+                                                                                  } catch (IndexOutOfBoundsException ex) {
+                                                                                      System.out.println("error TTransferenciaCaja = " + ex);
+                                                                                      System.out.println("** No encontrado ****");
+                                                                                      ttcaja.setMonto(new BigDecimal("0"));
+                                                                                  }
+                                                                                  out.println("<td style='display:none' >" + Moneda.getCodMoneda() + "</td>");
+                                                                                  out.println("<td >" + Moneda.getNombre() + "</td>");
+                                                                                  out.println("<td >" + Moneda.getSimbolo() + "</td>");
+                                                                                  out.println("<td ><input style='text-align:right;' id='monto" + Moneda.getCodMoneda() + contador + "' type='text' name='cuenta'  disabled='true' "
+                                                                                          + " onKeyPress=\"return(currencyFormat(this,',','.',event))\" "
+                                                                                          + " onkeyup=\"actSaldo('" + Moneda.getCodMoneda() + "','" + k + "')\" "
+                                                                                          + " value='" + fm.formatMoneda(ttcaja.getMonto().doubleValue()) + "' /></td>");
+                                                                                  out.println("<td style='text-align:right;' >" + fm.formatMoneda(ttcaja.getMonto().doubleValue()) + "</td>");
+                                                                                  out.println("<td  style='text-align:right;' >" + fm.formatMoneda(tdc.getMontoFinal().doubleValue()) + "</td>");
+                                                                                  out.println("<td ><input id='cambiarMonto' " + deshabilitado + " type='button' name='cambiarMonto' value='CAMBIAR' onclick=\"abilitarTxt('monto" + Moneda.getCodMoneda() + contador + "')\" /></td>");
+                                                                                  out.println("</tr>");
+                                                                                  k++;
+                                                                              }
+                                            %>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <input id="btn_tranferir<%=contador%>"  <%=deshabilitado%> type="button" name="btn_tranferir"  onclick="Transferir(<%=contador%>)" value="TRANSFERIR" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                        <%
+                                  contador++;
+                              }//DEL WHILE
+                              out.println("<script language='JavaScript'>");
+                              out.print("numeroTcajas(" + contador + ")");
+                              out.println("</script>");
+                        %>
+                        <% }%>
+                    </div>
+                    <div>
+                        <form id="frmOperaciones" method="post" action="">
+                            <table id="">
+
+                                <tr>
+                                    <td><fieldset style="border-width: 3px;">
+                                            <legend>Buscar Por: </legend>
+                                            <table >
+                                                <tr>
+                                                    <td></td>
+                                                    <td>Escriba N&uacute;mero de Operaci&oacute;n:</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><select id="selTipoOperacion">
+                                                            <option>TODO</option>
+                                                            <option>COMPRA</option>
+                                                            <option>VENTA</option>
+                                                            <option>DEPOSITO O RETIRO</option>
+                                                            <option>GIRO</option>
+                                                            <option>COBROGIRO</option>
+                                                            <option>PRESTAMO</option>
+                                                            <option>COBRANZA</option>
+                                                            <option>RETIRO OTRO</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" id="txtNumOperacion" name="txtNumOperacion" onkeypress="return solonumeros(event);" value=""></td>
+                                                    <td><input type="button" id="btnuscar" onclick="buscarOperacione();" value="Buscar Operaci&oacute;n"></td>
+                                                    <td></td>
+                                                </tr>
+                                            </table>
+                                        </fieldset>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="divOperacion">
+                                            <table id="tablaOperacion" class="tabla" border="0" style="display:none">
+                                                <tr>
+                                                    <th style="display:none">-.-</th>
+                                                    <th>Num. Operaci&oacute;n</th>
+                                                    <th>Fecha de Registro</th>
+                                                    <th>Tipo Operaci&oacute;n</th>
+                                                    <th>Moneda</th>
+                                                    <th>Descripci&oacute;n</th>
+                                                    <th>Estado</th>
+                                                    <th>Usuario</th>
+                                                    <th>Fecha Extorno</th>
+                                                    <th>Admin Extorno</th>
+                                                    <th style="display:none">-..-</th>
+                                                </tr>
+
+                                                <% int i = 0;
+
+                                                            for (i = 0; i < 4; i++) {
+                                                                String par = "";
+                                                                i = i + 1;
+                                                                if (i % 2 == 0) {
+                                                                    par = "modo2";
+                                                                } else {
+                                                                    par = "modo1";
+                                                                }
+                                                                i = i - 1;%>
+                                                <tr class="<%=par%>">
+                                                    <td id="r" style="display:none"></td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td>a</td>
+                                                    <td><input type="button" id="btnExtornar<%=i%>" value="Extornar"></td>
+                                                </tr>
+                                                <% }%>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

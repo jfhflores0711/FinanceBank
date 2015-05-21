@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TTipoCredito" table="t_tipo_credito" schema="public">
+        <id name="idtipocredito" type="string">
+            <column name="idtipocredito" length="41" />
+            <generator class="assigned" />
+        </id>
+        <property name="nombre" type="string">
+            <column name="nombre" length="50" not-null="true" />
+        </property>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="150" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="ctaContableCapital" type="string">
+            <column name="cta_contable_capital" length="150" />
+        </property>
+        <property name="montoMaximo" type="big_decimal">
+            <column name="monto_maximo" precision="20" not-null="true" />
+        </property>
+        <property name="numeroCuotasMax" type="java.lang.Integer">
+            <column name="numero_cuotas_max" />
+        </property>
+        <property name="tasaInteresMax" type="big_decimal">
+            <column name="tasa_interes_max" precision="20" />
+        </property>
+        <property name="tipoTasaInteres" type="int">
+            <column name="tipo_tasa_interes" not-null="true" />
+        </property>
+        <property name="tasaInteresCompensatorio" type="big_decimal">
+            <column name="tasa_interes_compensatorio" precision="20" not-null="true" />
+        </property>
+        <property name="tipoTasaIntComp" type="java.lang.Integer">
+            <column name="tipo_tasa_int_comp" />
+        </property>
+        <property name="tasaInteresMoratoria" type="big_decimal">
+            <column name="tasa_interes_moratoria" precision="20" scale="4" />
+        </property>
+        <property name="tipoTasaIntMora" type="java.lang.Integer">
+            <column name="tipo_tasa_int_mora" />
+        </property>
+        <property name="cobrarMora" type="java.lang.Integer">
+            <column name="cobrar_mora" />
+        </property>
+        <property name="cobrarInteresCompensatorio" type="java.lang.Integer">
+            <column name="cobrar_interes_compensatorio" />
+        </property>
+        <property name="formaCobroIntereses" type="java.lang.Integer">
+            <column name="forma_cobro_intereses" />
+        </property>
+        <property name="formaCalculoIntereses" type="java.lang.Integer">
+            <column name="forma_calculo_intereses" />
+        </property>
+        <property name="numeroCuotasMin" type="java.lang.Integer">
+            <column name="numero_cuotas_min" />
+        </property>
+        <property name="montoMinimo" type="big_decimal">
+            <column name="monto_minimo" precision="20" />
+        </property>
+        <property name="tasaInteresMin" type="big_decimal">
+            <column name="tasa_interes_min" precision="20" />
+        </property>
+        <property name="diasEntreCuotas" type="java.lang.Integer">
+            <column name="dias_entre_cuotas" />
+        </property>
+        <property name="tipoCuota" type="java.lang.Integer">
+            <column name="tipo_cuota" />
+        </property>
+        <property name="requiereGarantia" type="java.lang.Integer">
+            <column name="requiere_garantia" />
+        </property>
+        <property name="avisoCuota" type="java.lang.Integer">
+            <column name="aviso_cuota" />
+        </property>
+        <property name="redondeoCuota" type="java.lang.Integer">
+            <column name="redondeo_cuota" />
+        </property>
+        <property name="modoCalculoIntereses" type="java.lang.Integer">
+            <column name="modo_calculo_intereses" />
+        </property>
+        <property name="modoCalcIntComp" type="java.lang.Integer">
+            <column name="modo_calc_int_comp" />
+        </property>
+        <property name="modoCobroIntMora" type="java.lang.Integer">
+            <column name="modo_cobro_int_mora" />
+        </property>
+        <property name="numMaxReprogramacion" type="java.lang.Integer">
+            <column name="num_max_reprogramacion" />
+        </property>
+        <property name="numMaxRefinanciacion" type="java.lang.Integer">
+            <column name="num_max_refinanciacion" />
+        </property>
+        <set name="TRegistroPrestamos" inverse="true">
+            <key>
+                <column name="idtipocredito" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TRegistroPrestamo" />
+        </set>
+    </class>
+</hibernate-mapping>

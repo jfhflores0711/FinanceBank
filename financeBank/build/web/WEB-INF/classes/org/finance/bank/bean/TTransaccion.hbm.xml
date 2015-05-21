@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TTransaccion" table="t_transaccion" schema="public">
+        <id name="idtransaccion" type="string">
+            <column name="idtransaccion" length="41" />
+            <generator class="assigned" />
+        </id>
+        <property name="tipoOperacion" type="string">
+            <column name="tipo_operacion" length="50" />
+        </property>
+        <property name="monto" type="big_decimal">
+            <column name="monto" precision="20" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" />
+        </property>
+        <property name="idcuenta" type="string">
+            <column name="idcuenta" length="41" />
+        </property>
+        <property name="userLogin" type="string">
+            <column name="user_login" length="50" />
+        </property>
+        <property name="nombreReferencia" type="string">
+            <column name="nombre_referencia" length="200" />
+        </property>
+        <property name="apellidoReferencia" type="string">
+            <column name="apellido_referencia" length="200" />
+        </property>
+        <property name="numeroCheque" type="string">
+            <column name="numero_cheque" length="20" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" />
+        </property>
+        <property name="saldo" type="big_decimal">
+            <column name="saldo" precision="20" />
+        </property>
+    </class>
+</hibernate-mapping>

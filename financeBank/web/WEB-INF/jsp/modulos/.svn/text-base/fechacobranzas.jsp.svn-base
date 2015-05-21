@@ -1,0 +1,774 @@
+<%-- 
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : Oscar
+--%>
+<%@page session="true" import="org.finance.bank.util.*,org.finance.bank.model.*,java.util.*, java.math.*, org.finance.bank.model.dao.DAOGeneral"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title><%=(DateUtil.getDateTime("yyyymmddhhmmssS", new Date()))%>|financeBank! </title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href="css/francesGral.css" rel="stylesheet" type="text/css" media="All">
+        <link href="css/francesScreen.css" rel="stylesheet" type="text/css" media="screen">
+        <link href="css/francesPrint.css" rel="stylesheet" type="text/css" media="print">
+        <script type="text/javascript">
+            if (history.forward(1)){location.replace(history.forward(1))}
+        </script>
+        <script type="text/javascript">
+            var ventana_secundaria;
+            function abrirVentanac(){
+                ventana_secundaria = window.open("contrato.htm?contrato_postback=1&contratoGen="+document.getElementById("contratoGen").value,"contrato","width=800,height=840,menubar=yes,resizable=yes,scrollbars=yes,status=yes");
+                document.getElementById("contrato2").disabled=false;
+                document.getElementById("sinContrato").disabled=true;
+            }
+            function cerrarVentanac(){
+                //la referencia de la ventana es el objeto window del popup. Lo utilizo para acceder al método close
+                if(ventana_secundaria)
+                    ventana_secundaria.close()
+            }
+        </script>
+        <script type="text/javascript">
+            function printDes(){
+                window.open("comprobantePrestamo.htm?mensaje=ok", "ticketp", "width=900,height=600,menubar=yes,resizable=yes,scrollbars=yes,status=yes")
+            }
+        </script>
+        <script type="text/javascript">
+            <!-- //
+            function contratos(){
+                document.getElementById('contrato').disabled=!document.getElementById('contrato').disabled;
+                if(!document.getElementById('contrato').disabled){
+                    document.getElementById('habilitar').style.display='none';
+                    document.getElementById('inhabilitar').style.display='block';
+                }else{
+                    document.getElementById('habilitar').style.display='block';
+                    document.getElementById('inhabilitar').style.display='none';
+                }
+            }
+            //-->
+        </script>
+        <script type="text/javascript">
+            <!-- //
+            function formatCurrency(num) {
+                num = num.toString().replace(/\$|\,/g,'');
+                if(isNaN(num)) num = "0";
+                cents = Math.floor((num*100+0.5)%100);
+                num = Math.floor(num).toString();
+                if(cents < 10) cents = "0" + cents;
+                for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+                    num = num.substring(0,num.length-(4*i+3))+','+num.substring(num.length-(4*i+3));
+                return (num + '.' + cents);
+            }
+            // -->
+        </script>
+        <script type="text/javascript">
+            function letras(c,d,u){
+                var centenas,decenas,decom;
+                var lc="";var ld="";var lu="";
+                centenas=eval(c);decenas=eval(d);decom=eval(u);
+                switch(centenas){
+                    case 0: lc="";break;
+                    case 1:
+                        if (decenas==0 && decom==0)
+                            lc="Cien";
+                        else
+                            lc="Ciento ";
+                        break;
+                    case 2: lc="Doscientos ";break;
+                    case 3: lc="Trescientos ";break;
+                    case 4: lc="Cuatrocientos ";break;
+                    case 5: lc="Quinientos ";break;
+                    case 6: lc="Seiscientos ";break;
+                    case 7: lc="Setecientos ";break;
+                    case 8: lc="Ochocientos ";break;
+                    case 9: lc="Novecientos ";break;
+                }
+                switch(decenas){
+                    case 0: ld="";break;
+                    case 1:switch(decom){
+                    case 0:ld="Diez";break;
+                    case 1:ld="Once";break;
+                    case 2:ld="Doce";break;
+                    case 3:ld="Trece";break;
+                    case 4:ld="Catorce";break;
+                    case 5:ld="Quince";break;
+                    case 6:ld="Dieciseis";break;
+                    case 7:ld="Diecisiete";break;
+                    case 8:ld="Dieciocho";break;
+                    case 9:ld="Diecinueve";break;
+                }
+                break;
+            case 2:ld="Veinte";break;
+            case 3:ld="Treinta";break;
+            case 4:ld="Cuarenta";break;
+            case 5:ld="Cincuenta";break;
+            case 6:ld="Sesenta";break;
+            case 7:ld="Setenta";break;
+            case 8:ld="Ochenta";break;
+            case 9:ld="Noventa";break;
+        }
+        switch(decom){
+            case 0: lu="";break;
+            case 1: lu="Un";break;
+            case 2: lu="Dos";break;
+            case 3: lu="Tres";break;
+            case 4: lu="Cuatro";break;
+            case 5: lu="Cinco";break;
+            case 6: lu="Seis";break;
+            case 7: lu="Siete";break;
+            case 8: lu="Ocho";break;
+            case 9: lu="Nueve";break;
+        }
+        if (decenas==1){
+            return lc+ld;
+        }
+        if (decenas==0 || decom==0){
+            return lc+" "+ld+lu;
+        }
+        else{
+            if(decenas==2){
+                ld="Veinti";
+                return lc + ld + lu.toLowerCase();
+            }else{
+                return lc+ld+" y "+lu
+            }
+        }
+    }
+    function getNumberLiteral(n){
+        var m0,cm,dm,um,cmi,dmi,umi,ce,de,un,hlp,decimal;
+        if (isNaN(n)) {
+            alert("La Cantidad debe ser un valor Numérico.");
+            return null
+        }
+        m0= parseInt(n/ 1000000000000); rm0=n% 1000000000000;
+        m1= parseInt(rm0/100000000000); rm1=rm0%100000000000;
+        m2= parseInt(rm1/10000000000); rm2=rm1%10000000000;
+        m3= parseInt(rm2/1000000000); rm3=rm2%1000000000;
+        cm= parseInt(rm3/100000000); r1= rm3%100000000;
+        dm= parseInt(r1/10000000); r2= r1% 10000000;
+        um= parseInt(r2/1000000); r3= r2% 1000000;
+        cmi=parseInt(r3/100000); r4= r3% 100000;
+        dmi=parseInt(r4/10000); r5= r4% 10000;
+        umi=parseInt(r5/1000); r6= r5% 1000;
+        ce= parseInt(r6/100); r7= r6% 100;
+        de= parseInt(r7/10); r8= r7% 10;
+        un= parseInt(r8/1);
+        //r9=r8%1;//999123456789
+        if (n< 1000000000000 && n>=1000000000){
+            tmp=n.toString();
+            s=tmp.length;
+            tmp1=tmp.slice(0,s-9);
+            tmp2=tmp.slice(s-9,s);
+            tmpn1=getNumberLiteral(tmp1);
+            tmpn2=getNumberLiteral(tmp2);
+            if(tmpn1.indexOf("Un")>=0)
+                pred=" Billón ";
+            else
+                pred=" Billones ";
+            return tmpn1+ pred +tmpn2;
+        }
+        if (n<10000000000 && n>=1000000){
+            mldata=letras(cm,dm,um);
+            hlp=mldata.replace("Un","*");
+            if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                mldata=mldata.replace("Uno","un");
+                mldata+=" Millones ";
+            } else {
+                mldata="Un Millón ";
+            }
+            mdata=letras(cmi,dmi,umi);
+            cdata=letras(ce,de,un);
+            if(mdata!="	"){
+                if (n == 1000000) {
+                    mdata=mdata.replace("Uno","un") + "de";
+                } else {
+                    mdata=mdata.replace("Uno","un")+" mil ";
+                }
+            }
+            return (mldata+mdata+cdata);
+        }
+        if (n<1000000 && n>=1000){
+            mdata=letras(cmi,dmi,umi);
+            cdata=letras(ce,de,un);
+            hlp=mdata.replace("Un","*");
+            if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                mdata=mdata.replace("Uno","un");
+                return (mdata +" mil "+cdata);
+            }
+            else
+                return ("Mil "+ cdata);
+        }
+        if (n<1000 && n>=1){
+            return (letras(ce,de,un));
+        }
+        if (n==0){
+            return " Cero";
+        }
+        return "No disponible"
+    }
+        </script>
+        <%
+                    PrestamoUtil calc = new PrestamoUtil();
+                    TCuentaPersona tcuentaPrestamo = null;
+                    TTipoOperacion ttOperacion = null;
+                    TMoneda tmoneda = null;
+                    TPersonaCaja tpCaja = null;
+                    TRegistroPrestamo tregPrestamo = null;
+                    TContrato tcontrato = null;
+                    TDetallePrestamo tdetPrestamo = null;
+                    String tmp;
+                    /**Para responder reenvíos desde un refresh anterior*/
+                    String moneda = null; /*Moneda, sólo con fines de validacion, no se necesita, ya que se carga a traves de la cuenta persona*/
+                    //String mora = null;/*tasa de moras siempre es necesario guardar*/
+                    String submited = null;/*Para responder a la petición de cargar toda la transacion y finalizar la operacion*/
+                    String monto = null;/*Monto total que se incluye en e prestamo.*/
+                    String numCtaCte = null;/*Cuenta Corriente*/
+                    String tasaInteres = null;
+                    /**Tasa en porcentaje, es muy importante que sean el porcentaje*/
+                    String tasaMora = null;/*Tasa de moras que se aplica sólo cuando venza el plazo del pago de las cuotas.*/
+                    String tasaSEGDES = null;/*Tasa de Seguro de desgravamen de las cuotas.*/
+                    String tasaCOM = null;/*Tasa de comision que se aplica al pago de las cuotas.*/
+                    String tasaITF = null;/*Tasa de ITF que se aplica sólo al pago de las cuotas.*/
+                    String periodo = null;
+                    String plazoMeses = null;/*Plazo convertido a meses*/
+                    //carga de valores iniciales.
+                    calc.setReset();
+                    calc.setPanel_to_show("panel1");
+                    tmp = request.getParameter("xl_postback");
+                    submited = request.getParameter("xl_submit_bottom");
+                    if (tmp != null) {
+                        /* not first time */
+                        calc.setPanel_to_show(request.getParameter("xl_sheet_no"));
+                        /*if (request.getParameter("xl_update_top") != null || request.getParameter("xl_update_bottom") != null || request.getParameter("xl_submit_top") != null || request.getParameter("xl_submit_bottom") != null) {*/
+                        if (submited != null) {
+                            /* it wasn't a reset */
+                            monto = request.getParameter("XLEW_1_1_2");
+                            if (monto != null) {
+                                calc.setXLEW_1_1_2(DateUtil.eeparseFloatTh(monto));
+                            }
+                            plazoMeses = request.getParameter("XLEW_1_2_2");
+                            if (plazoMeses != null) {
+                                calc.setXLEW_1_2_2(DateUtil.eeparseFloat(plazoMeses));
+                            }
+                            tasaInteres = request.getParameter("XLEW_1_3_2");
+                            if (tasaInteres != null) {
+                                calc.setXLEW_1_3_2(DateUtil.eeparsePercent(tasaInteres + "%"));
+                            } else {
+                                tasaInteres = "0.00";
+                            }
+                            moneda = request.getParameter("MONEDA");
+                            tasaMora = request.getParameter("MORA");
+                            if (tasaMora == null) {
+                                tasaMora = "0.00";
+                            }
+                            tasaSEGDES = request.getParameter("SEGDES");
+                            if (tasaSEGDES == null) {
+                                tasaSEGDES = "0.00";
+                            }
+                            tasaCOM = request.getParameter("COM");
+                            if (tasaCOM == null) {
+                                tasaCOM = "0.00";
+                            }
+                            tasaITF = request.getParameter("ITF");
+                            if (tasaITF == null) {
+                                tasaITF = "0.00";
+                            }
+                            periodo = request.getParameter("periodo");
+                            if (periodo == null) {
+                                periodo = "30";
+                            }
+                            numCtaCte = request.getParameter("cuentaCte");
+                            /*guardar datos TRegistroPrestamo, TDetallePrestamo y en TOperacion*/
+                            /**
+                             * En el request recibir además los siguientes valores...
+                             * TOperacion: idOperacion=GENERADO/descripcion='Prestamo'/
+                             * fecha=HOY('yyyy/MM/dd HH24:mm:ss')/idUserPK=IDPERSONA/
+                             * codigoTipoOperacion=IDTIPOOPERACION/codigoMoneda=IDMONEDA/
+                             * codigoCaja=IDCAJA/estado='ACTIVO'/idUser=SESSION('ID')/ipUser=SESSION('IP')/
+                             * dateUser=HOY('yyyy/MM/dd HH24:mm:ss')/numeroOperacion=NUEVONUMERO;
+                             * GENERADO: codigo de 20 caracteres, dependiendo del tiempo.
+                             * IDPERSONA: request, después de recibir, cargar TPersona, no obligatorio;
+                             * IDTIPOOPERACION: obtener a partir TTipoOperacion cargado por cod 'TIPC6'
+                             * IDMONEDA: request, obtener desde la base de datos buscando por su nombre.
+                             * IDCAJA: obtener a partir de la SESSION ('IDUSER') cargando un TPersona y con el id, cargar el TPersonaCaja y luego se obtiene el idCaja
+                             * SESSION('ID'): idPersona, quien está en la sesion actual como cajero.
+                             * SESSION('IP'): Idem,.
+                             * NUEVONUMERO: numero del día que se busca con formato 'yyyyMMdd' y suma uno a la operación, válido para imprimir en las boletas.
+                             * Ahora,
+                             * TRegistroPrestamo:idPrestamo=GENERADO/Monto=MONTO/fecha=HOY('yyyy/MM/dd HH24:mm:ss')/
+                             * numeroCuotas=PLAZO/interesPrestamo=TASAANUAL/interesMoratoria=TASAMORATORIA/
+                             * idOperacion=CURRENTOPERACION/idCuentaPersona=IDCUENTA/idUser=SESSION('ID')/ipUser=SESSION('IP')/
+                             * dateUser=HOY('yyyy/MM/dd HH24:mm:ss');
+                             * GENERADO: Idem,.
+                             * MONTO: request, monto que se debe formatear.
+                             * PLAZO: request, dato que representa los meses.
+                             * TASAANUAL: request, Tasa de interés del prestamo.
+                             * TASAMORATORIA: request, Tasa de moras del prestamo.
+                             * CURRENTOPERACION: idOperacion actual.
+                             * TDetallePrestamo AS ALL-IN: idDetallePrestamo=GENERADO/numeroCuota=GENERADO/montoCapital=CALCULADO(
+                             * montoTotal=CALCULADO/fechaPago=CALCULADO/interesPrestamo=CALCULADO/interesMoratorio=RECALCULADO/
+                             * idPrestamo=CURRENTPRESTAMO/idUser=SESSION('ID')/ipUser=SESSION('IP')/
+                             * dateUser=HOY('yyyy/MM/dd HH24:mm:ss');
+                             * CALCULADO: calculo a partir de los datos del TPrestamo
+                             * RECALCULADO: calculo en el tiempo, segun el cronograma de vencimientos.
+                             * y commit.
+                             */
+                        }
+                    } else {
+                        if (response.isCommitted()) {
+                            out.println("<script language='JavaScript' type='text/javascript'>var pagina='" + request.getContextPath() + "/principal.htm'; "
+                                    + "function redireccionar() {location.href=pagina;} setTimeout ('redireccionar()', 50);</script>");
+                        } else {
+                            response.sendRedirect("principal.htm");
+                        }
+                        if (session.getAttributeNames().hasMoreElements()) {
+                            session.invalidate();
+                        }
+                    }
+        %>
+        <style type="text/css">
+            #content{ width:1100px; }
+            #sidebar{ width:200px; }
+            #main{ width:900px; }
+        </style>
+    </head>
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "8");
+        %>
+        <%
+                    if (moneda == null) {
+                        response.sendRedirect("prestamos.htm?mensaje=Seleccione+la+moneda");
+                    } else {
+                        moneda = moneda.trim();
+                        TMoneda mo = (TMoneda) d.load(TMoneda.class, moneda);
+                        moneda = mo.getSimbolo();
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset><legend>&nbsp;</legend>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Cuadro de Amortizacion financeBank</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                var fecha=new Date();
+                var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                        document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="meta">
+                        <p>Casa de cambios Ventura / INVERSIONES VENTURA</p>
+                    </div>
+                    <%
+                                            BigDecimal sa = BigDecimal.ZERO;
+                                            tpCaja = (TPersonaCaja) d.load(TPersonaCaja.class, session.getAttribute("USER_ID_PERSONA_CAJA").toString());
+                                            ttOperacion = (TTipoOperacion) d.load(TTipoOperacion.class, "TIPC6");
+                                            String[] cta = numCtaCte.split(" ");
+                                            List result = d.findAll("from TCuentaPersona where num_cta = '" + cta[0].replace("N", "") + "'");
+                                            Iterator it = result.iterator();
+                                            if (it.hasNext()) {
+                                                tcuentaPrestamo = (TCuentaPersona) it.next();
+                                                tmoneda = tcuentaPrestamo.getTMoneda();
+                                                TCuentaPersona st = (TCuentaPersona) d.load(TCuentaPersona.class, tcuentaPrestamo.getIdcuentapersona());
+                                                sa = st.getSaldo().subtract(BigDecimal.valueOf(calc.getXLEW_1_1_2()));
+                                                st.setSaldo(sa);
+                                                st.setInteres(BigDecimal.ZERO);
+                                                st.setSaldoSinInteres(sa);
+                                                st.setEstado("PRESTAMO");
+                                                d.update();
+                                            }
+                                            String idForInitNewestTable = DateUtil.convertDateId();
+                                            TOperacion operacion = new TOperacion();
+                                            operacion.setIdOperacion(idForInitNewestTable);
+                                            String idprn = PrestamoUtil.nextNumberPrestamo((String) session.getAttribute("USER_CODFILIAL"));
+                                            operacion.setDescripcion(idprn);
+                                            operacion.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                            operacion.setTTipoOperacion(ttOperacion);
+                                            operacion.setTMoneda(tmoneda);
+                                            operacion.setEstado("ACTIVO");
+                                            operacion.setIdUser((String) session.getAttribute("USER_ID"));
+                                            operacion.setIpUser((String) session.getAttribute("USER_IP"));
+                                            operacion.setDateUser(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                            operacion.setTPersonaCaja(tpCaja);
+                                            operacion.setNumeroOperacion(numeroOperacion.getNumber((String) session.getAttribute("USER_CODFILIAL"), (String) session.getAttribute("USER_CODCAJA")));
+                                            operacion.setSaldofinal(sa);
+                                            d.persist(operacion);
+                                            //tr.commit();
+                                            //tr = sess.beginTransaction();
+                                            List r = d.findAll("from TTipoCredito t");
+                                            // Query q= q.list();
+                                            TTipoCredito ttc;
+                                            if (r.size() < 1) {
+                                                //tr = sess.beginTransaction();
+                                                ttc = new TTipoCredito("20100408121623122356", "ESTANDAR", "USER", "IP", "DATE");
+                                                ttc.setDescripcion("ESTANDAR");
+                                                d.persist(ttc);
+                                                //tr.commit();
+                                            }
+                                            //tr = sess.beginTransaction();
+                                            ttc = (TTipoCredito) d.load(TTipoCredito.class, "20100408121623122356");
+                                            tregPrestamo = new TRegistroPrestamo();
+                                            tregPrestamo.setIdprestamo(idForInitNewestTable);
+                                            tregPrestamo.setMonto(BigDecimal.valueOf(calc.getXLEW_1_1_2()));
+                                            tregPrestamo.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                            tregPrestamo.setNumeroCuotas((int) calc.getXLEW_1_2_2());
+                                            tregPrestamo.setInteresPrestamo(BigDecimal.valueOf(calc.getXLEW_1_3_2()));
+                                            tregPrestamo.setInteresMoratorio(BigDecimal.valueOf(DateUtil.eeparseFloat(tasaMora)));
+                                            tregPrestamo.setTOperacion(operacion);
+                                            tregPrestamo.setTCuentaPersona(tcuentaPrestamo);
+                                            tregPrestamo.setIdUser((String) session.getAttribute("USER_ID"));
+                                            tregPrestamo.setIpUser((String) session.getAttribute("USER_IP"));
+                                            tregPrestamo.setEstado("ACTIVO");
+                                            tregPrestamo.setDateUser(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                            tregPrestamo.setSegDesg(tasaSEGDES);
+                                            tregPrestamo.setTea(DateUtil.eedisplayPercentND(PrestamoUtil.calTEA(calc.getXLEW_1_3_2()), 2));
+                                            tregPrestamo.setItf(tasaITF);
+                                            tregPrestamo.setPeriodo("30");
+                                            tregPrestamo.setTTipoCredito(ttc);
+                                            d.persist(tregPrestamo);
+                                            tcontrato = new TContrato();
+                                            tcontrato.setIdcontrato(idForInitNewestTable);
+                                            tcontrato.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                            tcontrato.setNumContrato(PrestamoUtil.nextNumberContrato("0501"));
+                                            tcontrato.setDniRuc(tcuentaPrestamo.getTPersona().getDocIdentidad());
+                                            tcontrato.setNombre(tcuentaPrestamo.getTPersona().getNombre());
+                                            tcontrato.setNombreRep(tcuentaPrestamo.getTPersona().getApellidos());
+                                            tcontrato.setDescripcion(new String("nonurl"));
+                                            tcontrato.setEstado("ACTIVO");
+                                            tcontrato.setTRegistroPrestamo(tregPrestamo);
+                                            d.persist(tcontrato);
+                                            Set tcp = new HashSet();
+                                            tcp.add(tcontrato);
+                                            if (calc.regPrestamo == null) {
+                                                calc.getXLEW_1_5_5();
+                                                calc.getXLEW_1_3_6();
+                                            }
+                                            Set tdp = new HashSet();
+                                            for (int x = 1; x < (((int) Math.round(calc.getXLEW_1_2_2())) + 1); x++) {
+                                                tdetPrestamo = new TDetallePrestamo();
+                                                tdetPrestamo.setIddetalleprestamo(DateUtil.convertDateId());
+                                                tdetPrestamo.setNumeroCuota(BigDecimal.valueOf(x));
+                                                tdetPrestamo.setMontoCapital(BigDecimal.valueOf(Double.parseDouble(calc.regPrestamo[x][2])));
+                                                tdetPrestamo.setMontoTotal(BigDecimal.valueOf(Double.parseDouble(calc.regPrestamo[x][0])));
+                                                tdetPrestamo.setCapitalPendiente(BigDecimal.valueOf(Double.parseDouble(calc.regPrestamo[x][3])));
+                                                tdetPrestamo.setFechaPago(calc.regPrestamo[x][4]);
+                                                tdetPrestamo.setInteresPrestamo(BigDecimal.valueOf(Double.parseDouble(calc.regPrestamo[x][1])));
+                                                tdetPrestamo.setInteresMoratorio(BigDecimal.ZERO);
+                                                tdetPrestamo.setIdUser((String) session.getAttribute("USER_ID"));
+                                                tdetPrestamo.setIpUser((String) session.getAttribute("USER_IP"));
+                                                tdetPrestamo.setDateUser(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+                                                tdetPrestamo.setEstado(new String("PENDIENTE"));
+                                                tdetPrestamo.setComision(tasaCOM);
+                                                tdetPrestamo.setTRegistroPrestamo(tregPrestamo);
+                                                tdp.add(tdetPrestamo);
+                                                d.persist(tdetPrestamo);
+                                            }
+                                            try {
+                                                //TDetalleCaja detaCaja = iniDetalleCaja.detalleActivaCaja((String) session.getAttribute("USER_CODCAJA"), mo.getCodMoneda(), DateUtil.getDate(new Date()));
+                                                TDetalleCaja detaCaja =(TDetalleCaja)d.load(TDetalleCaja.class, DateUtil.getDate(new Date()).replaceAll("/", "") + codcaja + mo.getCodParaNumCuenta() + "00");
+                                                detaCaja.setMontoFinal(detaCaja.getMontoFinal().subtract(tregPrestamo.getMonto()));
+                                                detaCaja.setMontoEntregado(detaCaja.getMontoEntregado().add(tregPrestamo.getMonto()));
+                                                d.update();
+                                                Map ticket = new HashMap();
+                                                double i = Double.valueOf(tregPrestamo.getMonto().doubleValue() * Double.parseDouble(tasaITF));
+                                                double te = tregPrestamo.getMonto().doubleValue() - i;
+                                                ticket.put("RUC", tcuentaPrestamo.getTPersona().getRuc());
+                                                ticket.put("DNI", tcuentaPrestamo.getTPersona().getDocIdentidad());
+                                                ticket.put("TIPOOPERACION", operacion.getTTipoOperacion().getNombre());
+                                                ticket.put("IDOPERACION", operacion.getIdOperacion());
+                                                ticket.put("NUMEROOPERACION", operacion.getNumeroOperacion());
+                                                ticket.put("NUMEROCRED", operacion.getDescripcion());
+                                                ticket.put("CODIGOCAJA", operacion.getTPersonaCaja().getTCaja().getCodCaja());
+                                                ticket.put("FILIAL", operacion.getTPersonaCaja().getTCaja().getTFilial().getNombre());
+                                                ticket.put("MONEDA", tcuentaPrestamo.getTMoneda().getNombre());
+                                                ticket.put("FECHA", operacion.getFecha());
+                                                ticket.put("NOMBRE", tcuentaPrestamo.getTPersona().getNombre());
+                                                ticket.put("APELLIDOS", tcuentaPrestamo.getTPersona().getApellidos());
+                                                String c = tcuentaPrestamo.getNumCta();
+                                                ticket.put("NUMEROCUENTA", c.substring(0, 5) + "-" + c.substring(5, 6) + "-" + c.substring(6));
+                                                ticket.put("CODTIPOCUENTA", tcuentaPrestamo.getTTipoCuenta().getCodigoCuenta());
+                                                ticket.put("TIPOCUENTA", tcuentaPrestamo.getTTipoCuenta().getDescripcion());
+                                                ticket.put("MONTO", CurrencyConverter.formatToMoneyUS(tregPrestamo.getMonto().doubleValue(), 2));
+                                                ticket.put("INTERES", CurrencyConverter.formatToMoneyUS(i, 2));
+                                                ticket.put("SALDO", CurrencyConverter.formatToMoneyUS(tcuentaPrestamo.getSaldo().doubleValue(), 2));
+                                                ticket.put("PP", DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(calc.regPrestamo[1][4])));
+                                                ticket.put("TE", CurrencyConverter.formatToMoneyUS(te, 2));
+                                                session.setAttribute("ticketp", ticket);
+                                            } catch (Exception ex) {
+                                                out.write("<div class='error'>" + ex.toString() + "</div>");
+                                            }
+                    %>
+                    <div class="story">
+                        <form id="formc" name="formc" method="post" action=""><div style="display:none">
+                                <input name="xl_sheet_no" id="xl_sheet_no" type="hidden"
+                                       value="<%=calc.getPanel_to_show()%>"
+                                       >
+                                <input name="xl_postback" id="xl_postback" type="hidden" value="1">
+                            </div>
+                            <div class="eebuttonbar_top">
+                                <input class="eebuttons" type="button" value="Imprimir" name="xl_print_top" onclick="window.print();">
+                            </div>
+                            <div>
+                                <table border="0">
+                                    <tr>
+                                        <td colspan="2" class="ee106">CRONOGRAMA DE PAGOS, CON PERIODO DE <%=periodo%> DÍAS</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="ee130">TASA DE INTERÉS COMPENSATORIA EFECTIVA ANUAL A 360 DÍAS: <%=DateUtil.eedisplayPercentND(Math.pow(1 + calc.getXLEW_1_3_2() / 12, 12) - 1.0D, 2)%> </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="ee130">TASA DE INTERÉS MORATORIA ANUAL: <%=DateUtil.eedisplayPercentND(Math.pow(1 + DateUtil.eeparseFloat(tasaMora) / 1200, 12) - 1.0D, 2)%></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ee130">NOMBRE: <%=(tcuentaPrestamo.getTPersona().getApellidos() + "," + tcuentaPrestamo.getTPersona().getNombre())%></td>
+                                        <td class="ee130">DNI/RUC: <%=(tcuentaPrestamo.getTPersona().getDocIdentidad() + (tcuentaPrestamo.getTPersona().getTCategoriaPersona().getDescripcion() == "JURIDICA" ? "/" + tcuentaPrestamo.getTPersona().getRuc() : ""))%></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ee130">CUENTA: <%=(tcuentaPrestamo.getNumCta())%></td>
+                                        <td>DIVISION DE CUOTAS: MENSUAL</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ee130" colspan="2">SON: <%=(NumberUtil.convertirLetrasDecimal(calc.getXLEW_1_1_2()).toUpperCase())%>  <%=("NUEVO SOL" == mo.getNombre() ? " NUEVOS SOLES" : ("DOLAR" == mo.getNombre() ? " DOLARES AMERICANOS" : ("EURO" == mo.getNombre() ? " EUROS" : mo.getNombre())))%></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <hr>
+                            <div id="panel1" style='display:<%= (calc.getPanel_to_show().equals("panel1")) ? "block" : "none"%>'>
+                                <table style='border-collapse:collapse' border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+                                    <col width="78.00" /><col width="130.00" /><col width="120.00" /><col width="115.00" /><col width="135.00" /><col width="244.00" /><col width="1.00" />
+                                    <tr style='height:17pt'>
+                                        <td class='ee100'>Desembolso:</td>
+                                        <td class='ee106'><%=moneda%> <%=CurrencyConverter.formatToMoneyUS(calc.getXLEW_1_1_2(), 2).replace(",", " ")%>
+                                        </td>
+                                        <td class='ee100'>
+                                            Tasa Mensual
+                                        </td>
+                                        <td class='ee106'>
+                                            <%=DateUtil.eedisplayPercentND(calc.getXLEW_1_1_4(), 4)%>
+                                        </td>
+                                        <td class='ee100'>
+                                            Fecha hoy:
+                                        </td>
+                                        <td class='ee106'>
+                                            <%=DateUtil.eedatefmt(DateUtil.fmtdate13, DateUtil.today())%>
+                                        </td>
+                                        <td class='ee100'>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                    <tr style='height:13pt'>
+                                        <td class='ee100'>
+                                            Plazo :
+                                        </td>
+                                        <td class='ee109'><%=DateUtil.eedisplayFloat(calc.getXLEW_1_2_2())%> meses
+                                        </td>
+                                        <td class='ee100'>
+                                            Pago mensual:
+                                        </td>
+                                        <td class='ee106'><%=moneda%>
+                                            <%=CurrencyConverter.formatToMoneyUS(calc.getXLEW_1_2_4(), 2).replace(",", " ")%>
+                                        </td>
+                                        <td class='ee100'>
+                                            Fecha Primer pago:
+                                        </td>
+                                        <td class='ee111'>
+                                            <%=(calc.eedatefmt(calc.fmtdate9, calc.getXLEW_1_2_6()).replace(",", ""))%>
+                                        </td>
+                                        <td class='ee100'>&nbsp;</td>
+                                    </tr>
+                                    <tr style='height:14pt'>
+                                        <td class='ee100'>
+                                            TEA:
+                                        </td>
+                                        <td class='ee114'><%=DateUtil.eedisplayPercentND(Math.pow(1 + calc.getXLEW_1_3_2() / 12, 12) - 1.0D, 2)%>
+                                        </td>
+                                        <td class='ee100'>
+                                            Meses :
+                                        </td>
+                                        <td class='ee106'>
+                                            <%=DateUtil.eedisplayFloat(calc.getXLEW_1_3_4())%> meses
+                                        </td>
+                                        <td class='ee100'>
+                                            VIGENCIA:
+                                        </td>
+                                        <td class='ee111'>
+                                            <%=(calc.eedatefmt(calc.fmtdate9, calc.getXLEW_1_3_6()).replace(",", ""))%>
+                                        </td>
+                                        <td class='ee100'>&nbsp;</td>
+                                    </tr>
+                                </table><table>
+                                    <tr style='height:14pt'>
+                                        <td class='ee115'>
+                                            Mes cuota
+                                        </td>
+                                        <td class='ee118'>
+                                            Cuota Mensual
+                                        </td>
+                                        <td class='ee115'>
+                                            Intereses
+                                        </td>
+                                        <td class='ee115'>
+                                            Amortizacion
+                                        </td>
+                                        <td class='ee115'>
+                                            Capital Pendiente
+                                        </td>
+                                        <td class='ee115'>
+                                            Vencimiento:
+                                        </td>
+                                        <td class='ee100'>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                    <%
+                                                            if (calc.regPrestamo != null) {
+                                                                double[] tt = {0D, 0D, 0D};
+                                                                for (int x = 0; x < (((int) Math.round(calc.getXLEW_1_2_2())) + 1); x++) {
+                                                                    if (x == 0) {
+                                                                        out.write("<tr style='height:13pt'><td class='ee131'>");
+                                                                        out.write(calc.regPrestamo[x][0]);
+                                                                        out.write("</td><td class='ee120' colspan='3'>");
+                                                                        out.write(calc.regPrestamo[x][1]);
+                                                                        out.write("</td><td class='ee126'>");
+                                                                        out.write(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][3].replace(" ", "")), 2).replace(",", " "));
+                                                                        out.write("</td><td class='ee126'>");
+                                                                        out.write(DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(calc.regPrestamo[x][4])));
+                                                                        out.write("</td><td class='ee100'>&nbsp;</td></tr>");
+                                                                    } else {
+                                                                        out.write("<tr style='height:13pt'><td class='ee131'>");
+                                    %>
+                                    <%=x%>
+                                    <%
+                                                                                                            out.write("</td><td class='ee131'>");
+                                                                                                            tt[0] += Double.parseDouble(calc.regPrestamo[x][0]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][0]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                            out.write("</td><td class='ee119'>");
+                                                                                                            tt[1] += Double.parseDouble(calc.regPrestamo[x][1]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][1]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                            out.write("</td><td class='ee119'>");
+                                                                                                            tt[2] += Double.parseDouble(calc.regPrestamo[x][2]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][2]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                            out.write("</td><td class='ee119'>");
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][3]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                            out.write("</td><td class='ee130'>");
+                                    %>
+                                    <%=(DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(calc.regPrestamo[x][4])))%>
+                                    <%
+                                                                        out.write("</td><td class='ee100'>&nbsp;</td></tr>");
+                                                                    }
+                                                                }
+                                                                out.write("<tr style='height:13pt'><td class='ee103'>");
+                                                                out.write("TOTAL:");
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[0], 2));
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[1], 2));
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[2], 2));
+                                                                out.write("</td><td class='ee103'>------");
+                                                                out.write("</td><td class='ee103'>------</td><td>&nbsp;</td></tr>");
+                                                            }
+                                    %>
+                                </table></div><br><hr>
+                            <div class="cl">
+                                <p>AMIGO CLIENTE, UD. PUEDE CANCELAR SUS CUOTAS EN CUALQUIERA DE NUESTRAS OFICINAS, PARA LO CUAL DEBE TENER LA CONSIDERACIÓN DEL COBRO DE UNA COMISIÓN, QUE ES DE 1.5% DEL MONTO APROBADO AL MOMENTO DEL DESEMBOLSO.</p>
+                                <p style="font-weight:bold">SI UD. TUVIERA ALGÚN RECLAMO Y/O DENUNCIA SOBRE NUESTROS SERVICIOS, REALÍCELO EN PRIMERA INSTANCIA A TRAVÉS DE NUESTRAS OFICINAS DE ATENCIÓN AL CLIENTE Y/O NUESTRA PÁGINA WEB. LA SBS E
+                                    INDECOPI, REPRESENTAN LA SEGUNDA INSTANCIA DE RESOLUCIÓN DE RECLAMOS AL QUE PUEDA RECURRIR.</p></div>
+                            <div class="eebuttonbar_bottom">
+                                <input class="eebuttons" type="button" value="Imprimir" name="xl_print_bottom" onclick="window.print();">
+                                <input class="eebuttons" type="button" value="Imprimir Comprobante" name="xl_bottom" onclick="printDes();">
+                                <span style="margin-left:1px;"> Disfrute el préstamo! </span>
+                            </div>
+                            <script language="javascript" type="text/javascript">
+                        function reset_onclick(x){
+                            document.formc.reset();
+                            postcode();
+                        }
+                        function postcode(){};
+                        function eequerystring(){
+                            var querystring=document.location.search;
+                            if(querystring.length>0){
+                                variables=(querystring.substring(1)).split("&");
+                                var variable;
+                                var key;
+                                var value;
+                                for(var ii=0;ii<variables.length;ii++){
+                                    variable=variables[ii].split("=");
+                                    key=unescape(variable[0]);
+                                    value=unescape(variable[1]);
+                                    if(document.formc[key]!=null){
+                                        document.formc[key].value=value;
+                                    }
+                                }
+                            }
+                        }
+                        function initial_update(){
+                            postcode('');
+                            eequerystring();
+                        }
+                            </script>
+                        </form>
+                    </div>
+                </div>
+                <div id="conContrato">
+                    <blockquote>
+                        <blockquote>
+                            <blockquote>
+                                <blockquote>
+                                    <blockquote>
+                                        <form name="form1" method="post" action="">
+                                            <input type="checkbox" id="sinContrato" name="sinContrato" value="" onclick="contratos();" >
+                                            <p id="habilitar">Habilitar contrato.</p><p id="inhabilitar" style="display:none;">Inhabilitar contrato.</p><br />
+                                            <span>
+                                                <input type="button" id="contrato" name="abrirContrato" value="Contrato" disabled onclick="abrirVentanac();">
+                                                <input name="cerrarContrato" id="contrato2" type="button" disabled onClick="cerrarVentanac();this.disabled=true" value="Cerrar Contrato">
+                                            </span>
+                                            <input type="hidden" id="contratoGen" name="contratoGen" value="<%=tcontrato.getIdcontrato()%>">
+                                        </form>
+                                        <p>&nbsp;</p>
+                                    </blockquote>
+                                </blockquote>
+                            </blockquote>
+                        </blockquote>
+                    </blockquote>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+        <%
+                    }
+        %>
+
+        <%@include file="../common/footer.jsp" %>
+        <noscript>The browser does not support JavaScript. The calculations created using financeBank will not work. Please access the web page using another browser.<p></p></noscript>
+    </body>
+</html>

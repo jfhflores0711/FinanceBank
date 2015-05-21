@@ -1,0 +1,548 @@
+/* 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+function clean(er){
+    this.document.getElementById(er+'idpersona').value="";
+    this.document.getElementById(er+'ruc').value="";
+    this.document.getElementById(er+'dni').value="";
+    this.document.getElementById(er+'nombres').value="";
+    this.document.getElementById(er+'apellidos').value="";
+    this.document.getElementById(er+'email').value="";
+    this.document.getElementById(er+'ubigeo').value="";
+    this.document.getElementById(er+'telefono').value="";
+    this.document.getElementById(er+'celular').value="";
+    this.document.getElementById(er+'direccion').value="";
+
+}
+function natural(er){
+    clean(er)
+    this.document.getElementById(er+'ruc').disabled=true;
+    this.document.getElementById(er+'tr_dni').style.visibility='';
+    this.document.getElementById(er+'td_nombres').style.display='';
+    this.document.getElementById(er+'td_razonsocial').style.display='none';
+    this.document.getElementById(er+'tr_apellidos').style.visibility='';
+    this.document.getElementById(er+'tr_ubigeo').style.visibility='';
+    this.document.getElementById(er+'tr_dni').style.visibility='';
+    this.document.getElementById(er+'tr_dni').style.visibility='';
+
+}
+function juridica(er){
+    this.document.getElementById(er+'ruc').disabled='';
+    clean(er)
+    this.document.getElementById(er+'tr_dni').style.visibility='hidden';
+    this.document.getElementById(er+'td_nombres').style.display='none';
+    this.document.getElementById(er+'td_razonsocial').style.display='';
+    this.document.getElementById(er+'tr_apellidos').style.visibility='hidden';
+    this.document.getElementById(er+'tr_ubigeo').style.visibility='hidden';
+    this.document.getElementById(er+'tr_dni').style.visibility='hidden';
+    this.document.getElementById(er+'tr_dni').style.visibility='hidden';
+}
+function buscarpersona(er){
+    ///clean(er);
+
+    var dni = document.getElementById(er+"dni").value;
+    var ruc = document.getElementById(er+"ruc").value;
+    //alert('ruc ='+ruc);
+
+    if(er=='R'){
+        var j
+        for (j=0;j<document.f1.Rcategoria.length;j++){
+            if (document.f1.Rcategoria[j].checked)
+                break;
+        }
+        var categoria = document.f1.Rcategoria[j].value;
+    } else{
+        this.document.getElementById('detalle_cuenta').innerHTML="";
+        //cambiarde tamaño el div
+        this.document.getElementById('grupo').value="";
+        var j
+        for (j=0;j<document.f1.Ecategoria.length;j++){
+            if (document.f1.Ecategoria[j].checked)
+                break;
+        }
+        var categoria = document.f1.Ecategoria[j].value;
+    }
+    req2 = false;
+    if (window.XMLHttpRequest) {
+        req2 = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject) {
+        req2 = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    if(req2!=null){
+        var PATH = "<%= request.getContextPath()%>";
+        var url = PATH + "/Sbuscarpersona?dni="+dni+"&categoria="+categoria+"&er="+er+"&ruc="+ruc;
+        req2.open("GET",url,true);
+        req2.onreadystatechange = procesarRespuesta2;
+        req2.send(null);
+
+    }
+}
+function procesarRespuesta2(){
+
+    //alert('dentro de la funcion procesra respuesta')
+    contenido = document.getElementById('detalle');
+
+    contenido.innerHTML="Cargando los datos...";
+
+
+    if (req2.readyState==4 && req2.status==200) {
+        //mostrar resultados en esta capa
+        ///contenido.innerHTML
+        var values = new Array();
+        var names;
+
+        contenido.innerHTML = req2.responseText;
+        //document.getElementById("nombres").value=document.getElementById('detalle').innerHTML;
+        var params = document.getElementById('detalle').innerHTML.split('-');
+        for(i=0; i<params.length; i++) {
+
+            names = params[i].split('=');
+            values[names[0]] = names[1];
+            document.getElementById(names[0]).value= names[1];
+        }
+
+    /*if(document.getElementById('Eidpersona').value!=null && document.getElementById('Eidpersona').value!=""){
+                        detalleEmisor()
+                    }*/
+
+    }
+}
+
+function currencyFormat(fld, milSep, decSep, e) {
+    var key = '';
+    var i =0, j = 0;
+    var len =0, len2 = 0;
+    var strCheck = '0123456789';
+    var aux =0, aux2 = '';
+    var whichCode = (window.Event) ? e.which : e.keyCode;
+
+    if (whichCode == 13) return true;  // Enter
+    if (whichCode == 8) return true;  // Delete
+    key = String.fromCharCode(whichCode);  // Get key value from key code
+    if (strCheck.indexOf(key) == -1) return false;  // Not a valid key
+    len = fld.value.length;
+    if(len==0){
+        return '0.00';
+    }
+    for(i = 0; i < len; i++)
+        if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+    aux = '';
+    for(; i < len; i++)
+        if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+    aux += key;
+    len = aux.length;
+    if (len == 0) fld.value = '';
+    if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+    if (len == 2) fld.value = '0'+ decSep + aux;
+    if (len > 2) {
+        aux2 = '';
+        for (j = 0, i = len - 3; i >= 0; i--) {
+            if (j == 3) {
+                aux2 += milSep;
+                j = 0;
+            }
+            aux2 += aux.charAt(i);
+            j++;
+        }
+        fld.value = '';
+        len2 = aux2.length;
+        for (i = len2 - 1; i >= 0; i--)
+            fld.value += aux2.charAt(i);
+        fld.value += decSep + aux.substr(len - 2, len);
+    }
+    return false;
+}
+
+function currencyFormat2(fld, milSep, decSep) {
+    var key = '';
+    var i =0, j = 0;
+    var len =0, len2 = 0;
+    var strCheck = '0123456789';
+    var aux = '',aux2 = '';
+    len = fld.length;
+    if(len==0){
+        return '0.00';
+    }
+    for(i = 0; i < len; i++)
+        if ((fld.charAt(i) != '0') && (fld.charAt(i) != decSep)) break;
+    aux = '';
+    for(; i < len; i++)
+        if (strCheck.indexOf(fld.charAt(i))!=-1) aux += fld.charAt(i);
+    aux += key;
+    len = aux.length;
+    if (len == 0) fld = '';
+    if (len == 1) fld = '0'+ decSep + '0' + aux;
+    if (len == 2) fld = '0'+ decSep + aux;
+    if (len > 2) {
+        aux2 = '';
+        for (j = 0, i = len - 3; i >= 0; i--) {
+            if (j == 3) {
+                aux2 += milSep;
+                j = 0;
+            }
+            aux2 += aux.charAt(i);
+            j++;
+        }
+        fld = '';
+        len2 = aux2.length;
+        for (i = len2 - 1; i >= 0; i--)
+            fld += aux2.charAt(i);
+        fld += decSep + aux.substr(len - 2, len);
+    //alert('fld ='+fld+' len ='+len)
+    }
+    return fld;
+}
+
+function procesar() {
+
+    /***********DATOS EMISOR ***************/
+    var j
+    for (j=0;j<document.f1.Ecategoria.length;j++){
+        if (document.f1.Ecategoria[j].checked)
+            break;
+    }
+    var categoria_e = document.f1.Ecategoria[j].value;
+    var idpersona_e = document.getElementById('Eidpersona').value;
+    var dni_e = document.getElementById("Edni").value;
+    var ruc_e = document.getElementById("Eruc").value;
+    var nombres_e = document.getElementById("Enombres").value;
+    var apellidos_e = document.getElementById("Eapellidos").value;
+    var email_e = document.getElementById("Eemail").value;
+    var ubigeo_e = document.getElementById("Eubigeo").value;
+    var telefono_e = document.getElementById("Etelefono").value;
+    var celular_e = document.getElementById("Ecelular").value;
+    var direccion_e = document.getElementById("Edireccion").value;
+
+    /***********DATOS RECEPTOR ***************/
+
+    var k
+    for (k=0;k<document.f1.Rcategoria.length;k++){
+        if (document.f1.Rcategoria[k].checked)
+            break;
+    }
+    var categoria_r = document.f1.Rcategoria[k].value;
+    var idpersona_r = document.getElementById('Ridpersona').value;
+    var dni_r = document.getElementById("Rdni").value;
+    var ruc_r = document.getElementById("Rruc").value;
+    var nombres_r = document.getElementById("Rnombres").value;
+    var apellidos_r = document.getElementById("Rapellidos").value;
+    var email_r = document.getElementById("Remail").value;
+    var ubigeo_r = document.getElementById("Rubigeo").value;
+    var telefono_r = document.getElementById("Rtelefono").value;
+    var celular_r = document.getElementById("Rcelular").value;
+    var direccion_r = document.getElementById("Rdireccion").value;
+    /***************DATOS DEL GIRO**************************/
+    var importe =document.getElementById("monto").value;
+    if(importe==""){
+        importe="0";
+    }
+    else{
+        importe = importe.replace(/,/gi, "")
+        }
+
+    var j0
+    for (j0=0;j<document.f1.forpago.length;j0++){
+        if (document.f1.forpago[j0].checked)
+            break;
+    }
+    var fpago_importe = document.f1.forpago[j0].value;
+
+    var j1
+    for (j1=0;j1<document.f1.usuariop.length;j1++){
+        if (document.f1.usuariop[j1].checked)
+            break;
+    }
+    var pagador_comision = document.f1.usuariop[j1].value;
+
+    var comision = document.getElementById('div_comision').innerHTML
+    if(comision==""){
+        comision=0;
+    }
+    else{
+        comision = comision.replace(/,/gi, "")
+        }
+
+    var j2
+    for (j2=0;j2<document.f1.formap.length;j2++){
+        if (document.f1.formap[j2].checked)
+            break;
+    }
+    var fpago_comision = document.f1.formap[j2].value;
+    var cod_moneda = document.f1.moneda[document.f1.moneda.selectedIndex].value;
+    var cod_filial = document.f1.filial_recepcion[document.f1.filial_recepcion.selectedIndex].value;
+    var  idcuentapersona =0;
+
+    if(document.f1.cuenta!=null && fpago_importe =="CUENTA"){
+        var i1 =0
+
+        for (i1=0;i1<document.f1.cuenta.length;i1++){
+            if (document.f1.cuenta[i1].checked)
+                break;
+        }
+
+        if(i1==document.f1.cuenta.length){
+            idcuentapersona=-1
+            }
+        else{
+            if(document.f1.cuenta.length==null){
+                idcuentapersona= document.f1.cuenta.value;
+            }else{
+                idcuentapersona= document.f1.cuenta[i1].value;
+            }
+        }
+
+    }
+    // var caja = document.fDetalle.caja[document.fDetalle.caja.selectedIndex].value;
+    if(importe==0){
+        alert("¡¡EL MONTO A GIRAR DEBE SER MAYO A CERO!!")
+    }else{
+        if(idcuentapersona==-1){
+            alert("¡¡DEBE SELECCIONAR UNA CUENTA!!")
+            }else{
+            req2 = false;
+
+            if (window.XMLHttpRequest) {
+                req2 = new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject) {
+                req2 = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            if(req2!=null){
+
+
+
+                var PATH = "<%= request.getContextPath()%>";
+                var url = PATH + "/Sprocesar?"+
+                "categoria_e="+categoria_e+
+                "&idpersona_e="+idpersona_e+
+                "&dni_e="+dni_e+
+                "&ruc_e="+ruc_e+
+                "&nombres_e="+nombres_e+
+                "&apellidos_e="+apellidos_e+
+                "&email_e="+email_e+
+                "&ubigeo_e="+ubigeo_e+
+                "&telefono_e="+telefono_e+
+                "&celular_e="+celular_e+
+                "&direccion_e="+direccion_e+
+                "&categoria_r="+categoria_r+
+                "&idpersona_r="+idpersona_r+
+                "&dni_r="+dni_r+
+                "&ruc_r="+ruc_r+
+                "&nombres_r="+nombres_r+
+                "&apellidos_r="+apellidos_r+
+                "&email_r="+email_r+
+                "&ubigeo_r="+ubigeo_r+
+                "&telefono_r="+telefono_r+
+                "&celular_r="+celular_r+
+                "&direccion_r="+direccion_r+
+                "&importe="+importe +
+                "&fpago_importe="+fpago_importe +
+                "&comision="+comision +
+                "&fpago_comision="+fpago_comision +
+                "&pagador_comision="+pagador_comision +
+                "&cod_moneda="+cod_moneda+
+                "&cod_filial="+cod_filial+
+                "&idcuentapersona="+idcuentapersona;
+
+                req2.open("GET",url,true);
+                req2.send(null);
+
+            }
+        }
+    }
+}
+
+function detalleEmisor() {
+    var idpersona_e = document.getElementById('Eidpersona').value;
+    req2 = false;
+
+    if (window.XMLHttpRequest) {
+        req2 = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject) {
+        req2 = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    if(req2!=null){
+        var PATH = "<%= request.getContextPath()%>";
+        var url = PATH + "/SBuscarCuenta?idpersona_e="+idpersona_e;
+        req2.open("GET",url,true);
+        req2.onreadystatechange = procesarRes;
+        req2.send(null);
+
+    }
+
+}
+
+function procesarRes(){
+    contenido = document.getElementById('detalle_cuenta');
+    contenido.innerHTML="Cargando los datos...";
+
+    if (req2.readyState==4 && req2.status==200) {
+        contenido.innerHTML = req2.responseText;
+    }
+}
+
+function efectivo(){
+    //alert('eferctivo');
+    this.document.getElementById('detalle_cuenta').innerHTML="";
+}
+
+function porcuenta(){
+    //alert('por cuenta');
+    detalleEmisor();
+}
+
+function calculo_comision(){
+    // ********* CALCULANDO EL 1.5 % DEL MONTO ********
+    var valor =document.getElementById('monto').value
+    valor = valor.replace(/,/gi, "")
+    var res =parseFloat ((valor)*1.5)/100
+    res=res.toFixed(2);
+    var Sres =""+res;
+    if(document.getElementById('Icomision').checked){
+        this.document.getElementById('div_comision').innerHTML=currencyFormat2(Sres,',','.');
+    } else{
+        this.document.getElementById('div_comision').innerHTML="";
+    }
+    this.document.getElementById('simbolo1').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+    this.document.getElementById('simbolo2').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+    this.document.getElementById('simbolo3').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+}
+
+
+
+function comision(){
+
+
+    if(document.getElementById('Icomision').checked){
+        this.document.getElementById('usuariop1').checked=true;
+        this.document.getElementById('formap1').checked=true;
+
+        calculo_comision()
+        calulo_gironeto()
+        this.document.getElementById('simbolo1').style.visibility='';
+        //this.document.getElementById('div_comision').style.visibility='';
+        this.document.getElementById('tr_usuariop').style.visibility='';
+        this.document.getElementById('tr_formap').style.visibility='';
+    }else{
+
+        calulo_gironeto()
+
+        this.document.getElementById('div_comision').innerHTML="";
+        this.document.getElementById('simbolo1').style.visibility='hidden';
+        //this.document.getElementById('div_comision').style.visibility='hidden';
+        this.document.getElementById('tr_usuariop').style.visibility='hidden';
+        this.document.getElementById('tr_formap').style.visibility='hidden';
+    }
+
+}
+function rpemisor(){
+    this.document.getElementById('tr_formap').style.visibility='';
+}
+function rpreceptor(){
+
+    this.document.getElementById('tr_formap').style.visibility='hidden';
+}
+
+function calulo_gironeto(){
+    var check
+    if(document.getElementById('Icomision').checked){
+        check='ACTIVO'
+        }else{
+        check='INACTIVO'
+        }
+    var i
+    for (i=0;i<document.f1.usuariop.length;i++){
+        if (document.f1.usuariop[i].checked)
+            break;
+    }
+    var usp = document.f1.usuariop[i].value;
+
+    var j
+    for (j=0;j<document.f1.formap.length;j++){
+        if (document.f1.formap[j].checked)
+            break;
+    }
+    var forp = document.f1.formap[j].value;
+
+    //alert("check ="+check);
+    //alert(" usp ="+usp);
+    //alert(" forp="+forp);
+
+    if(check=='ACTIVO'){
+
+
+        if(usp=='PEMISOR'){
+
+            if(forp=='EFECTIVO'){
+
+                this.document.getElementById('giro_neto').value=document.getElementById('monto').value
+
+                var valor =document.getElementById('monto').value
+                valor = valor.replace(/,/gi, "")
+
+                var valor1 =document.getElementById('div_comision').innerHTML
+
+                valor1 = valor1.replace(/,/gi, "")
+
+                var res =parseFloat (valor)+parseFloat(valor1)
+
+                res=res.toFixed(2);
+                var Sres =""+res;
+
+                this.document.getElementById('total').value=currencyFormat2(Sres,',','.')
+
+
+            } else {
+
+                this.document.getElementById('total').value=document.getElementById('monto').value
+
+                var valor =document.getElementById('monto').value
+                valor = valor.replace(/,/gi, "")
+
+                var valor1 =document.getElementById('div_comision').innerHTML
+
+                valor1 = valor1.replace(/,/gi, "")
+
+                var res =parseFloat (valor)-parseFloat(valor1)
+
+                res=res.toFixed(2);
+                var Sres =""+res;
+
+                this.document.getElementById('giro_neto').value=currencyFormat2(Sres,',','.')
+            }
+
+        }else{
+
+            this.document.getElementById('giro_neto').value=document.getElementById('monto').value
+            this.document.getElementById('total').value=document.getElementById('monto').value
+        }
+
+
+    }else{
+        // ********* SIN COMISION ********
+
+        this.document.getElementById('giro_neto').value=document.getElementById('monto').value
+        this.document.getElementById('total').value=document.getElementById('monto').value
+
+    }
+
+
+
+
+
+
+}
+function actmoneda(){
+    this.document.getElementById('simbolo1').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+    this.document.getElementById('simbolo2').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+    this.document.getElementById('simbolo3').innerHTML= document.f1.moneda[document.f1.moneda.selectedIndex].label;
+}
+
+
+
+

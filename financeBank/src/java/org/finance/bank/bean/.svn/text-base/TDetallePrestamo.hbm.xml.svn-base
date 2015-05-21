@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TDetallePrestamo" table="t_detalle_prestamo" schema="public">
+        <id name="iddetalleprestamo" type="string">
+            <column name="iddetalleprestamo" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TRegistroPrestamo" class="org.finance.bank.bean.TRegistroPrestamo" fetch="select">
+            <column name="idprestamo" length="41" not-null="true" />
+        </many-to-one>
+        <property name="numeroCuota" type="big_decimal">
+            <column name="numero_cuota" precision="20" scale="0" not-null="true" />
+        </property>
+        <property name="montoCapital" type="big_decimal">
+            <column name="monto_capital" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="montoTotal" type="big_decimal">
+            <column name="monto_total" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="fechaPago" type="string">
+            <column name="fecha_pago" length="50" not-null="true" />
+        </property>
+        <property name="interesPrestamo" type="big_decimal">
+            <column name="interes_prestamo" precision="12" scale="4" not-null="true" />
+        </property>
+        <property name="interesMoratorio" type="big_decimal">
+            <column name="interes_moratorio" precision="12" scale="4" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="50" />
+        </property>
+        <property name="capitalPendiente" type="big_decimal">
+            <column name="capital_pendiente" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="interesComp" type="string">
+            <column name="interes_comp" length="10" />
+        </property>
+        <property name="comision" type="string">
+            <column name="comision" length="10" />
+        </property>
+        <property name="itf" type="string">
+            <column name="itf" length="10" />
+        </property>
+        <set name="TCobranzas" inverse="true">
+            <key>
+                <column name="iddetalleprestamo" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCobranza" />
+        </set>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,242 @@
+/* 
+    Document   : FrancesGral
+    Created on : 26-feb-2010, 15:36:25
+    Author     : oscar
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+/* Styles needed by OSCAR */
+.eebuttons {width:120px}
+.eetooltips {
+    border: 1px solid #000000;
+    width: 180px;
+}
+.eetipcontent {
+    background-color: #FFFFCC;
+    color: #000000;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: arial;
+}
+
+*.ee100 {
+    color : windowtext;
+    font-family : Arial , sans-serif;
+    font-size : 10.00pt;
+    font-style : normal;
+    font-weight : 400;
+    padding-left : 1px;
+    padding-right : 1px;
+    padding-top : 1px;
+    text-align : left;
+    vertical-align : bottom
+}
+
+*.ee102 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 400;
+          text-align : left;
+          vertical-align : bottom
+}
+
+*.ee103 { background : #CCFFCC;
+          border-top : 0.50pt solid windowtext;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 9.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee105 { background : #CCFFCC;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 9.00pt;
+          font-style : normal;
+          font-weight : 700;
+          text-align : right;
+          vertical-align : bottom
+}
+
+*.ee106 { color : blue;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee109 { background : #CCFFCC;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee110 { background : #CCFFCC;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 12.00pt;
+          font-style : normal;
+          font-weight : 700;
+          text-align : right;
+          vertical-align : bottom
+}
+
+*.ee111 { color : blue;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee114 { background : #CCFFCC;
+          border-bottom : 0.50pt solid windowtext;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom }
+
+*.ee115 { background : #CCFFFF;
+          border : 1.00pt solid windowtext;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 1px;
+          padding-right : 1px;
+          padding-top : 1px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee118 { background : #CCFFFF;
+          border-bottom : 1.00pt solid windowtext;
+          border-top : 1.00pt solid windowtext;
+          color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 1px;
+          padding-right : 1px;
+          padding-top : 1px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee119 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 400;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : left;
+          vertical-align : bottom
+}
+
+*.ee120 { border-top : 1.00pt solid windowtext;
+          color : red;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : italic;
+          font-weight : 400;
+          padding-left : 1px;
+          padding-right : 1px;
+          padding-top : 1px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee126 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+
+*.ee128 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 400;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : right;
+          vertical-align : bottom
+}
+*.ee130 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : left;
+          vertical-align : bottom
+}
+*.ee131 { color : windowtext;
+          font-family : Arial , sans-serif;
+          font-size : 10.00pt;
+          font-style : normal;
+          font-weight : 700;
+          padding-left : 0px;
+          padding-right : 1px;
+          padding-top : 0px;
+          text-align : center;
+          vertical-align : bottom
+}
+*.ee900 { font-size : 10.00pt;
+          color : #3333ff;
+          font-family : "Arial", Sans-serif;
+          border-bottom : 3px solid #3333ff;
+          border-right : 3px solid #3333ff;
+          border-top : 3px solid #3333ff;
+          border-left : 3px solid #3333ff
+}
+textarea {  overflow: auto;
+}

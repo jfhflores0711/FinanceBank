@@ -1,0 +1,204 @@
+<html>
+<head>
+	<meta http-equiv="REFRESH" content="0;404.html">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>403 Forbidden</title>
+        <script type="text/javascript" language="javascript">
+<!--
+
+window.defaultStatus = "Copyright (c) 2010, FinanceBank";
+
+function calculate(form) {
+   var type = form.type.value;
+   var varb = form.varb.value;
+   var i = "" + form.i.value || "0";
+   var c = ""+ form.c.value || "0";
+   if (form.FV) {
+     var FV = ""+ form.FV.value || "0";
+     FV = format(FV);
+     form.FV.value = FV;
+   }
+   if (form.A) {
+     var A = ""+ form.A.value || "0";
+     A = format(A);
+     form.A.value = A;
+   }
+   if (form.p) {
+     var p = ""+ form.p.value || "0";
+     p = format(p)
+     form.p.value = p;
+   }
+   if (form.n) {
+     var n = ""+ form.n.value || "0";
+     n = format(n);
+     form.n.value = n;
+   }
+   i = format(i);
+   form.i.value = i;
+   c = format(c);
+   form.c.value = c;
+
+   n = n * c;
+
+   if (i <= 0) {
+      alert("Please enter a valid interest rate:");
+      form.i.select();
+      form.i.focus();
+      return;
+   }
+   if (i.charAt(i.length - 1) == "%") {
+      i = i.substring(0,i.length - 1);
+      form.i.value = i;
+   }
+   if (i >= 1) {
+      i = i / 100;
+      form.i.value = i;
+   }
+   i = "" + i;
+   if (i.indexOf(".") != 0) {
+      i = i.substring(i.indexOf("."),i.length);
+   }
+
+   if (c <= 0) {
+      alert("Please enter a valid # of times your investment is compounded each year:");
+      form.c.select();
+      form.c.focus();
+      return;
+   }
+
+   if (type == "annuity") {
+      p = (p * 12) / c;
+      if (varb == "FV") {
+         if (form.p.value <= 0) {
+            alert("Please enter a valid monthly investment:");
+            form.p.select();
+            form.p.focus();
+            return;
+         } else if (form.n.value <= 0) {
+            alert("Please enter a valid # of years:");
+            form.n.select();
+            form.n.focus();
+            return;
+         }
+         FV = (p * (Math.pow((1 + i/c),n) - 1)) / (i/c);
+         FV = "$" + FV;
+         FV = (FV.indexOf(".") >= 0) ? FV.substring(0, FV.indexOf(".",1) + 3) : FV + ".00";
+         answer(form,FV);
+         return;
+      } else if (varb == "p") {
+         if (form.FV.value <= 0) {
+            alert("Please enter a valid future value:");
+            form.FV.select();
+            form.FV.focus();
+            return;
+         } else if (form.n.value <= 0) {
+            alert("Please enter a valid # of years:");
+            form.n.select();
+            form.n.focus();
+            return;
+         }
+         p = (FV * i) / ((Math.pow((1 + i/c),n) - 1) * c)
+         p = (p * c) / 12;
+         p = "$" + p;
+         p = (p.indexOf(".") >= 0) ? p.substring(0, p.indexOf(".",1) + 3) : p + ".00";
+         answer(form,p);
+         return;
+      } else if (varb == "n") {
+         if (form.FV.value <= 0) {
+            alert("Please enter a valid future value:");
+            form.FV.select();
+            form.FV.focus();
+            return;
+         } else if (form.p.value <= 0) {
+            alert("Please enter a valid monthly investment:");
+            form.p.select();
+            form.p.focus();
+            return;
+         }
+         n = (Math.log(FV * i + c * p) - Math.log(c * p)) / (Math.log(c + i) - Math.log(c));
+         n = n / c;
+         n = "" + n;
+         n = (n.indexOf(".") >= 0) ? n.substring(0, n.indexOf(".",1) + 3) : n + ".00";
+         answer(form,n);
+         return;
+      }
+   } else {
+      if (varb == "FV") {
+         if (form.A.value <= 0) {
+            alert("Please enter a valid investment:");
+            form.A.select();
+            form.A.focus();
+            return;
+         } else if (form.n.value <= 0) {
+            alert("Please enter a valid # of years:");
+            form.n.select();
+            form.n.focus();
+            return;
+         }
+         FV = A * Math.pow((1 + i/c),n);
+         FV = "$" + FV;
+         FV = (FV.indexOf(".") >= 0) ? FV.substring(0, FV.indexOf(".",1) + 3) : FV + ".00";
+         answer(form,FV);
+         return;
+      } else if (varb == "A") {
+         if (form.FV.value <= 0) {
+            alert("Please enter a valid future value:");
+            form.FV.select();
+            form.FV.focus();
+            return;
+         } else if (form.n.value <= 0) {
+            alert("Please enter a valid # of years:");
+            form.n.select();
+            form.n.focus();
+            return;
+         }
+         A = FV / Math.pow((1 + i/c),n);
+         A = "$" + A;
+         A = (A.indexOf(".") >= 0) ? A.substring(0, A.indexOf(".",1) + 3) : A + ".00";
+         answer(form,A);
+         return;
+      } else if (varb == "n") {
+         if (form.FV.value <= 0) {
+            alert("Please enter a valid future value:");
+            form.FV.select();
+            form.FV.focus();
+            return;
+         } else if (form.A.value <= 0) {
+            alert("Please enter a valid investment:");
+            form.A.select();
+            form.A.focus();
+            return;
+         }
+         n = (Math.log(FV) - Math.log(A)) / (Math.log(c + i) - Math.log(c));
+         n = n / c;
+         n = "" + n;
+         n = (n.indexOf(".") >= 0) ? n.substring(0, n.indexOf(".",1) + 3) : n + ".00";
+         answer(form,n);
+         return;
+      }
+   }
+}
+
+function format(y) {
+  while (y.indexOf(",") >= 1) {
+    x = y.indexOf(",");
+    y = y.substring(0, x) + y.substring(x + 1, y.length);
+  }
+  return y;
+}
+
+function answer(form,x) {
+  form.answer.value = x;
+  form.answer.focus();
+  form.answer.select();
+}
+
+// -->
+</script>
+</head>
+<body>
+
+<p>Directory access is forbidden.</p>
+
+</body>
+</html>

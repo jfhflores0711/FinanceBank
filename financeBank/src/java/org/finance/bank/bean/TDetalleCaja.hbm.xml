@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TDetalleCaja" table="t_detalle_caja" schema="public">
+        <id name="iddetallecaja" type="string">
+            <column name="iddetallecaja" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCaja" class="org.finance.bank.bean.TCaja" fetch="select">
+            <column name="cod_caja" length="10" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TMoneda" class="org.finance.bank.bean.TMoneda" fetch="select">
+            <column name="cod_moneda" length="41" not-null="true" />
+        </many-to-one>
+        <property name="montoInicial" type="big_decimal">
+            <column name="monto_inicial" precision="20" />
+        </property>
+        <property name="montoFinal" type="big_decimal">
+            <column name="monto_final" precision="20" />
+        </property>
+        <property name="fechaTransaccion" type="string">
+            <column name="fecha_transaccion" length="50" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" />
+        </property>
+        <property name="montoRecibido" type="big_decimal">
+            <column name="monto_recibido" precision="20" />
+        </property>
+        <property name="montoEntregado" type="big_decimal">
+            <column name="monto_entregado" precision="20" />
+        </property>
+    </class>
+</hibernate-mapping>

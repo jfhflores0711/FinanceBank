@@ -1,0 +1,568 @@
+<%--
+    Document   : extornar
+    Created on : 13/04/2010, 05:54:01 PM
+    Author     : roger
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8" session="true"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="js/validacion.js"></script>
+        <!--script type="text/javascript" src="js/calendar/popcalendar.js"></script-->
+        <script language="javascript" type="text/javascript">
+            var req6;
+            function actualizarK(){
+                req6 = null;
+                if (window.XMLHttpRequest) {
+                    req6 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req6 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req6!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SActualizarCuentas";
+                    req6.open("GET",url,true);
+                    req6.send(null);
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req;
+            function buscarOperacione(){
+                var tipoOperacion,numOP;
+                tipoOperacion=document.getElementById("selTipoOperacion").value;
+                if(tipoOperacion!=""){
+                    numOP=document.getElementById("txtNumOperacion").value;
+                }else{
+                    numOP="";
+                }
+                if(numOP!="" || tipoOperacion=="TODO"){
+                    req = null;
+                    if (window.XMLHttpRequest) {
+                        req = new XMLHttpRequest();
+                    }else if (window.ActiveXObject) {
+                        req = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req!=null){
+                        req.onreadystatechange = pprocesar;
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SBuscarOperacion?numOP="+numOP+"&tipoOperacion="+tipoOperacion;
+                        req.open("GET",url,true);
+                        req.send(null);
+                    }
+                }else{window.alert("ingrese numero de operacion");}
+            }
+
+            function pprocesar(){
+                var contenido = document.getElementById('divOperacion');
+                contenido.innerHTML="Cargando los datos...";
+                if (req.readyState==4 && req.status==200) {
+                    contenido.innerHTML = req.responseText;
+                    var tamTabla;
+                    tamTabla=document.getElementById("tablaOperacion").rows.length;
+                    if(tamTabla>=15){
+                        contenido = document.getElementById('divOperacion').style.overflow="auto";
+                        contenido = document.getElementById('divOperacion').style.height="600px";
+                    }else{
+                        contenido = document.getElementById('divOperacion').style.overflow="";
+                        contenido = document.getElementById('divOperacion').style.height="";
+                    }
+                }
+            }
+
+            var Aut = false;
+            function ventanaNueva2(ind) {
+                Dialog.confirm($('login').innerHTML,
+                {   className:"alphacube",
+                    width:400,
+                    okLabel: "Login",
+                    title: "Autorizar Usuario",
+                    cancelLabel: "Cancelar",
+                    onOk:function(){
+                        var user =document.getElementById('user').value;
+                        var pass =document.getElementById('passwd').value;
+                        document.getElementById('res').innerHTML='';
+                        Autorizar(user,pass, ind);
+                    }
+                });
+                document.getElementById('user').focus();
+            }
+
+            var req4;
+            function extornar(ind){
+                var userAdmin =document.getElementById('tdIdAdmin').innerHTML;
+                req4 = null;
+                if (window.XMLHttpRequest) {
+                    req4 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req4!=null){
+                    var answer = window.confirm ("¿ESTA SEGURO QUE DESEA EXTORNAR ESTA OPERACIONES?")
+                    if (answer){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SExtornarOperacion?IdOperacion="+ind+"&userAdminExt="+userAdmin;
+                        req4.open("GET",url,true);
+                        req4.onreadystatechange = procesar4;
+                        req4.send(null);
+                    }
+                    return true;
+                }
+            }
+
+            function procesar4(){
+                contenido = document.getElementById('divExtorno');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                    if(document.getElementById("txtExtorno").value=="SI"){
+                        window.alert("EL EXTORNO SE REALIZO CON EXITO");
+                        document.formextor.submit();
+                    }else {
+                        window.alert("FALLO LA EXTORNACION");
+                    }
+                }
+            }
+
+            function Autorizar(login,contrasenia, ind) {
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesar1;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                    window.alert('¡¡ DATOS ENVIADOS !!')
+                    if(document.getElementById('res').innerHTML==1){
+                        Aut = true;                        
+                        return extornar(ind);
+                    }else{
+                        //document.fcambio.chkVerSaldo.checked=false;
+                        $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                        $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                        new Effect.Shake(Windows.focusedWindow.getId());
+                        return false;
+                    }
+                }
+            }
+
+            function procesar1(){
+                contenido = document.getElementById('res');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var eeisus=0;
+            var eetrue="VERDADERO";
+            var eefalse="FALSO";
+            var eedec=".";
+            var eeth=" ";
+            var eedecreg=new RegExp("\\.","g");
+            var eethreg=new RegExp(" ","g");
+            var eecurrencyreg=new RegExp("€","g");
+            var eepercentreg=new RegExp("%","g");
+            var fmtdaynamesshort=new Array("dom","lun","mar","mie","jue","vie","sab");
+            var fmtdaynameslong=new Array("domingo","lunes","martes","miércoles","jueves","viernes","sábado");
+            var fmtmonthnamesshort=new Array("ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic");
+            var fmtmonthnameslong=new Array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+            var fmtstrings=new Array(","," ","S/.","pta","€","/","$");
+            var fmtdate6=new Array(34,33,25,2);
+            var fmtdate7=new Array(25,2,33,35);
+            var fmtdate8=new Array(25,2,33,36);
+            var fmtdate9=new Array(7,37,3,37,11);
+            var fmtdate10=new Array(38,25,2);
+            function myIsNaN(x){
+                return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+            }
+
+            function round(n,nd){
+                if(isFinite(n)&&isFinite(nd)){
+                    var sign_n=(n<0)?-1:1;
+                    var abs_n=Math.abs(n);
+                    var factor=Math.pow(10,nd);
+                    return sign_n*Math.round(abs_n*factor)/factor;
+                }else{
+                    return NaN;
+                }
+            }
+
+            function b2s(b){
+                return b?eetrue:eefalse;
+            }
+
+            function eeparseFloat(str){
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeparsePercent(str){
+                var parts=String(str).split('%');
+                var tmp=String(parts[0]).replace(eedecreg,".");
+                var res=parseFloat(tmp)/100;if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+            function eedisplayFloat(x){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var str=String(x);
+                    if(near0RegExp.test(str)){
+                        x=round(x,8);
+                        str=String(x);
+                    }
+                    return str.replace(/\./g,eedec);
+                }
+            }
+
+            function eedisplayFloatV(x){
+                if(x=="")return x;
+                if(isFinite(x)){
+                    return eedisplayFloat(x);
+                }else{
+                    return x;
+                }
+            }
+
+            function eedisplayFloatND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }
+                    }else{
+                        return res;
+                    }
+                }
+            }
+
+            function eedisplayPercentND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    return eedisplayFloatND(x*100,nd)+'%';
+                }
+            }
+
+            function eeparseFloatTh(str){
+                str=String(str).replace(eethreg,"");
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eedisplayFloatNDTh(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        var res2=eeinsertThousand(parts[0].toString());
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }
+                    }else{
+                        return(eeinsertThousand(res.toString()));
+                    }
+                }
+            }
+
+            var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+            function eeparseFloatV(str){
+                if(str=="")
+                    return str;str=String(str).replace(eedecreg,".");
+                if(!eeparseFloatVreg.test(str)){
+                    return str;
+                }
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return str;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeinsertThousand(whole){
+                if(whole==""||whole.indexOf("e")>=0){
+                    return whole;
+                }else{
+                    var minus_sign="";
+                    if(whole.charAt(0)=="-"){
+                        minus_sign="-";
+                        whole=whole.substring(1);
+                    }
+                    var res="";
+                    var str_length=whole.length-1;
+                    for(var ii=0;ii<=str_length;ii++){
+                        if(ii>0&&ii%3==0){
+                            res=eeth+res;
+                        }
+                        res=whole.charAt(str_length-ii)+res;
+                    }
+                    return minus_sign+res;
+                }
+            }
+
+            function validar(e){
+                obj=e.srcElement || e.target;
+                tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo==8)return true;
+                patron =/[\d.]/;
+                tecla_valor = String.fromCharCode(tecla_codigo);
+                control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true
+                return patron.test(tecla_valor) &&  control;
+            }
+        </script>
+        <script type="text/javascript" language="JavaScript">
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i =0, j = 0;
+                var len =0, len2 = 0;
+                var strCheck = '0123456789';
+                var aux ='', aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode == 13) return true; // Enter
+                key = String.fromCharCode(whichCode); // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false; // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+        </script>
+    </head>
+    <body onload="document.getElementById('selTipoOperacion').focus();">
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "20110228202911531353");
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="xlogin" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="login" style="display:none">
+                <p>
+                    <span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span>
+                </p>
+                <div style="clear:both">
+                </div>
+                <p>
+                    <span class="login_label">Usuario</span>
+                    <span class="login_input">
+                        <input type="text" id="user"/>
+                    </span>
+                </p>
+                <div style="clear:both"></div>
+                <p>
+                    <span class="login_label">Contrase&ntilde;a</span>
+                    <span class="login_input">
+                        <input type="password" id="passwd"/>
+                    </span>
+                </p>
+                <div style="clear:both">
+                </div>
+                <div id="res" style="display:none">
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Modulo Extornar!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="story">
+                        <table id="">
+                            <tr>
+                                <td><fieldset style="border-width: 3px;">
+                                        <legend>Buscar Por: </legend>
+                                        <table>
+                                            <tr>
+                                                <td></td>
+                                                <td>Escriba N&uacute;mero de Operaci&oacute;n:</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td><select id="selTipoOperacion">
+                                                        <option>TODO</option>
+                                                        <option>COMPRA</option>
+                                                        <option>VENTA</option>
+                                                        <option>DEPOSITO O RETIRO</option>
+                                                        <option>GIRO</option>
+                                                        <option>COBROGIRO</option>
+                                                        <option>PRESTAMO</option>
+                                                        <option>COBRANZA</option>
+                                                        <option>RETIRO OTRO</option>
+                                                        <option>TRANFERENCIAS</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" id="txtNumOperacion" name="txtNumOperacion" onkeypress="return solonumeros(event);" value=""></td>
+                                                <td><input type="button" id="btnuscar" onclick="buscarOperacione();" value="Buscar Operaci&oacute;n"></td>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="divOperacion">
+                                        <table id="tablaOperacion" class="tabla" border="0" style="display:none">
+                                            <tr>
+                                                <th style="display:none">-.-</th>
+                                                <th>Num. Operaci&oacute;n</th>
+                                                <th>Fecha de Registro</th>
+                                                <th>Tipo Operaci&oacute;n</th>
+                                                <th>Moneda</th>
+                                                <th>Descripci&oacute;n</th>
+                                                <th>Estado</th>
+                                                <th>Usuario</th>
+                                                <th>Fecha Extorno</th>
+                                                <th>Admin Extorno</th>
+                                                <th style="display:none">-..-</th>
+                                            </tr>
+                                            <%
+                                                        int i = 0;
+                                                        for (i = 0; i < 4; i++) {
+                                                            String par = "";
+                                                            i = i + 1;
+                                                            if (i % 2 == 0) {
+                                                                par = "modo2";
+                                                            } else {
+                                                                par = "modo1";
+                                                            }
+                                                            i = i - 1;%>
+                                            <tr class="<%=par%>">
+                                                <td id="r" style="display:none"></td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td>a</td>
+                                                <td><input type="button" id="btnExtornar<%=i%>" value="Extornar"></td>
+                                            </tr>
+                                            <% }%>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="button" id="btnActualizarK" name="btnActualizarK" onclick="actualizarK();" value="Actualizar Cuenta">
+        <div id="divExtorno" style="display:none">
+            <input id="txtExtorno" name="txtExtorno" type="text" value="NO">
+        </div> <div id="res" style="display:none">
+        </div>    
+        <form id="formextor" name="formextor" action="extornar.htm"></form>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

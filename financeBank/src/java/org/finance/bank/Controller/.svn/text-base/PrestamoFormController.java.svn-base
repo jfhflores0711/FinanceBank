@@ -1,0 +1,62 @@
+package org.finance.bank.Controller;
+
+import org.finance.bank.model.service.GenericManager;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
+import org.finance.bank.bean.TRegistroPrestamo;
+
+/**
+ *
+ * @author oscar
+ */
+public class PrestamoFormController extends BaseFormController {
+
+    private GenericManager<TRegistroPrestamo, String> prestamoManager = null;
+
+    public void setPersonManager(GenericManager<TRegistroPrestamo, String> prestamoManager) {
+        this.prestamoManager = prestamoManager;
+    }
+
+    public PrestamoFormController() {
+        setCommandClass(TRegistroPrestamo.class);
+        setCommandName("person");
+    }
+
+    @Override
+    protected Object formBackingObject(HttpServletRequest request)
+            throws Exception {
+        String id = request.getParameter("id");
+        if (!StringUtils.isBlank(id)) {
+            return prestamoManager.get(new String(id));
+        }
+        return new TRegistroPrestamo();
+    }
+
+    @Override
+    public ModelAndView onSubmit(HttpServletRequest request,
+            HttpServletResponse response, Object command,
+            BindException errors)
+            throws Exception {
+        log.debug("entering 'onSubmit' method...");
+        TRegistroPrestamo prestamo = (TRegistroPrestamo) command;
+        boolean isNew = (prestamo.getIdprestamo() == null);
+        String success = getSuccessView();
+        Locale locale = request.getLocale();
+        if (request.getParameter("delete") != null) {
+            prestamoManager.remove(prestamo.getIdprestamo());
+            saveMessage(request, getText("person.deleted", locale));
+        } else {
+            prestamoManager.save(prestamo);
+            String key = (isNew) ? "person.added" : "person.updated";
+            saveMessage(request, getText(key, locale));
+            if (!isNew) {
+                success = "redirect:prestamo.htm?id=" + prestamo.getIdprestamo();
+            }
+        }
+        return new ModelAndView(success);
+    }
+}

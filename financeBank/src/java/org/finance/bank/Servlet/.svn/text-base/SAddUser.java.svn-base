@@ -1,0 +1,234 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.finance.bank.bean.TCaja;
+import org.finance.bank.bean.TCategoriaPersona;
+import org.finance.bank.bean.TControlTipo;
+import org.finance.bank.bean.TCuentaAcceso;
+import org.finance.bank.bean.TPersona;
+import org.finance.bank.bean.TPersonaCaja;
+import org.finance.bank.bean.TTipoPersona;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+import org.finance.bank.util.MD5;
+
+/**
+ *
+ * @author admin
+ */
+public class SAddUser extends HttpServlet {
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        DAOGeneral dao = new DAOGeneral();
+        String idForInitNewestTable = DateUtil.convertDateId("ID", SAddUser.class.getSimpleName());
+        try {
+            String estado = "";
+            if (request.getParameter("estado") != null) {
+                estado = request.getParameter("estado").toString();
+                //System.out.println("estado =" + estado);
+            }
+            String dni = "";
+            if (request.getParameter("dni") != null) {
+                dni = request.getParameter("dni").toString();
+                //System.out.println("dni =" + dni);
+            } else {
+                out.print("mensaje=Dni incorrecto.");
+            }
+            String ruc = "";
+            if (request.getParameter("ruc") != null) {
+                ruc = request.getParameter("ruc").toString();
+                //System.out.println("ruc =" + ruc);
+            }
+            String nombres = "";
+            if (request.getParameter("nombres") != null && !request.getParameter("nombres").equals("")) {
+                nombres = request.getParameter("nombres").toString();
+                //System.out.println("nombres =" + nombres);
+            } else {
+                out.print("mensaje=Nombres incorrecto.");
+            }
+            String apellidos = "";
+            if (request.getParameter("apellidos") != null && !request.getParameter("apellidos").equals("")) {
+                apellidos = request.getParameter("apellidos").toString();
+                //System.out.println("apellidos =" + apellidos);
+            } else {
+                out.print("mensaje=Apellidos incorrecto.");
+            }
+            String email = "";
+            if (request.getParameter("email") != null && !request.getParameter("email").equals("")) {
+                email = request.getParameter("email").toString();
+                //System.out.println("email =" + email);
+            }
+            String ubigeo = "";
+            if (request.getParameter("ubigeo") != null && !request.getParameter("ubigeo").equals("")) {
+                ubigeo = request.getParameter("ubigeo").toString();
+                //System.out.println("ubigeo =" + ubigeo);
+            } else {
+                out.print("mensaje=Ubigeo incorrecto.");
+            }
+            String telefono = "";
+            if (request.getParameter("telefono") != null && !request.getParameter("telefono").equals("")) {
+                telefono = request.getParameter("telefono").toString();
+                //System.out.println("telefono =" + telefono);
+            }
+            String celular = "";
+            if (request.getParameter("celular") != null && !request.getParameter("celular").equals("")) {
+                celular = request.getParameter("celular").toString();
+                //System.out.println("celular =" + celular);
+            }
+            String direccion = "";
+            if (request.getParameter("direccion") != null && !request.getParameter("direccion").equals("")) {
+                direccion = request.getParameter("direccion").toString();
+                //System.out.println("direccion =" + direccion);
+            } else {
+                out.print("mensaje=Direccion incorrecta.");
+            }
+            String login = "";
+            if (request.getParameter("login") != null && !request.getParameter("login").equals("")) {
+                login = request.getParameter("login").toString();
+                //System.out.println("login =" + login);
+            } else {
+                out.print("mensaje=Login incorrecto.");
+            }
+            String contrasenia = "";
+            if (request.getParameter("contrasenia") != null && !request.getParameter("contrasenia").equals("")) {
+                contrasenia = request.getParameter("contrasenia").toString();
+                //System.out.println("contrasenia =" + contrasenia);
+            } else {
+                out.print("mensaje=Contraseña incorrecta.");
+            }
+            String ipacceso = "";
+            if (request.getParameter("ipacceso") != null && !request.getParameter("ipacceso").equals("")) {
+                ipacceso = request.getParameter("ipacceso").toString();
+                //System.out.println("ipacceso =" + ipacceso);
+            } else {
+                out.print("mensaje=IP incorrecto.");
+            }
+            String grupo = "";
+            if (request.getParameter("grupo") != null && !request.getParameter("grupo").equals("")) {
+                grupo = request.getParameter("grupo").toString();
+                //System.out.println("grupo =" + grupo);
+            } else {
+                out.print("mensaje=Grupo incorrecto.");
+            }
+            String caja = "";
+            if (request.getParameter("caja") != null && !request.getParameter("caja").equals("")) {
+                caja = request.getParameter("caja").toString();
+                //System.out.println("caja =" + caja);
+            } else {
+                out.print("mensaje=Caja incorrecta.");
+            }
+            String categoria = "";
+            if (request.getParameter("categoria") != null && !request.getParameter("categoria").equals("")) {
+                categoria = request.getParameter("categoria").toString();
+                //System.out.println("categoria =" + categoria);
+            } else {
+                out.print("mensaje=Categoria incorrecta.");
+            }
+            TPersona persona = new TPersona();
+            persona.setIdUserPk(idForInitNewestTable);
+            persona.setDocIdentidad(dni);
+            persona.setNombre(nombres.toUpperCase());
+            persona.setApellidos(apellidos.toUpperCase());
+            persona.setEmail(email);
+            persona.setUbigeo(ubigeo);
+            persona.setTelefono(telefono);
+            persona.setCelular(celular);
+            persona.setUrlFoto("&nbsp;");
+            persona.setUrlFirma("&nbsp;");
+            persona.setDireccion(direccion.toUpperCase());
+            persona.setEstado(estado);
+            persona.setIdUser("ID");
+            persona.setIpUser("IP");
+            persona.setDateUser("DATE");
+            TCategoriaPersona tcategoria = (TCategoriaPersona) dao.load(TCategoriaPersona.class, categoria);
+            persona.setTCategoriaPersona(tcategoria);
+            persona.setRuc(ruc);
+            dao.persist(persona);
+            TControlTipo control_grupo = new TControlTipo();
+            control_grupo.setIdcontroltipo(idForInitNewestTable);
+            control_grupo.setTPersona(persona);
+            TTipoPersona ttipopersona = (TTipoPersona) dao.load(TTipoPersona.class, grupo);
+            control_grupo.setTTipoPersona(ttipopersona);
+            control_grupo.setEstado(estado);
+            control_grupo.setIdUser("ID");
+            control_grupo.setIpUser("IP");
+            control_grupo.setDateUser("DATE");
+            dao.persist(control_grupo);
+            TCuentaAcceso cuenta = new TCuentaAcceso();
+            cuenta.setIdAcceso(idForInitNewestTable);
+            cuenta.setLogin(login);
+            cuenta.setContrasenia(MD5.encriptar(contrasenia));
+            cuenta.setEstado(estado);
+            cuenta.setIdUser("ID");
+            cuenta.setIpUser("IP");
+            cuenta.setDateUser("DATE");
+            cuenta.setTPersona(persona);
+            cuenta.setIpAcceso(ipacceso);
+            cuenta.setKeyring(MD5.encriptar(MD5.encriptar(contrasenia).toLowerCase() + login.toLowerCase()));
+            dao.persist(cuenta);
+            TPersonaCaja pcaja = new TPersonaCaja();
+            pcaja.setIdpersonacaja(idForInitNewestTable);
+            pcaja.setTPersona(persona);
+            TCaja tcaja = (TCaja) dao.load(TCaja.class, caja);
+            pcaja.setEstado(estado);
+            pcaja.setTCaja(tcaja);
+            pcaja.setIdUser("ID");
+            pcaja.setIpUser("IP");
+            pcaja.setDateUser("DATE");
+            dao.persist(pcaja);
+        } finally {
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

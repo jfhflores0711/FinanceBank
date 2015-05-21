@@ -1,0 +1,1204 @@
+<%--
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : roger
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8" session="true"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank - Depósitos, Retiros</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <!-- WIN PROTOTYPE -->
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="js/validacion.js"> </script>
+        <script type="text/javascript" src="js/calendar/popcalendar.js"> </script>
+        <script type="text/javascript">
+            function cambiartipoTrans(){
+                if (document.getElementById("divcuenta").innerHTML!=""){
+                    var tipoTrans ;
+                    var newcadena,cadenalegend;
+                    cadenalegend=document.getElementById('legcuenta').innerHTML;
+                    if(document.getElementById("rdDeposito").checked==true){
+                        tipoTrans="DEPOSITO";
+                        cadenalegend=cadenalegend.replace("undefined",tipoTrans);
+                        newcadena=cadenalegend.replace("RETIRO",tipoTrans);
+                        document.getElementById("tdfechadep").innerHTML="<font color='#385b88' style='font-size: 12px;'><b>Fecha de Deposito:</b></font>";
+                        document.getElementById("cmdRegistrar").value="Registrar Dep&oacute;sito";
+                        document.getElementById("divpermisoKnegativo").style.display="none";
+                    }else if(document.getElementById("rdRetiro").checked==true){
+                        tipoTrans="RETIRO";
+                        cadenalegend=cadenalegend.replace("undefined",tipoTrans);
+                        newcadena=cadenalegend.replace("DEPOSITO",tipoTrans);
+                        document.getElementById("tdfechadep").innerHTML="<font color='#385b88' style='font-size: 12px;'><b>Fecha de Retiro:</b></font>";
+                        document.getElementById("cmdRegistrar").value="Registrar Retiro";
+                        document.getElementById("divpermisoKnegativo").style.display="";
+                        if(document.getElementById("divcuenta").innerHTML!=""){
+                            var tipo,indice;
+                            indice=document.getElementById("txtind").value;
+                            tipo=document.getElementById("tdtipocuenta"+indice).innerHTML;
+                            if(tipo=="CUENTA A PLAZO FIJO"){
+                                document.getElementById("chkKnegativo").style.display="";
+                                document.getElementById("blqKnegativo").style.display="";
+                                document.getElementById("lblinteres").style.display="none";
+                                document.getElementById("txtinteress").style.display="none";
+                                document.getElementById("lblCobroKnegativo").style.display="none";
+                                document.getElementById("txtCobroKnegativo").style.display="none";
+                                document.getElementById("chkCobroPF").style.display="";
+                                document.getElementById("blqCobroPF").style.display="";
+                            }else if(tipo=="CUENTA CORRIENTE"){
+                                document.getElementById("chkKnegativo").style.display="";
+                                document.getElementById("blqKnegativo").style.display="";
+                                document.getElementById("lblinteres").style.display="none";
+                                document.getElementById("txtinteress").style.display="none";
+                                document.getElementById("lblCobroKnegativo").style.display="none";
+                                document.getElementById("txtCobroKnegativo").style.display="none";
+                                document.getElementById("chkCobroPF").style.display="none";
+                                document.getElementById("blqCobroPF").style.display="none";
+                            }else if(tipo=="CUENTA AHORRO"){
+                                document.getElementById("chkKnegativo").style.display="";
+                                document.getElementById("blqKnegativo").style.display="";
+                                document.getElementById("lblinteres").style.display="none";
+                                document.getElementById("txtinteress").style.display="none";
+                                document.getElementById("lblCobroKnegativo").style.display="none";
+                                document.getElementById("txtCobroKnegativo").style.display="none";
+                                document.getElementById("chkCobroPF").style.display="none";
+                                document.getElementById("blqCobroPF").style.display="none";
+                            }
+                        }
+                    }
+                    document.getElementById('legcuenta').innerHTML=newcadena;
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function mostrarbotoncreate(indice) {
+                document.getElementById("chkKnegativo").checked=false;
+                document.getElementById("txtind").value=indice;
+                var tipo="";
+                tipo=document.getElementById("tdtipocuenta"+indice).innerHTML;
+                var numcuenta,fechahoy,miinteres,idPersona,idMoney,IdCuenPersona,observaciones,mon;
+                var fechaplazoFijo;
+                numcuenta=document.getElementById("tdNumCuenta"+indice).innerHTML;
+                fechahoy=document.getElementById("tdFechaHoy"+indice).innerHTML;
+                miinteres=document.getElementById("tdInteres"+indice).innerHTML;
+                miinteres=miinteres;
+                idPersona=document.getElementById("tdIdPersonas"+indice).innerHTML;
+                idMoney=document.getElementById("tdIdMoney"+indice).innerHTML;
+                IdCuenPersona=document.getElementById("tdIdCuenPersona"+indice).innerHTML;
+                observaciones=document.getElementById("tdObservacionCuen"+indice).innerHTML;
+                document.getElementById("cmdRegistrar").disabled=false;
+                document.getElementById("divpermisoKnegativo").style.display="";
+                if(idMoney=="PEN")
+                    mon="S/.";
+                else if(idMoney=="USD")
+                    mon="&#36;";
+                else
+                    mon="&#8364;";
+                var tipoTrans, tipoTransMinusculas ;
+                if(document.getElementById("rdDeposito").checked==true){
+                    tipoTrans="DEPOSITO";
+                    tipoTransMinusculas="Depósito";
+                    document.getElementById("cmdRegistrar").value="Registrar Depósito";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(document.getElementById("rdRetiro").checked==true){
+                    tipoTrans="RETIRO";
+                    tipoTransMinusculas="Retiro";
+                    document.getElementById("cmdRegistrar").value="Registrar Retiro";
+                    document.getElementById("divpermisoKnegativo").style.display="";
+                }
+                if(tipo=="CUENTA A PLAZO FIJO"){
+                    fechaplazoFijo=document.getElementById("tdfechaplazoF"+indice).innerHTML;
+                    document.getElementById("divcuenta").innerHTML="<fieldset id='fielCuen' style='border-width:3px'>"+
+                        "<legend id='legcuenta'><b>"+tipoTrans+" CUENTA A PLAZO FIJO</b></legend>"+
+                        "<table id='tablecuenta'>"+
+                        "<tr>"+
+                        "<td style='font-weight:bold' colspan='2'>&nbsp;</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cuenta:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCuentaDep' name='txtNumCuentaDep' value='"+numcuenta+"' disabled style='font-weight:bold;color:black'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td id='tdfechadep'><font color='#385b88' style='font-size: 12px;'><b>Fecha de "+tipoTransMinusculas+"</b></font></td>"+
+                        "<td><input type='text' id='txtFechaDeposito' name='txtFechaDeposito' value='"+fechahoy+"' disabled/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Fecha plazo fijo:</b></font></td>"+
+                        "<td><input type='text' id='txtPFFechaPlazoFijo' name='txtPFFechaPlazoFijo' value='"+fechaplazoFijo+"' readonly/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>importe:</b></font></td>"+
+                        "<td><font color='#E08934' style='font-size: 20px;'><b>"+mon+"</b></font><input type='text' id='txtImporteDep' name='txtImporteDep' value='' onfocus='this.select();' onblur='this.value=eedisplayFloatNDTh(eeparseFloatTh(this.value),2);' onkeypress='return validar(event);' /></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td></td>"+
+                        "<td ><input type='button' value='Limpiar monto' onclick=\"document.getElementById('txtImporteDep').value=''; document.getElementById('txtImporteDep').focus();\" ></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>interes:</b></font></td>"+
+                        "<td><input type='text' id='txtInteres' name='txtInteres' value='"+miinteres+"' disabled style='font-weight:bold;color:black;width: 60px;' /><font color='#385b88' style='font-size: 12px;'><b>%</b></font></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Nombre:</b></font></td>"+
+                        "<td><input type='text' id='txtNombreDep' name='txtNombreDep' value='' />(Nombre del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Apellidos:</b></font></td>"+
+                        "<td><input type='text' id='txtApellidoDep' name='txtApellidoDep' value=''/>(Apellidos del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cheque:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCheque' name='txtNumCheque' value=''/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Observaciones</b></font></td>"+
+                        "<td><textarea id='txtaObservacion' name='txtaObservacion' rows='4' cols='20' mmaxlength='500'>"+observaciones+"</textarea></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Tipo Cuenta</td>"+
+                        "<td><input type='text' id='txTipoCuenta' name='txTipoCuenta' value='"+tipo+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Persona</td>"+
+                        "<td><input type='text' id='txidPersona' name='txidPersona' value='"+idPersona+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Money</td>"+
+                        "<td><input type='text' id='txidMoney' name='txidMoney' value='"+idMoney+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id CuentaPersona</td>"+
+                        "<td><input type='text' id='txidCuentaPersona' name='txidCuentaPersona' value='"+IdCuenPersona+"' /></td>"+
+                        "</tr>"+
+                        "</table>"+
+                        "</fieldset>";
+                    document.getElementById("chkKnegativo").style.display="";
+                    document.getElementById("blqKnegativo").style.display="";
+                    document.getElementById("lblinteres").style.display="none";
+                    document.getElementById("txtinteress").style.display="none";
+                    document.getElementById("lblCobroKnegativo").style.display="none";
+                    document.getElementById("txtCobroKnegativo").style.display="none";
+                    document.getElementById("chkCobroPF").style.display="";
+                    document.getElementById("blqCobroPF").style.display="";
+                }else if(tipo=="CUENTA CORRIENTE") {
+                    var tip;
+                    if(tipo=="CUENTA CORRIENTE")
+                        tip="CUENTA CORRIENTE";
+                    else
+                        tip="CUENTA AHORRO";
+                    document.getElementById("divcuenta").innerHTML="<fieldset id='fielCuen' style='border-width:3px'>"+
+                        "<legend id='legcuenta'><b>"+tipoTrans+" "+tip+"</b></legend>"+
+                        "<table id='tablecuenta'>"+
+                        "<tr>"+
+                        "<td style='font-weight:bold' colspan='2'>&nbsp;</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cuenta:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCuentaDep' name='txtNumCuentaDep' value='"+numcuenta+"' disabled style='font-weight:bold;color:black'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td  id='tdfechadep'><font color='#385b88' style='font-size: 12px;'><b>Fecha de "+tipoTransMinusculas+":</b></font></td>"+
+                        "<td><input type='text' id='txtFechaDeposito' name='txtFechaDeposito' value='"+fechahoy+"' disabled/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>importe:</b></font></td>"+
+                        "<td><font color='#E08934' style='font-size: 20px;'><b>"+mon+"</b></font><input type='text' id='txtImporteDep' name='txtImporteDep' value='' onfocus='this.select();' onblur='this.value=eedisplayFloatNDTh(eeparseFloatTh(this.value),2);' onkeypress='return validar(event);'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td></td>"+
+                        "<td ><input type='button' value='Limpiar importe' onclick=\"document.getElementById('txtImporteDep').value=''; document.getElementById('txtImporteDep').focus();\" ></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>interes:</b></font></td>"+
+                        "<td><input type='text' id='txtInteres' name='txtInteres' value='"+miinteres+"' onkeypress='return solodecimales(event);' disabled style='font-weight:bold;color:black;width: 60px;'/><font color='#385b88' style='font-size: 12px;' ><b>%</b></font></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Nombre:</b></font></td>"+
+                        "<td><input type='text' id='txtNombreDep' name='txtNombreDep' value='' />(Nombre del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Apellidos:</b></font></td>"+
+                        "<td><input type='text' id='txtApellidoDep' name='txtApellidoDep' value=''/>(Apellido del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cheque:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCheque' name='txtNumCheque' value='' onkeypress='return soloNumeroTelefonico(event);'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Observaciones</b></font></td>"+
+                        "<td><textarea id='txtaObservacion' name='txtaObservacion' rows='4' cols='20' mmaxlength='500'>"+observaciones+"</textarea></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Tipo Cuenta</td>"+
+                        "<td><input type='text' id='txTipoCuenta' name='txTipoCuenta' value='"+tipo+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Persona</td>"+
+                        "<td><input type='text' id='txidPersona' name='txidPersona' value='"+idPersona+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Money</td>"+
+                        "<td><input type='text' id='txidMoney' name='txidMoney' value='"+idMoney+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id CuentaPersona</td>"+
+                        "<td><input type='text' id='txidCuentaPersona' name='txidCuentaPersona' value='"+IdCuenPersona+"' /></td>"+
+                        "</tr>"+
+                        "</table>"+
+                        "</fieldset>";
+                    document.getElementById("chkKnegativo").style.display="";
+                    document.getElementById("blqKnegativo").style.display="";
+                    document.getElementById("lblinteres").style.display="none";
+                    document.getElementById("txtinteress").style.display="none";
+                    document.getElementById("lblCobroKnegativo").style.display="none";
+                    document.getElementById("txtCobroKnegativo").style.display="none";
+                    document.getElementById("chkCobroPF").style.display="none";
+                    document.getElementById("blqCobroPF").style.display="none";
+                }else if(tipo=="CUENTA AHORRO") {
+                    var tip;
+                    if(tipo=="CUENTA CORRIENTE")
+                        tip="CUENTA CORRIENTE";
+                    else
+                        tip="CUENTA AHORRO";
+                    document.getElementById("divcuenta").innerHTML="<fieldset id='fielCuen' style='border-width:3px'>"+
+                        "<legend id='legcuenta'><b>"+tipoTrans+" "+tip+"</b></legend>"+
+                        "<table id='tablecuenta'>"+
+                        "<tr>"+
+                        "<td style='font-weight:bold' colspan='2'>&nbsp;</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cuenta:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCuentaDep' name='txtNumCuentaDep' value='"+numcuenta+"' disabled style='font-weight:bold;color:black'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td  id='tdfechadep'><font color='#385b88' style='font-size: 12px;'><b>Fecha de "+tipoTransMinusculas+":</b></font></td>"+
+                        "<td><input type='text' id='txtFechaDeposito' name='txtFechaDeposito' value='"+fechahoy+"' disabled/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>importe:</b></font></td>"+
+                        "<td><font color='#E08934' style='font-size: 20px;'><b>"+mon+"</b></font><input type='text' id='txtImporteDep' name='txtImporteDep' value='' onfocus='this.select();' onblur='this.value=eedisplayFloatNDTh(eeparseFloatTh(this.value),2);' onkeypress='return validar(event);'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td></td>"+
+                        "<td ><input type='button' value='Limpiar importe' onclick=\"document.getElementById('txtImporteDep').value=''; document.getElementById('txtImporteDep').focus();\" ></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>interes:</b></font></td>"+
+                        "<td><input type='text' id='txtInteres' name='txtInteres' value='"+miinteres+"' onkeypress='return solodecimales(event);' disabled style='font-weight:bold;color:black;width: 60px;'/><font color='#385b88' style='font-size: 12px;'><b>%</b></font></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Nombre:</b></font></td>"+
+                        "<td><input type='text' id='txtNombreDep' name='txtNombreDep' value='' />(Nombre del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Apellidos:</b></font></td>"+
+                        "<td><input type='text' id='txtApellidoDep' name='txtApellidoDep' value=''/>(Apellido del cliente que realiza transacci&oacute;n)</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Numero Cheque:</b></font></td>"+
+                        "<td><input type='text' id='txtNumCheque' name='txtNumCheque' value='' onkeypress='return soloNumeroTelefonico(event);'/></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td><font color='#385b88' style='font-size: 12px;'><b>Observaciones</b></font></td>"+
+                        "<td><textarea id='txtaObservacion' name='txtaObservacion' rows='4' cols='20' mmaxlength='500'>"+observaciones+"</textarea></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Tipo Cuenta</td>"+
+                        "<td><input type='text' id='txTipoCuenta' name='txTipoCuenta' value='"+tipo+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Persona</td>"+
+                        "<td><input type='text' id='txidPersona' name='txidPersona' value='"+idPersona+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id Money</td>"+
+                        "<td><input type='text' id='txidMoney' name='txidMoney' value='"+idMoney+"' /></td>"+
+                        "</tr>"+
+                        "<tr style='display:none'>"+
+                        "<td>Id CuentaPersona</td>"+
+                        "<td><input type='text' id='txidCuentaPersona' name='txidCuentaPersona' value='"+IdCuenPersona+"' /></td>"+
+                        "</tr>"+
+                        "</table>"+
+                        "</fieldset>";
+                    document.getElementById("chkKnegativo").style.display="";
+                    document.getElementById("blqKnegativo").style.display="";
+                    document.getElementById("lblinteres").style.display="none";
+                    document.getElementById("txtinteress").style.display="none";
+                    document.getElementById("lblCobroKnegativo").style.display="none";
+                    document.getElementById("txtCobroKnegativo").style.display="none";
+                    document.getElementById("chkCobroPF").style.display="none";
+                    document.getElementById("blqCobroPF").style.display="none";
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            var da1,da2;
+            var req4;
+            function vercuenta(){
+                document.getElementById("divcuenta").innerHTML="";
+                document.getElementById("txtTempSelTipB").value=document.getElementById("selTipoBus").value;
+                document.getElementById("txtTempdataB").value=document.getElementById("txtBuscar").value;
+                document.getElementById("divpermisoKnegativo").style.display="none";
+                document.getElementById("cmdRegistrar").disabled=true;
+                document.getElementById("divcuenta").innerHTML="";
+                var contenido, tipoBusqueda="";
+                contenido=document.getElementById("txtBuscar").value;
+                tipoBusqueda=document.getElementById("selTipoBus").value;
+                if(tipoBusqueda=='0'){
+                    window.alert("Seleccione un tipo de busqueda");
+                }
+                req4 = null;
+                if (window.XMLHttpRequest) {
+                    req4 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req4!=null){
+                    req4.onreadystatechange = procesarRespuesta3;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SDepositoRetiro2?contenido="+contenido.trim()+"&tipoBusqueda="+tipoBusqueda;
+                    req4.open("GET",url,true);
+                    req4.send(null);
+                }
+            }
+
+            var req2;
+            function mostrarcuentadetalle(ind) {
+                document.getElementById("divpermisoKnegativo").style.display="none";
+                document.getElementById("cmdRegistrar").disabled=true;
+                document.getElementById("divcuenta").innerHTML="";
+                var contenido, tipoBusqueda="";
+                contenido=document.getElementById("txtBuscar").value;
+                tipoBusqueda=document.getElementById("selTipoBus").value;
+                if (tipoBusqueda=="NUMERO DE CUENTA"){
+                    contenido=document.getElementById("ttdNumCuenta"+ind).innerHTML;
+                }else if (tipoBusqueda=="DNI" || tipoBusqueda=="NOMBRE" || tipoBusqueda=="APELLIDO"){
+                    contenido=ind;
+                }else if (tipoBusqueda=="RUC"){
+                    contenido=ind;
+                }
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    req2.onreadystatechange = procesarRespuesta2;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SDepositoRetiro?contenido="+contenido+"&tipoBusqueda="+tipoBusqueda;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function procesarRespuesta2(){
+                contenido = document.getElementById('tableMiscuentas');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                    var tamTabla;
+                    tamTabla=document.getElementById("tablamiscuentas").rows.length
+                    if(tamTabla>=6){
+                        contenido = document.getElementById('tableMiscuentas').style.overflow="auto";
+                        contenido = document.getElementById('tableMiscuentas').style.height="300px";
+                    }else{
+                        contenido = document.getElementById('tableMiscuentas').style.overflow="";
+                        contenido = document.getElementById('tableMiscuentas').style.height="";
+                    }
+                }
+            }
+
+            function procesarRespuesta3(){
+                contenido = document.getElementById('divlistPerCuentas');
+                contenido.innerHTML="Cargando los datos...";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                    var tamTabla;
+                    tamTabla=document.getElementById("tablapersonas").rows.length
+                    if(tamTabla>=7){
+                        contenido = document.getElementById('divlistPerCuentas').style.overflow="auto";
+                        contenido = document.getElementById('divlistPerCuentas').style.height="320px";
+                    }else{
+                        contenido = document.getElementById('divlistPerCuentas').style.overflow="";
+                        contenido = document.getElementById('divlistPerCuentas').style.height="";
+                    }
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            function mostrarCuentacliente(ind) {
+                var tipo="";
+                tipo=document.getElementById("tdtipocuenta"+ind).innerHTML
+                if(tipo=="CUENTA CORRIENTE"){
+                    document.getElementById("divcuenta").innerHTML="<table id='tablecuenta' class='tableItems'>"+
+                        "<tr>"+
+                        "<td style='font-weight:bold'>DEPOSITO CUENTA .......:</td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td>Numero de Cuenta:</td>"+
+                        "<td><input type='text' id='txtCCNumCuentaDep' name='txtCCNumCuentaDep' value='' /></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td>Fecha de Dep&oacute;sito:</td>"+
+                        "<td><input type='text' id='txtCCFechaDeposito' name='txtCCFechaDeposito' value='' /></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td>importe:</td>"+
+                        "<td><input type='text' id='txtCCImporteDep' name='txtCCImporteDep' value='' /></td>"+
+                        "</tr>"+
+                        "<tr>"+
+                        "<td>interes:</td>"+
+                        "<td><input type='text' id='txtCCInteres' name='txtCCInteres' value='' />%</td>"+
+                        "</tr>"
+                    "<tr>"
+                    "<td>Numero de Operaci&oacute;n:</td>"
+                    "<td><input type='text' id='txtCCNumeroOPeracion' name='txtCCNumeroOPeracion' value='' /></td>"+
+                        "</tr>"
+                    "</table>";
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            function validartxtBusqueda(){
+                var seltipo;
+                document.getElementById("cmdRegistrar").disabled=true;
+                seltipo=document.getElementById("selTipoBus").value;
+                if(seltipo=="NUMERO DE CUENTA"){
+                    document.getElementById('txtestados').value="0";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return soloNumeroTelefonico(event);' />";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.overflow="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(seltipo=="DNI"){
+                    document.getElementById('txtestados').value="0";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return solonumeros(event);' maxlength='8' />";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(seltipo=="RUC"){
+                    document.getElementById('txtestados').value="0";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return solonumeros(event);'/>";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(seltipo=="NOMBRE"){
+                    document.getElementById('txtestados').value="1";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='' />";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(seltipo=="APELLIDO"){
+                    document.getElementById('txtestados').value="1";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='' />";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }else if(seltipo=="(Seleccione Tipo Busqueda)"){
+                    document.getElementById('txtestados').value="0";
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' disabled type='text' name='txtBuscar' value='' onkeypress='' />";
+                    document.getElementById("divlistPerCuentas").innerHTML="";
+                    document.getElementById("divlistPerCuentas").style.height="0px";
+                    document.getElementById("tableMiscuentas").innerHTML="";
+                    document.getElementById("divcuenta").innerHTML="";
+                    document.getElementById("divpermisoKnegativo").style.display="none";
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var req3;
+            function registrarDepRet(){
+                var TipTrans,tipoCuentah,NumCuentaDep, miIdPersona, miIdMoney,miImporte,miInteres,miIdCuenPersona;
+                var nombreDeposit, apellidosDeposit,observacion,Importe,Knegativo,PCobroPF="",interesKnegativo="";
+                var fechaCobroKneagativo="";
+                TipTrans=document.getElementById("txtTipTrans").value;
+                Importe=document.getElementById("txtImporteDep").value;
+                Knegativo=document.getElementById("txtKnegativo").value;
+                if(document.getElementById("txtCobroPF").value!==null)
+                    PCobroPF=document.getElementById("txtCobroPF").value;
+                if(TipTrans=="DEPOSITO" || TipTrans=="RETIRO"){
+                    if(Importe!=""){
+                        NumCuentaDep=document.getElementById("txtNumCuentaDep").value;
+                        miIdPersona=document.getElementById("txidPersona").value;
+                        miIdMoney=document.getElementById("txidMoney").value;
+                        miImporte=document.getElementById("txtImporteDep").value;
+                        miInteres=document.getElementById("txtInteres").value;
+                        nombreDeposit=document.getElementById("txtNombreDep").value;
+                        apellidosDeposit=document.getElementById("txtApellidoDep").value;
+                        miIdCuenPersona=document.getElementById("txidCuentaPersona").value;
+                        observacion=document.getElementById("txtaObservacion").value;
+                        tipoCuentah=document.getElementById("txTipoCuenta").value;
+                        var miNumCheque;
+                        miNumCheque=document.getElementById("txtNumCheque").value;
+                        interesKnegativo=document.getElementById("txtinteress").value;
+                        fechaCobroKneagativo=document.getElementById("txtCobroKnegativo").value;
+                        if (window.XMLHttpRequest) {
+                            req3 = new XMLHttpRequest();
+                        }else if (window.ActiveXObject) {
+                            req3 = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+                        if(req3!=null){
+                            var rpta;
+                            if(TipTrans=="DEPOSITO")
+                                rpta="DEPOSITO";
+                            else
+                                rpta="RETIRO";
+                            if(document.getElementById('chkKnegativo').checked==true && document.getElementById('txtinteress').value==""){
+                                window.alert("Ingrese Interes para el prestamo");
+                                document.frmdeposito.txtinteress.focus();
+                                return;
+                            }
+                            var answer = confirm ("¿ESTA SEGURO QUE DESEA REGISTRAR "+rpta+"?");
+                            if (answer){
+                                req3.onreadystatechange = procesarrResspuesta;
+                                var PATH = "<%= request.getContextPath()%>";
+                                var url = PATH + "/SRegistrarDepositoRetiro?TipTrans="+TipTrans+"&NumCuentaDep="+
+                                    NumCuentaDep+"&miIdPersonah="+miIdPersona+"&miIdMoney="+
+                                    miIdMoney+"&miImporte="+miImporte+"&miInteres="+miInteres+
+                                    "&nombreDeposit="+nombreDeposit.replace("&", ";", "gi")+"&apellidosDeposit="+
+                                    apellidosDeposit.replace("&", ";", "gi")+"&miIdCuenPersona="+miIdCuenPersona+
+                                    "&observacion="+observacion+"&Knegativo="+Knegativo+"&PCobroPF="+PCobroPF+
+                                    "&miNumCheque="+miNumCheque+"&tipoCuentah="+tipoCuentah+
+                                    "&interesKnegativo="+interesKnegativo+"&fechaCobroKneagativo="+fechaCobroKneagativo;
+                                req3.open("GET",url,true);
+                                req3.send(null);
+                            }
+                        }
+                    }else{
+                        window.alert("DEBE INGRESAR IMPORTE PARA LA TRANSACCION");
+                        document.frmdeposito.txtImporteDep.focus();
+                    }
+                }else{
+                    window.alert("Debe seleccionar el TIPO DE TRANSACCION (DEPOSITO o RETIRO)");
+                }
+            }
+
+            function procesarrResspuesta(){
+                contenido = document.getElementById('divRespuestaRegistro');
+                contenido.innerHTML="Cargando los datos...";
+                if (req3.readyState==4 && req3.status==200) {
+                    contenido.innerHTML = req3.responseText;
+                    var tipTrans;
+                    tipTrans=document.getElementById('txtTipTrans').value;
+                    var es;
+                    es=document.getElementById("txtRespReg").value;
+                    var van;
+                    van=document.getElementById("txtExisteMontoCaja").value;
+                    var vanPF;
+                    vanPF=document.getElementById("txtVanPF").value;
+                    if(van=="OK"){
+                        if(es=="OK"){
+                            if(vanPF==""){
+                                if(tipTrans=="DEPOSITO"){
+                                    alert("El DEPOSITO se ha realizado satisfactoriamente");
+                                    document.frmiraticket.submit();
+                                }else{
+                                    alert("El RETIRO se ha realizado satisfactoriamente");
+                                    document.frmiraticket.submit();
+                                }
+                            }else{
+                                alert("La fecha de plazo fijo vence el :"+vanPF);
+                            }
+                        }else if (es=="NO HAY DINERO SUFICIENTE"){
+                            alert("NO HAY DINERO SUFICIENTE EN LA CUENTA DEL CLIENTE");
+                        }else{
+                            alert("La TRANSACCION NO se pudo realizar, revise sus datos e intentelo de nuevo");
+                        }
+                    }else if(van=="NO HAY DINERO EN CAJA"){
+                        alert("NO DISPONE DE DINERO EN CAJA EN ESTE TIPO DE MONEDA, PIDA UNA TRANSFERENCIA A LA BOVEDA O CAJERO");
+                    }else{
+                        alert("La TRANSACCION NO se pudo realizar, revise sus datos e intentelo de nuevo.");
+                    }
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var eeisus=0;
+            var eetrue="VERDADERO";
+            var eefalse="FALSO";
+            var eedec=".";
+            var eeth=" ";
+            var eedecreg=new RegExp("\\.","g");
+            var eethreg=new RegExp(" ","g");
+            var eecurrencyreg=new RegExp("€","g");
+            var eepercentreg=new RegExp("%","g");
+            var fmtdaynamesshort=new Array("dom","lun","mar","mié","jue","vie","sáb");
+            var fmtdaynameslong=new Array("domingo","lunes","martes","miércoles","jueves","viernes","sábado");
+            var fmtmonthnamesshort=new Array("ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic");
+            var fmtmonthnameslong=new Array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+            var fmtstrings=new Array(","," ","S/.","pta","€","/","$");
+            var fmtdate6=new Array(34,33,25,2);
+            var fmtdate7=new Array(25,2,33,35);
+            var fmtdate8=new Array(25,2,33,36);
+            var fmtdate9=new Array(7,37,3,37,11);
+            var fmtdate10=new Array(38,25,2);
+
+            function myIsNaN(x){
+                return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+            }
+
+            function round(n,nd){
+                if(isFinite(n)&&isFinite(nd)){
+                    var sign_n=(n<0)?-1:1;
+                    var abs_n=Math.abs(n);
+                    var factor=Math.pow(10,nd);
+                    return sign_n*Math.round(abs_n*factor)/factor;
+                }else{
+                    return NaN;
+                }
+            }
+
+            function b2s(b){
+                return b?eetrue:eefalse;
+            }
+
+            function eeparseFloat(str){
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeparsePercent(str){
+                var parts=String(str).split('%');
+                var tmp=String(parts[0]).replace(eedecreg,".");
+                var res=parseFloat(tmp)/100;if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+
+            function eedisplayFloat(x){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var str=String(x);
+                    if(near0RegExp.test(str)){
+                        x=round(x,8);
+                        str=String(x);
+                    }
+                    return str.replace(/\./g,eedec);
+                }
+            }
+
+            function eedisplayFloatV(x){
+                if(x=="")return x;
+                if(isFinite(x)){
+                    return eedisplayFloat(x);
+                }else{
+                    return x;
+                }
+            }
+
+            function eedisplayFloatND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }
+                    }else{
+                        return res;
+                    }
+                }
+            }
+
+            function eedisplayPercentND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    return eedisplayFloatND(x*100,nd)+'%';
+                }
+            }
+
+            function eeparseFloatTh(str){
+                str=String(str).replace(eethreg,"");
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eedisplayFloatNDTh(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        var res2=eeinsertThousand(parts[0].toString());
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }
+                    }else{
+                        return(eeinsertThousand(res.toString()));
+                    }
+                }
+            }
+
+            var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+
+            function eeparseFloatV(str){
+                if(str=="")
+                    return str;str=String(str).replace(eedecreg,".");
+                if(!eeparseFloatVreg.test(str)){
+                    return str;
+                }
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return str;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeinsertThousand(whole){
+                if(whole==""||whole.indexOf("e")>=0){
+                    return whole;
+                }else{
+                    var minus_sign="";
+                    if(whole.charAt(0)=="-"){
+                        minus_sign="-";
+                        whole=whole.substring(1);
+                    }
+                    var res="";
+                    var str_length=whole.length-1;
+                    for(var ii=0;ii<=str_length;ii++){
+                        if(ii>0&&ii%3==0){
+                            res=eeth+res;
+                        }
+                        res=whole.charAt(str_length-ii)+res;
+                    }
+                    return minus_sign+res;
+                }
+            }
+
+            function validar(e){
+                obj=e.srcElement || e.target;
+                tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo<14)return true;
+                patron =/[\d.]/;
+                tecla_valor = String.fromCharCode(tecla_codigo);
+                control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true
+                return patron.test(tecla_valor) &&  control;
+            }
+        </script>
+        <script type="text/javascript" language="JavaScript">
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i = 0,j = 0;
+                var len = 0,len2 = 0;
+                var strCheck = '0123456789';
+                var aux = '',aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode <= 13) return true; // Enter
+                key = String.fromCharCode(whichCode); // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false; // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+        </script>
+        <script type="text/javascript" language="JavaScript">
+            var Aut = false;
+            function ventanaNueva() {
+                if(document.getElementById("chkKnegativo").checked==true){
+                    document.getElementById("chkKnegativo").checked=false;
+                    document.getElementById("lblinteres").style.display="none";
+                    document.getElementById("txtinteress").style.display="none";
+                    document.getElementById("lblCobroKnegativo").style.display="none";
+                    document.getElementById("txtCobroKnegativo").style.display="none";
+                    Dialog.confirm($('loginn').innerHTML,
+                    {   className:"alphacube",
+                        width:400,
+                        okLabel: "Confirmar",
+                        title: "Autorizar Prestamo por falta de dinero en cuenta de Cliente",
+                        cancelLabel: "Cancel",
+                        onOk:function(){
+                            var user =document.getElementById('user').value
+                            var pass =document.getElementById('passwd').value
+                            document.getElementById('res').innerHTML='';
+                            Autorizar(user,pass);
+                            window.alert('¡¡ DATOS ENVIADOS !!')
+                            if(document.getElementById('res').innerHTML==1){
+                                Aut = true;
+                                document.getElementById("chkKnegativo").checked=true;
+                                document.getElementById("lblinteres").style.display="";
+                                document.getElementById("txtinteress").style.display="";
+                                document.getElementById("lblCobroKnegativo").style.display="";
+                                document.getElementById("txtCobroKnegativo").style.display="";
+                                confirmarprestamo();
+                                return true;
+                            }else{
+                                $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                                $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                                new Effect.Shake(Windows.focusedWindow.getId());
+                                return false;
+                            }
+                        }
+                    });
+                }else{
+                    document.getElementById("txtKnegativo").value="NO";
+                    document.getElementById("lblinteres").style.display="none";
+                    document.getElementById("txtinteress").style.display="none";
+                    document.getElementById("lblCobroKnegativo").style.display="none";
+                    document.getElementById("txtCobroKnegativo").style.display="none";
+                }
+            }
+
+            var Aut = false;
+            function ventanaNueva2() {
+                if(document.getElementById("chkCobroPF").checked==true){
+                    document.getElementById("chkCobroPF").checked=false;
+                    Dialog.confirm($('loginn').innerHTML,
+                    {   className:"alphacube",
+                        width:400,
+                        okLabel: "Confirmar",
+                        title: "Autorizar Usuario",
+                        cancelLabel: "cancel",
+                        onOk:function(){
+                            var user =document.getElementById('user').value
+                            var pass =document.getElementById('passwd').value
+                            document.getElementById('res').innerHTML='';
+                            Autorizar(user,pass);
+                            window.alert('¡¡DATOS ENVIADOS!!')
+                            if(document.getElementById('res').innerHTML==1){
+                                Aut = true;
+                                document.getElementById("txtCobroPF").value="2649232134";
+                                document.getElementById("chkCobroPF").checked=true;
+                                return true;
+                            }else{
+                                $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                                $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                                new Effect.Shake(Windows.focusedWindow.getId());
+                                return false;
+                            }
+                        }
+                    });
+                }
+                else{
+                    document.getElementById("txtCobroPF").value="x";
+                }
+            }
+
+            var req9;
+            function Autorizar(login,contrasenia) {
+                req9 = null;
+                if (window.XMLHttpRequest) {
+                    req9 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req9 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req9!=null){
+                    req9.onreadystatechange = procesar1;
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req9.open("GET",url,true);
+                    req9.send(null);
+                }
+            }
+
+            function procesar1(){
+                contenido = document.getElementById('res');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req9.readyState==4 && req9.status==200) {
+                    contenido.innerHTML = req9.responseText;
+                }
+            }
+
+            function confirmarprestamo(){
+                document.getElementById("txtKnegativo").value="SI";
+            }
+        </script>
+        <style type="text/css">
+            .tableItems {
+                border: 1px solid #008585;
+                border-spacing: 0px;
+                border-collapse: collapse;
+            }
+            .thItems {
+                background: #008585;
+                font-family: Arial;
+                font-size: 12pt;
+                color: #FFFFFF;
+            }
+            .tdItems {
+                border: 1px solid #008585;
+                font-family: Arial;
+                font-size: 10pt;
+            }
+            .trItems {
+                background: #FFFFFF;
+            }
+            .trItemspar {
+                background: #9BCFCF;
+            }
+        </style>
+    </head>
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <%
+                    request.setAttribute("idmenu", "20110228202911519729");
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Modulo de Dep&oacute;sitos y Retiros!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div id="loginn" style="display:none">
+                        <p>
+                            <span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span>
+                        </p>
+                        <div style="clear:both">
+
+                        </div>
+                        <p>
+                            <span class="login_label">Usuario</span>
+                            <span class="login_input">
+                                <input type="text" id="user"/>
+                            </span>
+                        </p>
+                        <div style="clear:both"></div>
+                        <p>
+                            <span class="login_label">Contrase&ntilde;a</span>
+                            <span class="login_input">
+                                <input type="password" id="passwd"/>
+                            </span>
+                        </p>
+                        <div style="clear:both">
+
+                        </div>
+                        <div id="res" style="display:none">
+                        </div>
+                    </div>
+                    <div class="story">
+                        <form id="frmdeposito" name="frmdeposito" action="<%= request.getContextPath()%>/NuevaCuentaController.java" method="post">
+                            <table >
+                                <tr>
+                                    <td>
+                                        <fieldset   style="border-width:3px">
+                                            <legend><b>TIPO DE TRANSACCION:</b></legend>
+                                            <center>
+                                                <table style="line-height: ">
+                                                    <tr>
+                                                        <td><font color='#385b88' style='font-size: 12px;'><b>&nbsp;</b></font></td>
+                                                        <td><b> <a onclick="document.getElementById('rdDeposito').checked=true; document.getElementById('txtTipTrans').value='DEPOSITO';" onmouseover="this.style.cursor='default'" style="cursor:default;font-size:16px">DEPOSITO</a><input id="rdDeposito" name="rdTipoTransaccion" type="radio" onclick="document.getElementById('txtTipTrans').value='DEPOSITO'; cambiartipoTrans();"></b> &nbsp;&nbsp;&nbsp;&nbsp;
+                                                            <b> <a onclick="document.getElementById('rdRetiro').checked=true; document.getElementById('txtTipTrans').value='RETIRO';" onmouseover="this.style.cursor='default'" style="cursor:default;font-size:16px">RETIRO</a><input id="rdRetiro"  name="rdTipoTransaccion" type="radio" onclick="document.getElementById('txtTipTrans').value='RETIRO'; cambiartipoTrans();"></b>
+                                                            <input id="txtTipTrans" name="txtTipTrans" type="text" value="" style="display:none">
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </center>
+                                        </fieldset>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><div id="divTipoTrans">
+                                            <table>
+                                                <tr><td>
+                                                        <div id="divBotonCrear">
+
+                                                        </div>
+                                                    </td></tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        <fieldset   style="border-width:3px">
+                                                            <legend><b>BUSCAR POR:</b></legend>
+                                                            <table>
+                                                                <tr>
+                                                                    <td><input type="text" id="txtTempSelTipB" name="txtTempSelTipB" value="" style="display:none">
+                                                                        <input type="text" id="txtTempdataB" name="txtTempdataB" value="" style="display:none">
+                                                                        <input type="text" id="txtbanz" name="txtbanz" value="" style="display:none">
+                                                                        <input type="text" id="txtestados" name="txtestados" value="0" style="display:none">
+                                                                        <select id="selTipoBus" name="selTipoBus" onchange="validartxtBusqueda()" >
+                                                                            <option value="0">(Seleccione Tipo Busqueda)</option>
+                                                                            <option>NUMERO DE CUENTA</option>
+                                                                            <option>DNI</option>
+                                                                            <option>RUC</option>
+                                                                            <option>NOMBRE</option>
+                                                                            <option>APELLIDO</option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td><div id="divtxtBuscar"><input id="txtBuscar" disabled type="text" name="txtBuscar" value="" onkeypress='return soloNumeroTelefonico(event);' /></div></td>
+                                                                    <td colspan="4"><input id="btnBuscarCtas" type="button" value="BuscarCuenta"onclick="vercuenta()" /></td>
+                                                                </tr>
+                                                            </table>
+                                                        </fieldset>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6"><div id="divlistPerCuentas">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6"><div id="tableMiscuentas">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6">
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="divcuenta"></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div id="divKnegativo">
+                                <input id="txtKnegativo" name="txtKnegativo" type="text" value="NO" style="display:none">
+                            </div>
+                            <center><input id="cmdRegistrar" name="cmdRegistrar" type="button" value="Registrar" onclick="registrarDepRet();" disabled/><br>
+                                <div id="divpermisoKnegativo" style="display:none">
+                                    <table border="0">
+                                        <tr>
+                                            <td><input id="chkKnegativo" name="chkKnegativo" type="checkbox" value="valor" onclick="ventanaNueva();" style="display:none"></td>
+                                            <td><label id="blqKnegativo" style="display:none">Permitir prestamo si cliente no cuenta con saldo</label></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><label id="lblinteres" style="display:none">Inter&eacute;s</label><input type="text" id="txtinteress" name="txtinteress" value="0" maxlength="23" onfocus="this.select();" onkeypress="return validar(event);" onchange="range = /^\d{1,3}(\.\d{1,3})?$/;
+                                                hundred = /^1000$/;
+                                                if(!(range.test(this.value) || hundred.test(this.value))){alert('La tasa de interés es inválida.'); document.getElementById('txtTasa').focus();};" style="display:none;">%</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><label id="lblCobroKnegativo" style="display:none">Fecha de Pago</label><input type="text" id="txtCobroKnegativo" name="txtCobroKnegativo" value="<%=DateUtil.getDateTime("dd/MM/yyyy", new Date()) %>" onclick="popUpCalendar(this, frmdeposito.txtCobroKnegativo , 'dd/mm/yyyy');" style="display:none"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><input id="chkCobroPF" name="chkCobroPF" type="checkbox" value="valor" onclick="ventanaNueva2();" style="display:none"></td>
+                                            <td><label id="blqCobroPF" style="display:none">Permitir Cobro a Plazo Fijo antes de Fecha Pactada</label></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </center>
+                            <div id="divRespuestaRegistro">
+                                <input id="txtRespReg" name="txtRespReg" type="text" style="display:none" value="">
+                                <input id="txtExisteMontoCaja" name="txtExisteMontoCaja" type="text" style="display:none" value="">
+                                <input id="txtVanPF" name="txtVanPF" type="text" style='display:none' value="">
+                                <input id="txtCobroPF" name="txtCobroPF" type="text" style='display:none' value="x">
+                            </div>
+                        </form>
+                        <form id="frmiraticket" name="frmiraticket" method="post" action="ticket.htm">
+                        </form>
+                        <input type="hidden" id="txtind" name="txtind" value="">
+                    </div>
+                </div>
+            </div>
+        </div>
+                                        <script type="text/javascript">
+                                            document.getElementById('rdDeposito').focus();
+                                        </script>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

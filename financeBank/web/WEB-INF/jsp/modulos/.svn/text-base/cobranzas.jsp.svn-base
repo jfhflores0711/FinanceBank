@@ -1,0 +1,926 @@
+<%-- 
+Document : Cobranzas.jsp
+Created on : 11/02/2010, 04:41:24 PM
+Author : Oscar
+--%>
+<%@page session="true"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <script language="JavaScript" type="text/JavaScript">
+            <!--
+            function MM_reloadPage(init) {//reloads the window if Nav4 resized
+                if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+                        document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+                else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+            }
+            MM_reloadPage(true);
+            //-->
+        </script>
+        <script type="text/javascript">
+            <%@include file="/js/funciones.js" %>
+        </script>
+        <script type="text/javascript" src="js/validacion.js">
+        </script>
+        <script type="text/javascript">
+            function actualiza(tipo){
+                if('Natural'==tipo){
+                    document.getElementById("tpersona").value=tipo;
+                } else if ('Juridica'==tipo){
+                    document.getElementById("tpersona").value=tipo;
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function submitB(){
+                document.formCobranza.action='cobranzas.htm';
+                document.formCobranza.onsubmit='';
+                document.formCobranza.submit();
+                document.formCobranza.BUSCAR.value="Cargando";
+                document.formCobranza.BUSCAR.disabled=true;
+                document.getElementById("ajaximgo").style.display='block';
+            }
+        </script>
+        <script type="text/javascript">
+            function raise(id, quantidate){
+                var idl=id.substring(0, 1);
+                var idh=id.substring(1);
+                var com=document.getElementById("cobrar2"+idh);
+                var tot=document.getElementById('cobrarT');
+                if(idl=='z'){
+                    if(com.checked){
+                        tot.value= Math.round((parseFloat(tot.value)-parseFloat(document.getElementById('cobrar21'+idh).value))* 100) / 100;
+                    }
+                    com.checked=true;
+                    document.getElementById('x'+idh).value='1';
+                }
+                tot.value= Math.round((quantidate + parseFloat(tot.value))* 100) / 100;
+                document.getElementById(id).value='1';
+            }
+            function fold(id,quantidate){
+                var idl=id.substring(0, 1);
+                var idh=id.substring(1);
+                var tot=document.getElementById('cobrarT');
+                if(idl=='z'){
+                    var uncomp=document.getElementById("cobrar2"+idh);
+                    if(uncomp.checked){
+                        uncomp.checked=false;
+                    }
+                    document.getElementById('x'+idh).value='0';
+                    tot.value=Math.round((parseFloat(tot.value) -quantidate)* 100) / 100 ;
+                    document.getElementById(id).value='0';
+                } else {
+                    var uncomp=document.getElementById("cobrar1"+idh);
+                    document.getElementById(id).value='0';
+                    if(uncomp.checked){
+                        uncomp.checked=false;
+                        tot.value= Math.round((parseFloat(tot.value)-parseFloat(document.getElementById('cobrar12'+idh).value))* 100) / 100;
+                        document.getElementById('z'+idh).value='0';
+                    }else{
+                        tot.value=Math.round((parseFloat(tot.value) -quantidate)* 100) / 100 ;
+                    }
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function validartxtBusquedac(){
+                var seltipo;
+                seltipo=document.getElementById("selTipoBus")[document.getElementById("selTipoBus").selectedIndex].value;
+                if(seltipo=="ncta"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return soloNumeroTelefonico(event);'  />";
+                }else if(seltipo=="dni_ruc"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='' onkeypress='return solonumeros(event);'/>";
+                }else if(seltipo=="ape" || seltipo=="nom"){
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value=''/>";
+                }else{
+                    document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='No se puede realizar la búsqueda' readonly";
+                }
+                document.getElementById("txtBuscar").focus();
+            }
+            function rebusqueda(){
+                var seltipo=document.getElementById("cuentaCte")[document.getElementById("cuentaCte").selectedIndex].value;
+                var cc=seltipo.split(" ",1);
+                document.getElementById("selTipoBus")[document.getElementById("selTipoBus").selectedIndex].value="ncta";
+                document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='"+cc[0].replace("N", "") +"' onfocus='blur();' />";
+            }
+        </script>
+        <script type="text/javascript">
+            function rebusquedac(){
+                var seltipo=document.getElementById("cuentadr")[document.getElementById("cuentadr").selectedIndex].value;
+                document.getElementById("selTipoBus")[document.getElementById("selTipoBus").selectedIndex].value="dni_ruc";
+                document.getElementById("divtxtBuscar").innerHTML=" <input id='txtBuscar' type='text' name='txtBuscar' value='"+seltipo+"' onfocus='blur();' />";
+            }
+        </script>
+        <script language="javascript" type="text/javascript" src="js/library.js">
+        </script>
+        <script language="Javascript" type="text/javascript">
+            function numero(){
+                if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;
+            }
+            function roundupMP(){
+                var dMontoPagar=document.frmdata.dMontoPagar.value;
+                dMontoPagar=Math.round(dMontoPagar*100)/100;
+                document.frmdata.dMontoPagar.value=dMontoPagar;
+            }
+            function roundupMR(){
+                var dMontoRetrib=document.frmdata.dMontoRetrib.value;
+                dMontoRetrib=Math.round(dMontoRetrib*100)/100;
+                document.frmdata.dMontoRetrib.value=dMontoRetrib;
+            }
+            function esDecimal(valor) {
+                var result = true;
+                var strValidChars = "0123456789.";
+                var strChar;
+                var cantDec = 0;
+                var charEvent;
+                var digitosDec = 0;
+                if(navigator.appName=="Netscape"){charEvent = window.event.which} else {charEvent = window.event.keyCode}
+                if(charEvent==46) {cantDec++;}
+                if(charEvent > 31 && (charEvent < 46 || (charEvent>46 && charEvent<48) || charEvent> 57)) {result=false;}
+                if(result){
+                    var pasoDecimal = false;
+                    // Para validar el punto decimal.-
+                    for (i=0; i<valor.length; i++){
+                        strChar = valor.charAt(i);
+                        if(strValidChars.indexOf(strChar)==-1){result = false;}
+                        if(strChar=='.'){
+                            cantDec++;
+                            pasoDecimal=true;
+                            digitosDec++;
+                        }else{
+                            if(pasoDecimal){digitosDec++;}
+                        }
+                        if(cantDec>1) {result=false; break;}
+                    }
+                }
+                return result;
+            }
+            function redondearDecimales( objeto ){
+                objeto.value = RedondeoDecimal( objeto.value , 2);
+            }
+            function RedondeoDecimal(numero, decimales){
+                var m= Math.pow(10,decimales);
+                var n2 = Math.round(numero * m);
+                var n3 = n2/m;
+                var n4 = ""+n3;
+                var punto = false;
+                var tiene = 0;
+                var oneChar = '';
+                var faltan = 0;
+                for(var i=0; i<n4.length; i++){
+                    oneChar = n4.charAt(i);
+                    if (oneChar == ".")	{punto = true; continue;}
+                    if(punto)	{tiene++;}
+                }
+                faltan = decimales - tiene;
+                if(tiene==0){ n4 = n4 + "."; }
+                for(var i=0; i<faltan; i++){ n4 = n4 + "0"; }
+                return( n4 );
+            }
+            function calcular(){
+                date2=new Date();
+                var date=03;
+                var Dmes=document.frmdata.sMes.value;
+                var Danio=document.frmdata.sAnio.value;
+                var sAnioPago=document.frmdata.sAnioPago.value;
+                var Pdia=document.frmdata.sDiaPago.value;
+                var mes=document.frmdata.sMesPago.value;
+                var dia=document.frmdata.sDiaPago.value;
+                var Pmes=document.frmdata.sMesPago.value;
+                var Panio=document.frmdata.sAnioPago.value;
+                var anoref=1900;
+                var modulo=(sAnioPago-anoref)%4;
+                var error=0;
+                if(Dmes==""){
+                   window.alert("Debe seleccionar el mes de devengue");
+                    return;
+                }
+                if(document.frmdata.ruc.value!="" && document.frmdata.RazSoc.value!="" && document.frmdata.sDiaPago.value!="" && document.frmdata.sMesPago.value!="" && document.frmdata.sAnioPago.value!=""){
+                    if(document.frmdata.dMontoPagar.value>0 || document.frmdata.dMontoRetrib.value>0)
+                    { if(date<Pmes) {
+                           window.alert("La fecha es mayor a la del sistema");
+                            error=error+1;
+                        }
+                        if(Pdia>31 || Pmes>12 || Panio>date2.getYear()) {
+                           window.alert("Verifique la fecha");
+                            error=error+1;
+                        }
+                        if(sAnioPago<Danio) {
+                           window.alert("La fecha devengue no puede ser mayor a la de pago");
+                            error=error+1;
+                        }
+                        if(sAnioPago<1900) {
+                           window.alert("Año "+anio+" incorrecto");
+                            document.frmdata.sAnioPago.value="";
+                            error=error+1;
+                        }else {
+                            if(modulo==1 && mes==2 && dia==29){
+                               window.alert("El año no es bisiesto");
+                                document.frmdata.dia.value="";
+                                error=error+1;
+                            }else{
+                                if(mes==2 && dia>29){
+                                   window.alert("No hay dia "+dia+" en febrero");
+                                    error=error+1;
+                                }
+                            }if(modulo==1 && mes==2 && dia>29){
+                               window.alert("El mes de febrero no tiene dia "+dia);
+                                error=error+1;
+                            }
+                        }
+                        if(dia>30 && mes==4){
+                           window.alert("El mes de abril no tiene dia 31");
+                            error=error+1;
+                        }
+                        if(dia>30 && mes==6){
+                           window.alert("El mes de junio no tiene dia 31");
+                            error=error+1;
+                        }
+                        if(dia>30 && mes==9){
+                           window.alert("El mes de setiembre no tiene dia 31");
+                            error=error+1;
+                        }
+                        if(dia>30 && mes==11){
+                           window.alert("El mes de noviembre no tiene dia 31");
+                            error=error+1;
+                        }
+                        if(error==0){
+                            document.frmdata.action="/IntMoratorioCal?flag=01";
+                            document.frmdata.method="post";
+                            document.frmdata.submit();
+                        }
+                    }
+                    else{
+                       window.alert("No se puede hacer el cálculo con valores 0.00");
+                    }
+                }else
+                   window.alert("Debe llenar todos los campos");
+            }
+            function validarRuc(){
+                var ruc=document.frmdata.ruc.value;
+                var truc=ruc.length;
+                if(truc==11){
+                    document.frmdata.action="/IntMoratorioCal?flag=ruc";
+                    document.frmdata.method="post";
+                    document.frmdata.submit();
+                }
+                else {
+                   window.alert("Por favor, ingrese 11 digitos en el RUC");
+                    return;
+                }
+            }
+            function cambiarAnio(){
+                anioR=document.frmdata.sAnio.value;
+                date=new Date();
+                anioA=date.getYear()-1;
+                tanio="18";
+                if(document.frmdata.sMes.selectedIndex == -1)
+                    mes=0;
+                else
+                    mes = document.frmdata.sMes[document.frmdata.sMes.selectedIndex].text;
+                with (document.frmdata.sMes){
+                    for (var i = options.length; i > 0 ; i--) options[i] = null;
+                    if(date.getYear()==anioR){
+                        options[0] = new Option('02');
+                        options[0].value = '02';
+                        if (mes == options[0].text){
+                            options[0].selected = true;
+                        }
+                        options[1] = new Option('01');
+                        options[1].value = '01';
+                        if (mes == options[1].text){
+                            options[1].selected = true;
+                        }
+                    }
+                    if(date.getYear()!=anioR && anioR!=1993){
+                        options[0] = new Option('01');
+                        options[0].value = '01';
+                        if (mes == options[0].text){
+                            options[0].selected = true;
+                        }
+                        options[1] = new Option('02');
+                        options[1].value = '02';
+                        if (mes == options[1].text){
+                            options[1].selected = true;
+                        }
+                        options[2] = new Option('03');
+                        options[2].value ='03';
+                        if (mes == options[2].text){
+                            options[2].selected = true;
+                        }
+                        options[3] = new Option('04');
+                        options[3].value = 04;
+                        if (mes == options[3].text){
+                            options[3].selected = true;
+                        }
+                        options[4] = new Option('05');
+                        options[4].value = '05';
+                        if (mes == options[4].text){
+                            options[4].selected = true;
+                        }
+                        options[5] = new Option('06');
+                        options[5].value = '06';
+                        if (mes == options[5].text){
+                            options[5].selected = true;
+                        }
+                        options[6] = new Option('07');
+                        options[6].value = '07';
+                        if (mes == options[6].text){
+                            options[6].selected = true;
+                        }
+                        options[7] = new Option('08');
+                        options[7].value = '08';
+                        if (mes == options[7].text){
+                            options[7].selected = true;
+                        }
+                        options[8] = new Option('09');
+                        options[8].value = '09';
+                        if (mes == options[8].text){
+                            options[8].selected = true;
+                        }
+                        options[9] = new Option('10');
+                        options[9].value = '10';
+                        if (mes == options[9].text){
+                            options[9].selected = true;
+                        }
+                        options[10] = new Option('11');
+                        options[10].value = '11';
+                        if (mes == options[10].text){
+                            options[10].selected = true;
+                        }
+                        options[11] = new Option('12');
+                        options[11].value = '12';
+                        if (mes == options[11].text){
+                            options[11].selected = true;
+                        }
+                    }
+                    if(anioR==1993){
+                        options[00] = new Option('06');
+                        options[00].value = '06';
+                        if (mes == options[0].text){
+                            options[0].selected = true;
+                        }
+                        options[01] = new Option('07');
+                        options[01].value = '07';
+                        if (mes == options[1].text){
+                            options[1].selected = true;
+                        }
+                        options[02] = new Option('08');
+                        options[02].value = '08';
+                        if (mes == options[2].text){
+                            options[2].selected = true;
+                        }
+                        options[03] = new Option('09');
+                        options[03].value = '09';
+                        if (mes == options[3].text){
+                            options[3].selected = true;
+                        }
+                        options[4] = new Option('10');
+                        options[4].value = '10';
+                        if (mes == options[4].text){
+                            options[4].selected = true;
+                        }
+                        options[5] = new Option('11');
+                        options[5].value = '11';
+                        if (mes == options[5].text){
+                            options[5].selected = true;
+                        }
+                        options[6] = new Option('12');
+                        options[6].value = '12';
+                        if (mes == options[6].text){
+                            options[6].selected = true;
+                        }
+                    }
+                }
+            }
+            window.name="mapa";
+            function filtraParametroRequest(parametro){
+                var expreg = ///[_:;<>°!"#$%=?¡¿'*\~{}\()[\]{\\^`|¬´¨]/g;
+                parametro = parametro.replace(expreg,"");
+                return parametro;
+            }
+            function filtraParametro(objeto){
+                objeto.value = filtraParametroRequest(objeto.value);
+            }
+        </script>
+        <script type="text/javascript" language="JavaScript"><!--
+            function evaluar(){
+                var tf;
+                if(document.formCobranza.action=="cobranzas.htm"){
+                    if(document.formCobranza.txtBuscar.value==""){
+                        window.alert("Ingrese algún texto a buscar!");
+                        return false;
+                    }
+                    return true;
+                }
+                tf = window.confirm("Está seguro de que desea grabar los datos?")
+                if (tf == true){
+                    return true;
+                }
+                else {
+                    return false
+                }
+            }//---></script>
+        <script type="text/javascript" language="JavaScript"><!--
+            function validarc(){
+                if(document.getElementById("cobrarT").value==0){
+                    window.alert("No ha seleccionado ninguna opción a cobrar");
+                    return false;
+                }else{
+                    var mm=document.getElementById("cobrarT").value;
+                    document.formCobranza.action="comprobanteCobranza.htm";
+                    window.alert("El monto actual a cobrar es " + mm );
+                }
+                var tf = window.confirm("Está seguro de que desea grabar los datos?");
+                if (tf == true){
+                    return true;
+                }
+                return false
+            }//--->
+        </script>
+        <STYLE type="text/css">
+            <!--
+            .Estilo1 {font-size: 18px; font-weight: bold;}
+            .Estilo3 {font-size: 18px}
+            .Estilo4 {color: #FF0000; font-weight: bold; font-family: Arial, Helvetica, sans-serif; }
+            .cobranza{color: #125010; font-size:1.4em; font-family: Arial, Helvetica, sans-serif; }
+            -->
+        </STYLE>
+    </head>
+    <body onload="document.getElementById('rbPersona').focus();">
+        <%
+                    request.setAttribute("idmenu", "20110228202911502983");
+        %>
+        <%@include file="../common/header.jsp" %>        
+        <%
+                    String dato1[] = null;
+                    String dato2[] = null;
+                    String dato3[] = null;
+                    String many = "";
+                    String mensaje = "Carga Completada";
+                    String dato4[] = null;
+                    Set detalles = new HashSet();
+                    String numeroPrestamo = "";
+                    String moneda = "";
+                    String tmp;
+                    tmp = request.getParameter("xl_postback");
+                    if (tmp != null) {
+                        mensaje = "";
+                        tmp = request.getParameter("selTipoBus");
+                        String texto = request.getParameter("txtBuscar");
+                        String tipopersona = request.getParameter("radioPersona");
+                        boolean ejecutar = true;
+                        if (texto == null || texto.length() == 0) {
+                            ejecutar = false;
+                            mensaje = "No introdujo ningún texto a buscar";
+                        }
+                        if (tmp == null || tmp.length() == 0) {
+                            ejecutar = false;
+                            mensaje += "\nSe produjo un error, vuelva a intentar";
+                        }
+                        if (ejecutar) {
+                            String hql = "";
+                            texto = ConvertUtil.prepareStringParameter(texto);
+                            if ("ncta".equals(tmp)) {
+                                texto = texto.replace("N", "");
+                                hql = "from TCuentaPersona where numCta like '%" + texto + "%' and estado='PRESTAMO'";
+                                List result = d.findAll(hql);
+                                Iterator it = result.iterator();
+                                int tcpsize = result.size();
+                                if (tcpsize > 0) {
+                                    if (tcpsize < 10) {
+                                        Set data = new HashSet();
+                                        int tcps = 0;
+                                        while (it.hasNext()) {
+                                            TCuentaPersona tcp = (TCuentaPersona) it.next();
+                                            if ("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) || "CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) {
+                                                data.add(tcp);
+                                            }
+                                        }
+                                        int xData = data.size();
+                                        if (xData > 0) {
+                                            many = "yes";
+                                            dato1 = new String[xData];
+                                            dato2 = new String[xData];
+                                            dato3 = new String[xData];
+                                            dato4 = new String[xData];
+                                            Iterator itDat = data.iterator();
+                                            while (itDat.hasNext()) {
+                                                TCuentaPersona tcp = (TCuentaPersona) itDat.next();
+                                                if ("Juridica".equals(tipopersona)) {
+                                                    dato1[tcps] = tcp.getTPersona().getRuc();
+                                                } else {
+                                                    dato1[tcps] = tcp.getTPersona().getDocIdentidad();
+                                                }
+                                                dato2[tcps] = tcp.getTPersona().getNombre();
+                                                dato3[tcps] = tcp.getTPersona().getApellidos();
+                                                dato4[tcps] = tcp.getNumCta() + (tcp.getSaldo().doubleValue() < 0.0 ? "N" : "") + " " + tcp.getTMoneda().getNombre() + " (" + tcp.getTMoneda().getCodMoneda() + ")";
+                                                tcps++;
+                                            }
+                                        } else {
+                                            mensaje += "Cuenta del cliente no apta para préstamos";
+                                        }
+                                    } else {
+                                        mensaje += "Se encontraron muchas coincidencias, ajuste más los parámetros";
+                                    }
+                                } else {
+                                    mensaje += "No se ha encontrado a ninguna entidad por su cuenta corriente.";
+                                }
+                            } else {
+                                if ("dni_ruc".equals(tmp)) {
+                                    if ("Juridica".equals(tipopersona)) {
+                                        hql = "from TPersona where ruc like '%" + texto + "%' and estado='ACTIVO'";
+                                    } else {
+                                        hql = "from TPersona where docIdentidad like '%" + texto + "%' and estado='ACTIVO'";
+                                    }
+                                } else {
+                                    if ("nom".equals(tmp)) {
+                                        hql = "from TPersona where nombre like '%" + texto.toUpperCase() + "%' and estado='ACTIVO'";
+                                    } else {
+                                        hql = "from TPersona where apellidos like '%" + texto.toUpperCase() + "%' and estado='ACTIVO'";
+                                    }
+                                }
+                                List result = d.findAll(hql);
+                                Iterator it = result.iterator();
+                                int tpsize = result.size();
+                                if (tpsize > 0) {
+                                    if (tpsize < 10) {
+                                        Set datPer = new HashSet();
+                                        while (it.hasNext()) {
+                                            TPersona p = (TPersona) it.next();
+                                            Iterator itera = p.getTCuentaPersonas().iterator();
+                                            boolean buscando = true;
+                                            while (itera.hasNext() && buscando) {
+                                                TCuentaPersona tcp = (TCuentaPersona) itera.next();
+                                                if ("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) || "CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) {
+                                                    datPer.add(p);
+                                                    buscando = false;
+                                                }
+                                            }
+                                        }
+                                        Iterator idataTP = datPer.iterator();
+                                        int xDaPer = datPer.size();
+                                        if (xDaPer > 0) {
+                                            if (xDaPer == 1) {
+                                                TPersona tp = (TPersona) idataTP.next();
+                                                Iterator iteral = tp.getTCuentaPersonas().iterator();
+                                                dato1 = new String[xDaPer];
+                                                dato2 = new String[xDaPer];
+                                                dato3 = new String[xDaPer];
+                                                if ("Juridica".equals(tipopersona)) {
+                                                    dato1[0] = tp.getRuc();
+                                                } else {
+                                                    dato1[0] = tp.getDocIdentidad();
+                                                }
+                                                dato2[0] = tp.getNombre();
+                                                dato3[0] = tp.getApellidos();
+                                                Set datal = new HashSet();
+                                                int tcps = 0;
+                                                while (iteral.hasNext()) {
+                                                    TCuentaPersona tcp = (TCuentaPersona) iteral.next();
+                                                    if ("CUENTA CORRIENTE".equals(tcp.getTTipoCuenta().getDescripcion()) || "CUENTA AHORRO".equals(tcp.getTTipoCuenta().getDescripcion())) {
+                                                        datal.add(tcp);
+                                                    }
+                                                }
+                                                int xData = datal.size();
+                                                if (xData > 0) {
+                                                    many = "many";
+                                                    dato4 = new String[xData];
+                                                    Iterator itDat = datal.iterator();
+                                                    while (itDat.hasNext()) {
+                                                        TCuentaPersona tcp = (TCuentaPersona) itDat.next();
+                                                        dato4[tcps] = tcp.getNumCta() + (tcp.getSaldo().doubleValue() < 0.0 ? "N" : "") + " " + tcp.getTMoneda().getNombre() + " (" + tcp.getTMoneda().getCodMoneda() + ")";
+                                                        tcps++;
+                                                    }
+                                                } else {
+                                                    mensaje += "Cuenta del cliente no encontrada";
+                                                }
+                                            } else {
+                                                dato1 = new String[xDaPer];
+                                                dato2 = new String[xDaPer];
+                                                dato3 = new String[xDaPer];
+                                                int q = 0;
+                                                while (idataTP.hasNext()) {
+                                                    TPersona tp = (TPersona) idataTP.next();
+                                                    if ("Juridica".equals(tipopersona)) {
+                                                        dato1[q] = tp.getRuc();
+                                                    } else {
+                                                        dato1[q] = tp.getDocIdentidad();
+                                                    }
+                                                    dato2[q] = tp.getNombre();
+                                                    dato3[q] = tp.getApellidos();
+                                                    q++;
+                                                }
+                                                many = "manymuch";
+                                            }
+                                        } else {
+                                            mensaje += "Cuenta del cliente no apta para préstamos, créalo uno nuevo";
+                                        }
+                                    } else {
+                                        many = "no";
+                                        mensaje += "Se encontraron muchas entidades/personas, ajuste más los parámetros";
+                                    }
+                                } else {
+                                    mensaje += "No se ha encontrado a ninguna entidad/persona en la búsqueda.";
+                                }
+                            }
+                        } else {
+                            mensaje = "\nLa busqueda no tuvo resultado";
+                        }
+                    } else {
+                        mensaje = "Ingrese una opcion a buscar";
+                    }
+        %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Credencial personal</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <legend>
+                                    <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                                </legend></fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main"><div id="welcome" class="post">
+                    <h2 class="title">Préstamos y cobranzas --> Créditos!</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="meta"><table border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td width="307" valign="top"><blockquote>
+                                        <p><strong><a href="prestamos.htm" title="REALIZAR PRÉSTAMOS">Ir a PRÉSTAMOS</a></strong>&nbsp;</p>
+                                    </blockquote></td>
+                                <td width="588"><span class="Estilo1" style="background:url(images/bg_glossaryButton.png) repeat-x">COBRANZA DE CUOTAS</span></td>
+                            </tr>
+                            <tr><td colspan="2"><div id="Layer1" style="z-index:1">
+                                        <form name="formCobranza" method="post" action="#" onsubmit="return validarc();">
+                                            <input type="hidden" name="xl_postback" value="1">
+                                            <blockquote><table width="800" border="0" class="cobranza">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td width="161"> <p><strong> Escoja:<input type="hidden" value="Natural" name="tpersona" id="tpersona">
+                                                                    </strong></p></td>
+                                                            <td>
+                                                                <strong><a onclick="document.getElementById('rbPersona').click();" style="cursor: default;">Persona Natural&nbsp;</a>
+                                                                    <input type="radio" onclick="actualiza('Natural');" value="Natural" checked="checked" name="radioPersona" id="rbPersona"></strong>
+                                                                <strong><a onclick="document.getElementById('rbJuridica').click();" style="cursor: default;">Persona Juridica&nbsp;</a>
+                                                                    <input type="radio" onclick="actualiza('Juridica');" value="Juridica" name="radioPersona" id="rbJuridica"></strong></td>
+                                                            <td>____________________________________________________</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><p><strong ><select id="selTipoBus" name="selTipoBus" onchange="validartxtBusquedac();">
+                                                                            <option selected value="noSelB">Seleccione:</option>
+                                                                            <option value="dni_ruc">DNI/RUC:</option>
+                                                                            <option value="nom">NOMBRES:</option>
+                                                                            <option value="ape">APELLIDOS:</option>
+                                                                            <option value="ncta">Num. Cuenta:</option>
+                                                                        </select>
+                                                                    </strong></p></td>
+                                                            <td><div id="divtxtBuscar"><input id="txtBuscar" type="text" value="Seleccione" name="txtBuscar" /></div></td>
+                                                            <td><input type="button" name="BUSCAR" value="BUSCAR" onclick="return submitB();">
+                                                                <div id="ajaximgo" style="display:none"><img alt="Cargando.." src="images/ajax/ajax-loader1.gif"></div></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><p><strong>DNI/RUC:
+                                                                    </strong></p></td>
+                                                            <td>
+                                                                <%
+                                                                            String js = "";
+                                                                            if ("manymuch".equals(many)) {
+                                                                                js = "onclick=\"rebusquedac();\"";
+                                                                                mensaje += "Seleccione un DNI/RUC y volver a realizar otra búsqueda";
+                                                                            }
+                                                                            out.write("<select name=\"cuentadr\" id=\"cuentadr\" size=\"1\" " + js + "/>");
+                                                                            if (dato1 != null) {
+                                                                                for (int i = 0; i < dato1.length; i++) {
+                                                                                    out.write("<option value='" + dato1[i] + "'>" + dato1[i] + "</option>");
+                                                                                }
+                                                                                out.write("</select>");
+                                                                            } else {
+                                                                                out.write("<option value='sinSeleccion'>No hay Entidad/Persona</option></select>");
+                                                                            }
+                                                                %>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><p><strong>NOMBRES/Razon Social:
+                                                                    </strong></p></td>
+                                                            <td><input type="text" name="textfield2" id="nombrers" value="<%=(dato2 != null ? dato2[0] : "")%>" readonly></td>
+                                                            <td rowspan="3" style="color:red;font-weight:bold"><%=mensaje%></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><p><strong>APELLIDOS/Representante:
+                                                                    </strong></p></td>
+                                                            <td><input type="text" name="textfield3" id="aperep" value="<%=(dato3 != null ? dato3[0] : "")%>"  readonly></td>
+                                                        </tr>
+                                                        <tr><td><p><strong>CTA. CTE.:</strong></p></td>
+                                                            <td>
+                                                                <%
+                                                                            js = "";
+                                                                            if ("many".equals(many)) {
+                                                                                js = "onclick=\"rebusqueda();\"";
+                                                                            }
+                                                                            out.write("<select name=\"cuentaCte\" id=\"cuentaCte\" size=\"1\" " + js + "/>");
+                                                                            if (dato4 != null) {
+                                                                                if (dato4.length == 1) {
+                                                                                    String hqlc = "from TRegistroPrestamo trp where trp.TCuentaPersona.numCta='" + dato4[0].substring(0, dato4[0].indexOf(" ")).replace("N", "") + "'";
+                                                                                    System.out.println("hqlc = " + hqlc);
+                                                                                    List el = d.findAll(hqlc);
+                                                                                    int p = el.size();
+                                                                                    System.out.println("p=" + p);
+                                                                                    if (p >= 1) {
+                                                                                        Iterator ift = el.iterator();
+                                                                                        List realP = new ArrayList();
+                                                                                        realP.clear();
+                                                                                        while (ift.hasNext()) {
+                                                                                            TRegistroPrestamo xtrp = (TRegistroPrestamo) ift.next();
+                                                                                            if ("ACTIVO".equals(xtrp.getEstado())) {
+                                                                                                realP.add(xtrp);
+                                                                                            }
+                                                                                        }
+                                                                                        if (realP.isEmpty()) {
+                                                                                            mensaje = "No tiene un préstamo que cancelar...";
+                                                                                        } else {
+                                                                                            TRegistroPrestamo xtrp = (TRegistroPrestamo) realP.get(0);
+                                                                                            moneda = xtrp.getTCuentaPersona().getTMoneda().getSimbolo() + " ";
+                                                                                            numeroPrestamo = xtrp.getTOperacion().getDescripcion();
+                                                                                            detalles = xtrp.getTDetallePrestamos();
+                                                                                            Map ticket = new HashMap();
+                                                                                            ticket.put("RUC", xtrp.getTCuentaPersona().getTPersona().getRuc());
+                                                                                            ticket.put("DNI", xtrp.getTCuentaPersona().getTPersona().getDocIdentidad());
+                                                                                            ticket.put("MONEDA", xtrp.getTCuentaPersona().getTMoneda().getNombre());
+                                                                                            ticket.put("NOMBRE", xtrp.getTCuentaPersona().getTPersona().getNombre());
+                                                                                            ticket.put("APELLIDOS", xtrp.getTCuentaPersona().getTPersona().getApellidos());
+                                                                                            String c = xtrp.getTCuentaPersona().getNumCta();
+                                                                                            ticket.put("NUMEROCUENTA", c.substring(0, 5) + "-" + c.substring(5, 6) + "-" + c.substring(6));
+                                                                                            ticket.put("CODTIPOCUENTA", xtrp.getTCuentaPersona().getTTipoCuenta().getCodigoCuenta());
+                                                                                            ticket.put("TIPOCUENTA", xtrp.getTCuentaPersona().getTTipoCuenta().getDescripcion());
+                                                                                            ticket.put("IDPRESTAMO", xtrp.getIdprestamo());
+                                                                                            session.setAttribute("ticketc", ticket);
+                                                                                        }
+                                                                                    } else {
+                                                                                        mensaje += "La cuenta no tiene un prestamo pendiente.";
+                                                                                    }
+
+                                                                                } else if (dato4.length > 1) {
+                                                                                    mensaje += "Muchos préstamos no se pueden mostrar a la vez.";
+                                                                                }
+                                                                                if ("yes".equals(many)) {
+                                                                                    out.write("<script> var data1=new Array(" + dato1.length + "); var data2=new Array(" + dato2.length + "); var data3=new Array(" + dato3.length + "); var data4=new Array(" + dato4.length + ");");
+                                                                                    for (int i = 0; i < dato1.length; i++) {
+                                                                                        out.write("data1[" + i + "]='" + dato1[i] + "';");
+                                                                                        out.write("data2[" + i + "]='" + dato2[i] + "';");
+                                                                                        out.write("data3[" + i + "]='" + dato3[i] + "';");
+                                                                                        out.write("data4[" + i + "]='" + dato4[i] + "';");
+                                                                                    }
+                                                                                    out.write("</script>");
+                                                                                }
+                                                                                for (int i = 0; i < dato4.length; i++) {
+                                                                                    out.write("<option value='" + dato4[i] + "'>" + dato4[i] + "</option>");
+                                                                                }
+                                                                                out.write("</select>");
+                                                                            } else {
+                                                                                out.write("<option value='sinSeleccion'>No hay cuentas</option></select>");
+                                                                            }
+                                                                %>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="3"><p><strong>PR&Eacute;STAMO N&ordm; <span id="numeroPrestamo"><%=numeroPrestamo%><input name="numeroPrestamo" type="hidden" value="<%=numeroPrestamo%>"> </span></strong></p></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="3"><div class="pagos" id="pagos">
+                                                                    <%
+                                                                                int cdeP = detalles.size();
+                                                                                Iterator iDet = detalles.iterator();
+                                                                                if (cdeP > 0) {
+                                                                    %>
+                                                                    <table width="806" border="1">
+                                                                        <tr>
+                                                                            <td colspan="7"><div align="center"><strong>Fechas de Pago del pr&eacute;stamo</strong></div></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td width="50"><div align="center"><strong>Numero de Cuota </strong></div></td>
+                                                                            <td width="125"><div align="center"><strong>Fecha de pago </strong></div></td>
+                                                                            <td><div align="center"><strong>Capital</strong></div></td>
+                                                                            <td><div align="center"><strong>Inter&eacute;s</strong></div></td>
+                                                                            <td><div align="center"><strong>Moras</strong></div></td>
+                                                                            <td><div align="center"><strong>Monto Total </strong></div></td>
+                                                                            <td width="60"><div align="center"><strong>Estado de cancelaci&oacute;n</strong></div></td>
+                                                                        </tr>
+                                                                        <%
+                                                                                                                                                            TDetallePrestamo[] ordenado = new TDetallePrestamo[cdeP + 1];
+                                                                                                                                                            while (iDet.hasNext()) {
+                                                                                                                                                                TDetallePrestamo prestamo = (TDetallePrestamo) iDet.next();
+                                                                                                                                                                ordenado[prestamo.getNumeroCuota().intValue()] = prestamo;
+                                                                                                                                                            }
+                                                                                                                                                            for (int l = 1; l <= cdeP; l++) {
+                                                                                                                                                                TDetallePrestamo prestamo = ordenado[l];
+                                                                        %>
+                                                                        <tr>
+                                                                            <td><div align="center"><%=prestamo.getNumeroCuota().toString()%> </div></td>
+                                                                            <%
+                                                                                                                                                                        double hoy = DateUtil.today();
+                                                                                                                                                                        double tim = prestamo.getTRegistroPrestamo().getInteresMoratorio().doubleValue();
+                                                                                                                                                                        double fechap = DateUtil.v2n(prestamo.getFechaPago());
+                                                                                                                                                                        boolean estado = ("PENDIENTE".equals(prestamo.getEstado()) ? true : false);
+                                                                                                                                                                        if (estado) {
+                                                                                                                                                                            TDetallePrestamo xprestamo = (TDetallePrestamo) d.load(TDetallePrestamo.class, prestamo.getIddetalleprestamo());
+                                                                                                                                                                            xprestamo.setInteresMoratorio(BigDecimal.valueOf(PrestamoUtil.calculoMora(fechap, hoy, prestamo.getMontoCapital().doubleValue(), PrestamoUtil.calTEA(tim / 100))));
+                                                                                                                                                                            xprestamo.setInteresComp(CurrencyConverter.formatToMoneyUS(PrestamoUtil.calculoInteresCompensatorio(prestamo.getMontoCapital().doubleValue(), PrestamoUtil.calTEA(tim / 100), hoy - fechap), 2));
+                                                                                                                                                                            //double comision = DateUtil.round(PrestamoUtil.calCom(prestamo.getMontoCapital().doubleValue(), Double.parseDouble(prestamo.getComision())), 2);
+                                                                                                                                                                            //double segdes = DateUtil.round(PrestamoUtil.calCom(prestamo.getMontoCapital().doubleValue(), Double.parseDouble(prestamo.getTRegistroPrestamo().getSegDesg())), 2);
+                                                                                                                                                                            xprestamo.setItf(CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue() * Double.parseDouble(prestamo.getTRegistroPrestamo().getItf()) / 100, 2).replace(",", ""));
+                                                                                                                                                                            //sess.update(prestamo);
+                                                                                                                                                                            d.update();
+
+                                                                            %>
+                                                                            <td align="center"><%= DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(prestamo.getFechaPago()))%></td>
+                                                                            <td><div align="right"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getMontoCapital().doubleValue(), 2))%>
+                                                                                    <input type="checkbox" name="cobrar2<%=prestamo.getIddetalleprestamo()%>" id="cobrar2<%=prestamo.getIddetalleprestamo()%>" onclick="if(this.checked==true){raise('x<%= prestamo.getIddetalleprestamo()%>',<%= CurrencyConverter.formatToMoneyUS(prestamo.getMontoCapital().doubleValue(), 2).replace(",", "")%>);
+                                                                                    }else{fold('x<%= prestamo.getIddetalleprestamo()%>',<%= CurrencyConverter.formatToMoneyUS(prestamo.getMontoCapital().doubleValue(), 2).replace(",", "")%>);}" value="<%=prestamo.getNumeroCuota().toString()%>">Cobrar</div>
+                                                                                <input type='hidden' name='x<%=prestamo.getIddetalleprestamo()%>' id='x<%=prestamo.getIddetalleprestamo()%>' value='0'><input type='hidden' name='cobrar21<%=prestamo.getIddetalleprestamo()%>' id='cobrar21<%=prestamo.getIddetalleprestamo()%>' value="<%= CurrencyConverter.formatToMoneyUS(prestamo.getMontoCapital().doubleValue(), 2).replace(",", "")%>"></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getInteresPrestamo().doubleValue(), 2))%>
+                                                                                </div></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getInteresMoratorio().doubleValue(), 2))%></div></td>
+                                                                            <%--<td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(prestamo.getInteresComp()) + Double.parseDouble(prestamo.getComision()), 2))%></div></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(prestamo.getItf()), 2))%></div></td>--%>
+                                                                            <td><div align="right"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue(), 2))%>
+                                                                                    <input type="checkbox" name="cobrar1<%=prestamo.getIddetalleprestamo()%>" id="cobrar1<%=prestamo.getIddetalleprestamo()%>" onclick="if(this.checked==true){ raise('z<%= prestamo.getIddetalleprestamo()%>',<%=CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue(), 2).replace(",", "")%>);
+                                                                                }else{fold('z<%=prestamo.getIddetalleprestamo()%>', <%=CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue(), 2).replace(",", "")%>);}" value="<%=prestamo.getNumeroCuota().toString()%>">Cobrar </div>
+                                                                                <input type='hidden' name='z<%=prestamo.getIddetalleprestamo()%>' value='0' id='z<%=prestamo.getIddetalleprestamo()%>'><input type='hidden' name='cobrar12<%=prestamo.getIddetalleprestamo()%>' value="<%=CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue(), 2).replace(",", "")%>" id='cobrar12<%=prestamo.getIddetalleprestamo()%>'></td>
+                                                                                <%
+                                                                                                                                                                                } else {
+                                                                                %>
+                                                                            <td align="center"><%= DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(prestamo.getFechaPago()))%></td>
+                                                                            <td><div align="right"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getMontoCapital().doubleValue(), 2))%>
+                                                                                </div></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getInteresPrestamo().doubleValue(), 2))%>
+                                                                                </div></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getInteresMoratorio().doubleValue(), 2))%></div></td>
+                                                                            <%--<td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(prestamo.getInteresComp()) + Double.parseDouble(prestamo.getComision()), 2))%></div></td>
+                                                                            <td><div align="center"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(prestamo.getItf()), 2))%></div></td>--%>
+                                                                            <td><div align="right"><%=(moneda + " " + CurrencyConverter.formatToMoneyUS(prestamo.getMontoTotal().doubleValue(), 2))%>
+                                                                                </div></td>
+                                                                                <%
+                                                                                                                                                                            }
+                                                                                %>
+                                                                            <td><%= prestamo.getEstado()%></td>
+                                                                        </tr>
+                                                                        <%
+                                                                                                                                                            }
+                                                                        %>
+                                                                        <tr>
+                                                                            <td colspan="4">&nbsp;</td>
+                                                                            <td><span class="Estilo3">Total</span></td>
+                                                                            <td><%=moneda%><input type="text" name="cobrarT" readonly id="cobrarT" value="0.00"></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                    <blockquote>
+                                                                        <blockquote>
+                                                                            <blockquote>
+                                                                                <blockquote>
+                                                                                    <p><input type="submit" name="grabarC" value="GRABAR">&nbsp;
+                                                                                        <input type="reset" name="reset" value="LIMPIAR"></p>
+                                                                                </blockquote>
+                                                                            </blockquote>
+                                                                        </blockquote>
+                                                                    </blockquote>
+                                                                    <%
+                                                                                }
+                                                                    %>
+                                                                </div><div style="color:red"><%=mensaje%></div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </blockquote>
+                                        </form>
+                                    </div></td></tr>
+                        </table></div>
+                </div></div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

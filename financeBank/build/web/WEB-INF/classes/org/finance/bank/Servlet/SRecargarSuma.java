@@ -1,0 +1,129 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.finance.bank.bean.TDenominacionMoneda;
+import org.finance.bank.bean.TDetalleSuma;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.formatMoneda;
+
+/**
+ *
+ * @author ronald
+ */
+public class SRecargarSuma extends HttpServlet {
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        DAOGeneral dao = new DAOGeneral();
+        request.getSession(true);
+        try {
+            String idSuma = "";
+            if (request.getParameter("idSuma") != null && !request.getParameter("idSuma").equals("")) {
+                idSuma = request.getParameter("idSuma").toString();
+            }
+            out.println("<div id='' style='overflow-y:auto; height:400px;width:400px' >");
+            out.println("<fieldset>");
+            out.println("<table border='0' width='100%'>");
+            List lSumaM = dao.findAll("from TDetalleSuma where TSumaMoneda.idsumamoneda='" + idSuma + "' ");
+            Iterator itSumaM = lSumaM.iterator();
+            int i = 0;
+            Double montoT = 0.0;
+            while (itSumaM.hasNext()) {
+                TDetalleSuma dsum = (TDetalleSuma) itSumaM.next();
+                TDenominacionMoneda denom = dsum.getTDenominacionMoneda();
+                out.println("<tr>");
+                out.println("<td align='center'>");
+                out.println("<img src='billetesmonedas/" + denom.getImagen() + "' width='131' height='60' alt='" + denom.getMonto().toString() + " " + denom.getTMoneda().getNombre() + "'/>");
+                out.println("</td><td><label id='montoMonedaB" + i + "' style='font-size:12px;width:50px;text-align:right;background:transparent' title='" + denom.getIddenominacionmoneda() + "' >" + denom.getMonto() + "</label>" + " " + denom.getTMoneda().getSimbolo());
+                out.println("</td>");
+                out.println("<td>");
+                out.println("<input id='CantidadB" + i + "' type='text' style='font-size:12px;width:50px;text-align:right' name='monto" + i + "' value='" + dsum.getCantidad() + "' onKeyPress=\"return(currencyFormat_decimal(this,',','',event,0))\"  onkeyup='calTotalB();' />");
+                out.println("</td>");
+                out.println("<td>");
+                Double monto = Double.parseDouble(denom.getMonto()) * dsum.getCantidad();
+                montoT = montoT + monto;
+                out.println("<label id='totalDineroB" + i + "' style='font-size:12px;width:70px;text-align:right;color:red;font-weight:bold'>" + monto + "</label>");
+                out.println("</td>");
+                out.println("</tr>");
+                i++;
+            }
+            out.println("</table>");
+            out.println("</fieldset>");
+            out.println("</div>");
+            out.println("<fieldset>");
+            out.println("<table width='100%'>");
+            out.println("<tr>");
+            out.println("<td align='right' width='50%'>");
+            out.println("<input id='totalB' type='hidden' value='" + i + "' />TOTAL");
+            out.println("</td>");
+            out.println("<td align='left'> ");
+            out.println("<input id='sumaTotalB' name='sumaTotalB' type='text' style='font-size:20px;width:150px;text-align:right' value='" + formatMoneda.formatMoneda(montoT) + "' readonly='true' />");
+            out.println("</td>");
+            out.println("</tr>");
+            out.println("<tr>");
+            out.println("<td align='center'>");
+            out.println("<input type='button' name='Cerrar' value='Cerrar' onclick='cerrar()' />");
+            out.println("</td>");
+            out.println("<td align='center'> ");
+            out.println("<input type='button' name='Actualizar' value='GrabarB' onclick=\"sumarCalcularON('" + idSuma + "')\" />");
+            out.println("</td>");
+            out.println("</tr>");
+            out.println("</table>");
+            out.println("</fieldset>");
+        } finally {
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

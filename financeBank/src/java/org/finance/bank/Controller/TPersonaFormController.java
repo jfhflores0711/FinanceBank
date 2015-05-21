@@ -1,0 +1,64 @@
+package org.finance.bank.Controller;
+
+/**
+ *
+ * @author oscar
+ */
+import org.apache.commons.lang.StringUtils;
+import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
+import org.finance.bank.bean.TPersona;
+import org.finance.bank.model.service.GenericManager;
+
+public class TPersonaFormController extends BaseFormController {
+
+    private GenericManager<TPersona, String> personManager = null;
+
+    public void setPersonManager(GenericManager<TPersona, String> personManager) {
+        this.personManager = personManager;
+    }
+
+    public TPersonaFormController() {
+        setCommandClass(TPersona.class);
+        setCommandName("person");
+    }
+
+    @Override
+    protected Object formBackingObject(HttpServletRequest request)
+            throws Exception {
+        String id = request.getParameter("id");
+
+        if (!StringUtils.isBlank(id)) {
+            return personManager.get(new String(id));
+        }
+
+        return new TPersona();
+    }
+
+    @Override
+    public ModelAndView onSubmit(HttpServletRequest request,
+            HttpServletResponse response, Object command,
+            BindException errors)
+            throws Exception {
+        a.debug("entering 'onSubmit' method...");
+        TPersona person = (TPersona) command;
+        boolean isNew = (person.getIdUserPk() == null);
+        String success = getSuccessView();
+        Locale locale = request.getLocale();
+        if (request.getParameter("delete") != null) {
+            personManager.remove(person.getIdUserPk());
+            saveMessage(request, getText("person.deleted", locale));
+        } else {
+            personManager.save(person);
+            String key = (isNew) ? "person.added" : "person.updated";
+            saveMessage(request, getText(key, locale));
+            if (!isNew) {
+                success = "redirect:personform.html?id=" + person.getIdUserPk();
+            }
+        }
+        return new ModelAndView(success);
+    }
+}

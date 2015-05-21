@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TControlModulo" table="t_control_modulo" schema="public">
+        <id name="idcontrolmodulo" type="string">
+            <column name="idcontrolmodulo" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TModulo" class="org.finance.bank.bean.TModulo" fetch="select">
+            <column name="idmodulo" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TTipoPersona" class="org.finance.bank.bean.TTipoPersona" fetch="select">
+            <column name="idtipopersona" length="41" not-null="true" />
+        </many-to-one>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="20" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>

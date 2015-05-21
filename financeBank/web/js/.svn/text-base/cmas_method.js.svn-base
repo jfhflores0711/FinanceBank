@@ -1,0 +1,249 @@
+function Cierre()
+{
+    window.close()
+}
+
+
+var doble = 0;
+var hID = 0;
+
+
+function enviar_cmas_login6(form, numero){
+    var sizepan = 16;
+    var sizeclave = 6;
+    if( !doble )
+    {
+        if(form.pan.value=="")
+        {
+            alert("Ingresa el número de tu tarjeta.");
+            form.pan.focus();
+        }
+        else if (form.pan.value.length<sizepan || (!EsNumero(form.pan.value)))
+        {
+            alert("El número de tarjeta que has ingresado no es el correcto. Vuelve a intentarlo.");
+            cmas_option();
+            form.pan.focus();
+        }
+        else if(form.clave.value=="")
+        {
+            alert("Ingresa tu clave.");
+            form.clave.focus();
+        }
+        else if(((form.clave.value.length!=sizeclave))  || !EsNumero(form.clave.value))
+        {
+            alert("La clave que has ingresado no es la correcta. Inténtalo nuevamente.");
+            //if(document.frmData.np_cc!=null) clear(document.frmData.np_cc);
+            form.clave.value="";
+            form.clave.focus();
+        }
+        else if(numero=="1")
+        {
+            form.submit();
+        //doble = 1;
+        //if( window.setInterval ) hID = window.setInterval( "Salida()",1500 );
+        //else Salida(form1);
+        }
+    }
+}
+
+function cmas_option(){
+ 	 
+    if(document.frmData.bincard.value=="1")
+    {
+        document.frmData.pan.value='45578800';
+ 	   
+    } else{
+        document.frmData.pan.value='45578807';
+ 	   
+    }
+    document.frmData.pan.focus();
+         
+}
+
+function enviar_cmas_formulario7( form, numero){
+    
+    var sizeclave = 7;
+    var sizeminpam = 5;
+    form.pam.value= trim(form.pam.value);
+     
+    if(((form.clave7.value.length!=sizeclave))  || !EsNumero(form.clave7.value))
+    {
+        alert("La nueva clave de compras por internet que has ingresado no es válida. Tu clave debe estar compuesta por 7 d�gitos. Inténtalo nuevamente.");
+        form.rbC7[0].checked= true;
+        form.clave7.value="";
+        form.cclave7.value="";
+        form.clave7.focus();
+    }
+    else if(((form.cclave7.value.length!=sizeclave))  || !EsNumero(form.cclave7.value))
+    {
+        alert("La nueva clave de compras por internet que has ingresado no es v�lida. Tu clave debe estar compuesta por 7 dígitos. Inténtalo nuevamente.");
+        //clear(document.frmData.np_cc);
+        form.rbC7[0].checked= true;
+        form.clave7.value="";
+        form.cclave7.value="";
+        form.cclave7.focus();
+    }
+    else if(form.clave7.value!=form.cclave7.value)
+    {
+        alert("La nueva clave de compras por Internet que has ingresado no coincide con la clave ingresada en el campo 'confirmacion'. Int�ntalo nuevamente.");
+        form.rbC7[0].checked= true;
+        form.clave7.value="";
+        form.cclave7.value="";
+        form.clave7.focus();
+    }
+  
+    else if (((form.pam.value.length<sizeminpam) || (form.pam.value=="")) || (!EsAlfanumerico(form.pam.value)))
+    {
+        alert("La Frase que has ingresado no es válida. Debe estar compuesta por 5 caracteres como m�nimo y 20 caracteres alfanum�ricos como m�ximo. Inténtalo nuevamente.");
+        form.pam.focus();
+    }
+	
+    //else if((!(form.radiobutton[0].checked == true)) && (!(form.radiobutton[1].checked == true)))
+    else if((!(form.radiobutton[0].checked == true)))
+    {
+        alert("Debes aceptar la declaratoria para poder afiliarte.");
+		
+		
+    }
+    else if(numero=="2")
+    {
+        form.submit();
+    //doble = 1;
+    //if( window.setInterval ) hID = window.setInterval( "Salida()",1500 );
+    //else Salida(form1);
+    }
+}
+
+function enviar_cmas_verificacion(form, numero){
+    var sizeclave = 6;
+    if(form.claveConfirma.value=="")
+    {
+        alert("Ingresa tu clave.");
+        form.claveConfirma.focus();
+    }
+    else if((form.claveConfirma.value.length!=sizeclave)  || !EsNumero(form.claveConfirma.value))
+    {
+        alert("La clave que has ingresado no es la correcta. Inténtalo nuevamente.");
+        form.claveConfirma.value="";
+        form.claveConfirma.focus();
+    }
+    else if(numero=="3")
+    {
+        form.submit();
+		
+    }
+	
+}
+
+function EsNumero(cad)
+{
+    var i,letra;
+    for (i=0;i < cad.length;i++)
+    {
+        letra = cad.substring(i,i+1);
+        if (letra < "0" || letra > "9") return false;
+    }
+    return true;
+}
+
+function EsAlfanumerico(cad)
+{
+    var l_Permitidos = new Array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',' ','1','2','3','4','5','6','7','8','9','0');
+    var longi = 0;
+    var carac ;
+    
+    for (i=0;i < cad.length;i++) {
+        longi=0;
+        for (var j=0 ; j < l_Permitidos.length ; j++){
+            longi=j;
+            carac= cad.charAt(i);
+            if (carac == l_Permitidos[j]){
+                break;
+            }
+        }
+        if((carac!='0') && (longi >=(l_Permitidos.length-1)) ){
+            return false;
+        }
+		
+    }
+    return true;
+}
+function checkKey(e,num1,form1) 
+{	
+    if (checkEnterKey(e))
+    {
+        if (num1==1) form1.tarjeta.focus()
+        else if (num1==2) form1.pin.focus()
+        else if (num1==3) Enviar()
+    }
+}
+function goto(form1){
+    form1.submit();
+}
+function cerrar(){
+    window.close();
+}
+function enviar_cred_formulario(pam, clave7, form){
+    //Aqui hay que validar los parametros parecido a enviar_cred_login4(pan, clave, form).
+
+    form.submit();
+}
+function enviar_cred_verifica(claveConfirma, form){
+    //Aqui hay que validar los parametros parecido a enviar_cred_login4(pan, clave, form).
+    form.submit();
+}
+
+function envio_cmas_mail(form,numero){
+    var email_to =trim(form.to.value);
+    var email_cc =trim(form.cc.value);
+    if((email_to=="") || (!validarEmail(email_to))) {
+        alert("Ingrese un correcto formato de correo electronico en 'Correo a:'");
+        form.to.focus();
+    }
+    else if((email_cc!="") && (!validarEmail(email_cc))) {
+        alert("Ingrese un correcto formato de correo electronico en 'Correo copia :'");
+        form.cc.focus();
+    }
+    else if(numero=="4")
+    {
+        form.submit();
+		
+    }
+}
+
+function trim(x) {
+   
+    while (x.substring(0,1) == ' ') x = x.substring(1);
+    while (x.substring(x.length-1,x.length) == ' ') x = x.substring(0,x.length-1);
+    return x;
+}
+
+function validarCorreo(valor) {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(valor)){
+        return (true)
+    } else {
+        return (false);
+    }
+}
+function validarEmail(valor) {
+    valor=valor.replace(';',',');
+    var correo;
+
+    while (1){
+        var num = valor.indexOf(",");
+        if(num>0){
+            correo = valor.substring(0,num);
+            correo =trim(correo);
+            if (!validarCorreo(correo)) return false;
+            var longi = valor.length;
+            valor=valor.substring(num+1,longi);
+        }else {
+            correo = valor;
+            correo =trim(correo);
+            if (!validarCorreo(correo)) return false;
+            break;
+        }
+  
+    }
+    return true;
+}

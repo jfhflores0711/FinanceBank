@@ -1,0 +1,114 @@
+
+function solonumeros(e)
+{
+    var key;
+    if(window.event){
+        key = e.keyCode;
+    }
+    else if(e.which){
+        key = e.which;
+    }
+    if(key==45){
+        return true;
+    }
+    if (key<8 || (key >8 && key < 48) || key > 57){
+        return false;
+    }
+    return true;
+}
+function solodecimales(e)
+{
+    var key;
+    if(window.event){
+        key = e.keyCode;
+    }
+    else if(e.which){
+        key = e.which;
+    }
+    if(key==45){
+        return true;
+    }
+    if (key<8 || (key >8 && key < 46) || key > 57){
+        return false;
+    }
+    if(key==47)
+        return false;
+    return true;
+}
+function soloNumeroTelefonico(e)
+{
+    var key;
+    if(window.event){
+        key = e.keyCode;
+    }
+    else if(e.which){
+        key = e.which;
+    }
+    if (key<8 || (key >8 && key < 45) || key > 57){
+        return false;
+    }
+    if(key==47)
+        return false;
+    if(key==46)
+        return false;
+    return true;
+}
+function validaFT(obj){
+    var range = /^\d{1,3}(\.\d{1,5})?$/;
+    var hundred = /^100$/;
+    if(!(range.test(obj.value) || hundred.test(obj.value))){
+        alert('El valor es inválido.');
+        obj.focus();
+    }
+}
+function converseN2S(n){
+    var s = "";
+    if (n != null) {
+        n = n.trim();
+        n = n.replace("0", "Z","gi");
+        n = n.replace("1", "O","gi");
+        n = n.replace("2", "W","gi");
+        n = n.replace("3", "T","gi");
+        n = n.replace("4", "F","gi");
+        n = n.replace("5", "V","gi");
+        n = n.replace("6", "X","gi");
+        n = n.replace("7", "S","gi");
+        n = n.replace("8", "H","gi");
+        n = n.replace("9", "N","gi");
+        n = n.replace(".", "P","gi");
+        for (var x = n.length - 1; x >= 0; x--)
+            s += n.charAt(x);
+    }
+    return s;
+}
+function converseS2N(s){
+    var n = "";
+    if (s != null) {
+        s = s.trim();
+        s = s.replace("Z", "0","gi");
+        s = s.replace("O", "1","gi");
+        s = s.replace("W", "2","gi");
+        s = s.replace("T", "3","gi");
+        s = s.replace("F", "4","gi");
+        s = s.replace("V", "5","gi");
+        s = s.replace("X", "6","gi");
+        s = s.replace("S", "7","gi");
+        s = s.replace("H", "8","gi");
+        s = s.replace("N", "9","gi");
+        s = s.replace("P", ".","gi");
+        for (var x = s.length - 1; x >= 0; x--)
+            n += s.charAt(x);
+    }
+    return n;
+}
+
+
+
+function filtraParametroRequestC(parametro){
+    var expreg = ///[_:;<>°!"$%=?¡¿'\~{}\()[\]{\\^`|¬´¨]/g;
+    parametro = parametro.replace(expreg,"");
+    parametro = parametro.replace("#", "SHRP", "g");
+    parametro = parametro.replace("&", "AMPSD", "g");
+    parametro = parametro.replace("*", "ASTRX", "g");
+    return parametro;
+}

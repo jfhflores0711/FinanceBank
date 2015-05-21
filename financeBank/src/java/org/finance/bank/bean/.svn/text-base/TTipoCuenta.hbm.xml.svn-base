@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TTipoCuenta" table="t_tipo_cuenta" schema="public">
+        <id name="codigoCuenta" type="string">
+            <column name="codigo_cuenta" length="10" />
+            <generator class="assigned" />
+        </id>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="100" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="codParaNumCuenta" type="string">
+            <column name="cod_para_num_cuenta" length="10" not-null="true" />
+        </property>
+        <set name="TCuentaPersonas" inverse="true">
+            <key>
+                <column name="codigo_cuenta" length="10" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCuentaPersona" />
+        </set>
+    </class>
+</hibernate-mapping>

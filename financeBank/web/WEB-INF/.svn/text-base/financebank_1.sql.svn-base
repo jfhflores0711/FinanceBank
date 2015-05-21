@@ -1,0 +1,1123 @@
+--POSTGRESQL
+DROP TABLE t_Suma_Moneda cascade
+;
+DROP TABLE t_Detalle_Suma cascade
+;
+DROP TABLE t_SobreGiro cascade
+;
+DROP TABLE t_Certificado cascade
+;
+DROP TABLE t_Tipo_Credito cascade
+;
+DROP TABLE t_Denominacion_Moneda cascade
+;
+DROP TABLE t_Registro_Otros cascade
+;
+DROP TABLE t_Utilidad cascade
+;
+DROP TABLE t_patrimonio cascade
+;
+DROP TABLE t_balancexmoneda cascade
+;
+DROP TABLE t_tasa cascade
+;
+DROP TABLE t_Contrato cascade
+;
+DROP TABLE t_Cobranza cascade
+;
+DROP TABLE t_Detalle_Prestamo cascade
+;
+DROP TABLE t_Detalle_Cuenta_Persona cascade
+;
+DROP TABLE t_Registro_Prestamo cascade
+;
+DROP TABLE t_Transferencia_Caja cascade
+;
+DROP TABLE t_Sesion cascade
+;
+DROP TABLE t_Categoria_Persona cascade
+;
+DROP TABLE t_Control_Tipo cascade
+;
+DROP TABLE t_Control_Modulo cascade
+;
+DROP TABLE t_Departamento cascade
+;
+DROP TABLE t_Provincia cascade
+;
+DROP TABLE t_Distrito cascade
+;
+DROP TABLE t_Moneda cascade
+;
+DROP TABLE t_Tipo_Cambio cascade
+;
+DROP TABLE t_Tipo_Operacion cascade
+;
+DROP TABLE t_Registro_Compra_Venta cascade
+;
+DROP TABLE t_Registro_Giro cascade
+;
+DROP TABLE t_Operacion cascade
+;
+DROP TABLE t_Registro_Deposito_Retiro cascade
+;
+DROP TABLE t_Detalle_Caja cascade
+;
+DROP TABLE t_filial cascade
+;
+DROP TABLE t_Caja cascade
+;
+DROP TABLE t_Persona_Caja cascade
+;
+DROP TABLE t_Modulo cascade
+;
+DROP TABLE t_Cuenta_Acceso cascade
+;
+DROP TABLE t_Tipo_Persona cascade
+;
+DROP TABLE t_Persona cascade
+;
+DROP TABLE t_Cuenta_Persona cascade
+;
+DROP TABLE t_Tipo_Cuenta cascade
+;
+DROP TABLE t_Transaccion cascade
+;
+/*
+DROP TABLE T_TRANSACCION 
+;
+CREATE TABLE T_TRANSACCION
+(
+IDTRANSACCION VARCHAR(41) NOT NULL,
+TIPO_OPERACION VARCHAR(50),
+MONTO DECIMAL(20, 2),
+FECHA VARCHAR(50),
+IDCUENTA VARCHAR(41),
+USER_LOGIN VARCHAR(50),
+NOMBRE_REFERENCIA VARCHAR(200),
+APELLIDO_REFERENCIA VARCHAR(200),
+SALDO DECIMAL(20, 2) DEFAULT 0 ,
+PRIMARY KEY (IDTRANSACCION)
+)
+;
+*/
+CREATE TABLE t_Transaccion
+(
+	idTransaccion        VARCHAR(41) NOT NULL,
+	tipo_operacion       VARCHAR(50) NULL,
+	monto                DECIMAL(20,2) NULL,
+	fecha                VARCHAR(50) NULL,
+	idCuenta             VARCHAR(41) NULL,
+	user_login           VARCHAR(50) NULL,
+	nombre_referencia    VARCHAR(200) NULL,
+	apellido_referencia  VARCHAR(200) NULL,
+	numero_cheque        VARCHAR(20) NULL,
+        estado               VARCHAR(10) NULL,
+        saldo                  DECIMAL(20,2) null
+)
+;
+
+
+CREATE TABLE t_Suma_Moneda
+(
+	idSumaMoneda  VARCHAR(50) NOT NULL,
+	estado        VARCHAR(50) NULL,
+	idOperacion   VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Detalle_Suma
+(
+	idDetalleSuma         VARCHAR(50) NOT NULL,
+	cantidad              DECIMAL(6) NULL,
+	estado                VARCHAR(50) NULL,
+	idDenominacionMoneda  VARCHAR(50) NOT NULL,
+	idSumaMoneda          VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_SobreGiro
+(
+	idSobreGiro          VARCHAR(41) NOT NULL,
+	monto_actual         DECIMAL(20,2) NULL,
+	interesSG            DECIMAL(20,2) NULL,
+	fecha_pago           VARCHAR(50) NULL,
+	estado               VARCHAR(10) NULL,
+	id_user              VARCHAR(50) NOT NULL,
+	ip_user              VARCHAR(50) NOT NULL,
+	date_user            VARCHAR(50) NOT NULL,
+	idCuentaPersona      VARCHAR(41) NOT NULL,
+	monto_sin_interes    DECIMAL(8,2) NULL,
+	fecha_actualizacion  VARCHAR(50) NULL,
+        fecha_cap           VARCHAR(50) null
+)
+;
+
+
+CREATE TABLE t_Certificado
+(
+	idCertificado     VARCHAR(41) NOT NULL,
+	fecha             VARCHAR(50) NULL,
+	num_certificado   VARCHAR(40) NULL,
+	dni_ruc           VARCHAR(20) NULL,
+	nombre            VARCHAR(120) NULL,
+	nombre_rep        VARCHAR(100) NULL,
+	descripcion       VARCHAR(4000) NULL,
+	estado            VARCHAR(20) NULL,
+	tipo              VARCHAR(20) NULL,
+	idDepositoRetiro  VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Tipo_Credito
+(
+	idTipoCredito  VARCHAR(41) NOT NULL,
+	nombre         VARCHAR(50) NOT NULL,
+	descripcion    VARCHAR(150) NULL,
+	id_user        VARCHAR(50) NOT NULL,
+	ip_user        VARCHAR(50) NOT NULL,
+	date_user      VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Denominacion_Moneda
+(
+	idDenominacionMoneda  VARCHAR(41) NOT NULL,
+	tipo                  VARCHAR(50) NOT NULL,
+	monto                 VARCHAR(20) NOT NULL,
+	imagen                VARCHAR(500) NULL,
+	id_user               VARCHAR(50) NOT NULL,
+	ip_user               VARCHAR(50) NOT NULL,
+	date_user             VARCHAR(50) NOT NULL,
+	cod_moneda            VARCHAR(41) NOT NULL,
+	orden                 DECIMAL(6) NULL
+)
+;
+
+
+CREATE TABLE t_Registro_Otros
+(
+	idRegistroOtros  VARCHAR(41) NOT NULL,
+	descripcion      VARCHAR(500) NOT NULL,
+	monto            DECIMAL(20,2) NOT NULL,
+	id_user          VARCHAR(50) NOT NULL,
+	ip_user          VARCHAR(50) NULL,
+	date_user        VARCHAR(50) NULL,
+	id_operacion     VARCHAR(41) NULL,
+	idPersonaCaja    VARCHAR(41) NULL
+)
+;
+
+
+CREATE TABLE t_Utilidad
+(
+	idUtilidad  VARCHAR(41) NOT NULL,
+	utilidad    DECIMAL(20,4) NOT NULL,
+	fecha       VARCHAR(50) NOT NULL,
+	id_user     VARCHAR(50) NOT NULL,
+	ip_user     VARCHAR(50) NULL,
+	date_user   VARCHAR(50) NULL,
+	idBalance   VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_patrimonio
+(
+	idPatrimonio       VARCHAR(41) NOT NULL,
+	patrimonio         DECIMAL(20,4) NOT NULL,
+	patrimonio_actual  DECIMAL(20,4) NOT NULL,
+	estado             VARCHAR(30) NOT NULL,
+	id_user            VARCHAR(50) NOT NULL,
+	ip_user            VARCHAR(50) NOT NULL,
+	date_user          VARCHAR(50) NOT NULL,
+	idBalance          VARCHAR(41) NOT NULL,
+	tipo_variacion     VARCHAR(20) NULL
+)
+;
+
+
+CREATE TABLE t_balancexmoneda
+(
+	idBalance             VARCHAR(41) NOT NULL,
+	activo_cajaybanco     DECIMAL(20,4) NOT NULL,
+	activo_cuentaxcobrar  DECIMAL(20,4) NOT NULL,
+	pasivo                DECIMAL(20,4) NOT NULL,
+	encaje                DECIMAL(20,4) NOT NULL,
+	p_respaldo            DECIMAL(20,4) NOT NULL,
+	estado                VARCHAR(10) NOT NULL,
+	id_user               VARCHAR(50) NOT NULL,
+	ip_user               VARCHAR(50) NOT NULL,
+	date_user             VARCHAR(50) NOT NULL,
+	cod_moneda            VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_tasa
+(
+	idTasa        VARCHAR(41) NOT NULL,
+	f_conversion  DECIMAL(20,3) NOT NULL,
+	fecha         VARCHAR(50) NOT NULL,
+	estado        VARCHAR(50) NOT NULL,
+	id_user       VARCHAR(50) NOT NULL,
+	ip_user       VARCHAR(50) NOT NULL,
+	date_user     VARCHAR(50) NOT NULL,
+	idTipoCambio  VARCHAR(41) NOT NULL,
+	tipo_tasa     VARCHAR(50) NULL
+)
+;
+
+
+CREATE TABLE t_Contrato
+(
+	idContrato    VARCHAR(41) NOT NULL,
+	fecha         VARCHAR(50) NOT NULL,
+	num_contrato  VARCHAR(40) NULL,
+	dni_ruc       VARCHAR(20) NOT NULL,
+	nombre        VARCHAR(120) NOT NULL,
+	nombre_rep    VARCHAR(100) NOT NULL,
+	descripcion   VARCHAR(4000) NOT NULL,
+	idPrestamo    VARCHAR(41) NOT NULL,
+	estado        VARCHAR(20) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Cobranza
+(
+	idCobranza         VARCHAR(41) NOT NULL,
+	idOperacion        VARCHAR(41) NOT NULL,
+	idDetallePrestamo  VARCHAR(41) NOT NULL,
+	fecha              VARCHAR(50) NOT NULL,
+	id_user            VARCHAR(50) NOT NULL,
+	ip_user            VARCHAR(50) NOT NULL,
+	date_user          VARCHAR(50) NOT NULL,
+	estado             VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Detalle_Prestamo
+(
+	idDetallePrestamo  VARCHAR(41) NOT NULL,
+	numero_cuota       DECIMAL(20) NOT NULL,
+	monto_capital      DECIMAL(20,4) NOT NULL,
+	monto_total        DECIMAL(20,4) NOT NULL,
+	fecha_pago         VARCHAR(50) NOT NULL,
+	interes_prestamo   DECIMAL(12,4) NOT NULL,
+	interes_moratorio  DECIMAL(12,4) NOT NULL,
+	idPrestamo         VARCHAR(41) NOT NULL,
+	id_user            VARCHAR(50) NOT NULL,
+	ip_user            VARCHAR(50) NOT NULL,
+	date_user          VARCHAR(50) NOT NULL,
+	estado             VARCHAR(50) NULL,
+	capital_pendiente  DECIMAL(20,4) NOT NULL,
+	interes_comp       VARCHAR(10) NULL,
+	comision           VARCHAR(10) NULL,
+	itf                VARCHAR(10) NULL
+)
+;
+
+
+CREATE TABLE t_Detalle_Cuenta_Persona
+(
+	idDetalleCuentaPersona  VARCHAR(41) NOT NULL,
+	interes                 DECIMAL(20,2) NOT NULL,
+	fecha_plazo             VARCHAR(50) NOT NULL,
+	idCuentaPersona         VARCHAR(50) NOT NULL,
+	ip_user                 VARCHAR(50) NOT NULL,
+	id_user                 VARCHAR(50) NOT NULL,
+	date_user               VARCHAR(50) NOT NULL,
+	num_dias                VARCHAR(10) NULL
+)
+;
+
+
+CREATE TABLE t_Registro_Prestamo
+(
+	idPrestamo         VARCHAR(41) NOT NULL,
+	monto              DECIMAL(20,2) NOT NULL,
+	fecha              VARCHAR(50) NOT NULL,
+	numero_cuotas      DECIMAL(8) NOT NULL,
+	interes_prestamo   DECIMAL(12,4) NOT NULL,
+	interes_moratorio  DECIMAL(12,4) NULL,
+	idOperacion        VARCHAR(41) NOT NULL,
+	idCuentaPersona    VARCHAR(41) NOT NULL,
+	id_user            VARCHAR(50) NOT NULL,
+	ip_user            VARCHAR(50) NOT NULL,
+	date_user          VARCHAR(50) NOT NULL,
+	estado             VARCHAR(20) NOT NULL,
+	TEA                VARCHAR(10) NULL,
+	seg_desg           VARCHAR(10) NULL,
+	periodo            VARCHAR(10) NULL,
+	idTipoCredito      VARCHAR(41) NOT NULL,
+	itf                VARCHAR(10) NULL
+)
+;
+
+
+create table T_Transferencia_Caja
+(
+	IDTRANSFERENCIACAJA VARCHAR(41),
+	FECHA VARCHAR(50) not null,
+	MONTO DECIMAL(20,2) NOT NULL,
+	DESCRIPCION VARCHAR(500),
+	TIPO VARCHAR(20) not null,
+	COD_CAJA_DESTINO VARCHAR(10) not null,
+	COD_CAJA VARCHAR(10) not null,
+	IP_USER VARCHAR(50) not null,
+	ID_USER VARCHAR(50) not null,
+	DATE_USER VARCHAR(50) not null,
+	COD_MONEDA VARCHAR(41) not null,
+        ID_OPERACION VARCHAR(41) NOT NULL
+)
+;
+
+CREATE TABLE t_Sesion
+(
+	idSession  VARCHAR(41) NOT NULL,
+	fecha      VARCHAR(50) NOT NULL,
+	accion     VARCHAR(50) NOT NULL,
+	id_user    VARCHAR(50) NOT NULL,
+	ip_user    VARCHAR(41) NOT NULL,
+	date_user  VARCHAR(50) NOT NULL,
+	id_acceso  VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Categoria_Persona
+(
+	idCategoriaPersona  VARCHAR(41) NOT NULL,
+	descripcion         VARCHAR(100) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Control_Tipo
+(
+	idControlTipo  VARCHAR(41) NOT NULL,
+	id_user_pk     VARCHAR(50) NOT NULL,
+	idTipoPersona  VARCHAR(41) NOT NULL,
+	id_user        VARCHAR(50) NOT NULL,
+	ip_user        VARCHAR(50) NOT NULL,
+	date_user      VARCHAR(50) NOT NULL,
+	estado         VARCHAR(20) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Control_Modulo
+(
+	idControlModulo  VARCHAR(41) NOT NULL,
+	idModulo         VARCHAR(41) NOT NULL,
+	idTipoPersona    VARCHAR(41) NOT NULL,
+	id_user          VARCHAR(50) NOT NULL,
+	ip_user          VARCHAR(50) NOT NULL,
+	date_user        VARCHAR(50) NOT NULL,
+	estado           VARCHAR(20) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Departamento
+(
+	idDepartamento  VARCHAR(41) NOT NULL,
+	codigo          VARCHAR(50) NOT NULL,
+	descripcion     VARCHAR(200) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Provincia
+(
+	idProvincia     VARCHAR(41) NOT NULL,
+	codigo          VARCHAR(50) NOT NULL,
+	descripcion     VARCHAR(200) NULL,
+	idDepartamento  VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Distrito
+(
+	idDistrito   VARCHAR(41) NOT NULL,
+	codigo       VARCHAR(50) NOT NULL,
+	descripcion  VARCHAR(200) NOT NULL,
+	idProvincia  VARCHAR(41) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Moneda
+(
+	cod_moneda           VARCHAR(41) NOT NULL,
+	nombre               VARCHAR(20) NOT NULL,
+	simbolo              VARCHAR(10) NOT NULL,
+	id_user              VARCHAR(50) NOT NULL,
+	ip_user              VARCHAR(50) NOT NULL,
+	date_user            VARCHAR(50) NOT NULL,
+	cod_para_num_cuenta  VARCHAR(10) NOT NULL,
+	color                VARCHAR(20) NULL,
+	estado               VARCHAR(10) NULL
+)
+;
+
+
+CREATE TABLE t_Tipo_Cambio
+(
+	idTipoCambio  VARCHAR(41) NOT NULL,
+	fecha         VARCHAR(50) NOT NULL,
+	cod_moneda_a  VARCHAR(41) NOT NULL,
+	descripcion   VARCHAR(100) NULL,
+	estado        VARCHAR(10) NOT NULL,
+	id_user       VARCHAR(50) NOT NULL,
+	ip_user       VARCHAR(50) NOT NULL,
+	date_user     VARCHAR(50) NOT NULL,
+	cod_moneda    VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Tipo_Operacion
+(
+	codigo_tipo_operacion  VARCHAR(41) NOT NULL,
+	nombre                 VARCHAR(50) NOT NULL,
+	id_user                VARCHAR(50) NOT NULL,
+	ip_user                VARCHAR(50) NOT NULL,
+	date_user              VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Registro_Compra_Venta
+(
+	idRegistroCompraVenta  VARCHAR(41) NOT NULL,
+	fecha                  VARCHAR(50) NOT NULL,
+	monto_entregado        DECIMAL(20,2) NOT NULL,
+	monto_recibido         DECIMAL(20,2) NOT NULL,
+	tipo_cambio            VARCHAR(20) NOT NULL,
+	id_user                VARCHAR(50) NOT NULL,
+	ip_user                VARCHAR(50) NOT NULL,
+	date_user              VARCHAR(50) NOT NULL,
+	id_operacion           VARCHAR(41) NOT NULL,
+	idTipoCambio           VARCHAR(41) NOT NULL,
+	estado                 VARCHAR(50) NULL,
+	descuento_deterioro    DECIMAL(8,2) NULL
+)
+;
+
+
+CREATE TABLE t_Registro_Giro
+(
+	idregistro          VARCHAR(41) NOT NULL,
+	id_user_pk_origen   VARCHAR(50) NOT NULL,
+	id_user_pk_destino  VARCHAR(50) NULL,
+	fecha               VARCHAR(50) NOT NULL,
+	importe             DECIMAL(20,2) NOT NULL,
+	fpago_importe       VARCHAR(20) NULL,
+	comision            DECIMAL(20,2) NULL,
+	fpago_comision      VARCHAR(20) NULL,
+	fecha_entrega       VARCHAR(20) NOT NULL,
+	id_user             VARCHAR(50) NOT NULL,
+	ip_user             VARCHAR(50) NOT NULL,
+	date_user           VARCHAR(50) NOT NULL,
+	estado              VARCHAR(50) NOT NULL,
+	id_operacion        VARCHAR(41) NOT NULL,
+	cod_Filial          VARCHAR(41) NOT NULL,
+	pagador_comision    VARCHAR(100) NULL,
+	idCuentaPersona     VARCHAR(41) NULL,
+	idOperacionCobro    VARCHAR(41) NULL
+)
+;
+
+
+CREATE TABLE t_Operacion
+(
+	id_operacion           VARCHAR(41) NOT NULL,
+	numero_operacion       VARCHAR(50) NOT NULL,
+	descripcion            VARCHAR(100) NULL,
+	fecha                  VARCHAR(50) NOT NULL,
+	codigo_tipo_operacion  VARCHAR(41) NOT NULL,
+	cod_moneda             VARCHAR(41) NOT NULL,
+	estado                 VARCHAR(100) NOT NULL,
+	id_user                VARCHAR(50) NOT NULL,
+	ip_user                VARCHAR(50) NOT NULL,
+	date_user              VARCHAR(50) NOT NULL,
+	idPersonaCaja          VARCHAR(41) NOT NULL,
+	fecha_extornacion      VARCHAR(41) NULL,
+	id_admin_extorno       VARCHAR(41) NULL,
+        SALDOFINAL DECIMAL(20, 4) DEFAULT 0
+)
+;
+
+
+CREATE TABLE t_Registro_Deposito_Retiro
+(
+	idDepositoRetiro         VARCHAR(41) NOT NULL,
+	fecha                    VARCHAR(50) NOT NULL,
+	num_cta                  VARCHAR(30) NOT NULL,
+	importe                  DECIMAL(20,2) NOT NULL,
+	nombre_representante     VARCHAR(200) NULL,
+	apellidos_representante  VARCHAR(200) NULL,
+	estado                   VARCHAR(10) NOT NULL,
+	id_user                  VARCHAR(50) NOT NULL,
+	ip_user                  VARCHAR(50) NOT NULL,
+	date_user                VARCHAR(50) NOT NULL,
+	id_operacion             VARCHAR(41) NOT NULL,
+	idCuentaPersona          VARCHAR(41) NOT NULL,
+	numero_cheque            VARCHAR(20) NULL,
+	num_dias                 VARCHAR(10) NULL,
+	dni_representante        VARCHAR(12) NULL,
+	fecha_nac_representante  VARCHAR(50) NULL
+)
+;
+
+
+CREATE TABLE t_Detalle_Caja
+(
+	idDetalleCaja      VARCHAR(41) NOT NULL,
+	monto_inicial      DECIMAL(20,2) NULL,
+	monto_final        DECIMAL(20,2) NULL,
+	fecha_transaccion  VARCHAR(50) NOT NULL,
+	cod_caja           VARCHAR(10) NOT NULL,
+	cod_moneda         VARCHAR(41) NOT NULL,
+	id_user            VARCHAR(50) NOT NULL,
+	ip_user            VARCHAR(50) NOT NULL,
+	date_user          VARCHAR(50) NOT NULL,
+	estado             VARCHAR(10) NULL
+)
+;
+
+
+CREATE TABLE t_filial
+(
+	cod_filial           VARCHAR(10) NOT NULL,
+	nombre               VARCHAR(100) NOT NULL,
+	direccion            VARCHAR(100) NULL,
+	estado               VARCHAR(10) NOT NULL,
+	telefono             VARCHAR(10) NULL,
+	id_user              VARCHAR(50) NOT NULL,
+	ip_user              VARCHAR(50) NOT NULL,
+	date_user            VARCHAR(50) NOT NULL,
+	idDistrito           VARCHAR(41) NOT NULL,
+	cod_para_num_cuenta  VARCHAR(10) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Caja
+(
+	cod_caja     VARCHAR(10) NOT NULL,
+	nombre_caja  VARCHAR(50) NOT NULL,
+	tipo         VARCHAR(20) NOT NULL,
+	estado       VARCHAR(10) NOT NULL,
+	ip_user      VARCHAR(50) NOT NULL,
+	id_user      VARCHAR(50) NOT NULL,
+	date_user    VARCHAR(50) NOT NULL,
+	cod_filial   VARCHAR(10) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Persona_Caja
+(
+	idPersonaCaja  VARCHAR(41) NOT NULL,
+	id_user_pk     VARCHAR(50) NOT NULL,
+	cod_caja       VARCHAR(10) NOT NULL,
+	estado         VARCHAR(50) NOT NULL,
+	id_user        VARCHAR(50) NOT NULL,
+	ip_user        VARCHAR(50) NOT NULL,
+	date_user      VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Modulo
+(
+	idModulo     VARCHAR(41) NOT NULL,
+	descripcion  VARCHAR(200) NOT NULL,
+	url          VARCHAR(50) NULL,
+	id_user      VARCHAR(50) NOT NULL,
+	ip_user      VARCHAR(50) NOT NULL,
+	date_user    VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Cuenta_Acceso
+(
+	id_acceso    VARCHAR(41) NOT NULL,
+	login        VARCHAR(50) NOT NULL,
+	contrasenia  VARCHAR(50) NOT NULL,
+	ip_acceso    VARCHAR(500) NOT NULL,
+	estado       VARCHAR(10) NOT NULL,
+	id_user      VARCHAR(50) NOT NULL,
+	ip_user      VARCHAR(50) NOT NULL,
+	date_user    VARCHAR(50) NOT NULL,
+	id_user_pk   VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Tipo_Persona
+(
+	idTipoPersona  VARCHAR(41) NOT NULL,
+	descripcion    VARCHAR(200) NOT NULL,
+	id_user        VARCHAR(50) NOT NULL,
+	ip_user        VARCHAR(50) NOT NULL,
+	date_User      VARCHAR(50) NOT NULL
+)
+;
+
+
+CREATE TABLE t_Persona
+(
+	id_user_pk          VARCHAR(50) NOT NULL,
+	doc_identidad       VARCHAR(10) NULL,
+	nombre              VARCHAR(60) NOT NULL,
+	apellidos           VARCHAR(60) NOT NULL,
+	email               VARCHAR(50) NULL,
+	ubigeo              VARCHAR(10) NULL,
+	telefono            VARCHAR(100) NULL,
+	celular             VARCHAR(100) NULL,
+	url_foto            VARCHAR(200) NULL,
+	url_firma           VARCHAR(200) NULL,
+	direccion           VARCHAR(100) NULL,
+	estado              VARCHAR(10) NOT NULL,
+	id_user             VARCHAR(50) NOT NULL,
+	ip_user             VARCHAR(50) NOT NULL,
+	date_user           VARCHAR(50) NOT NULL,
+	idCategoriaPersona  VARCHAR(41) NOT NULL,
+	ruc                 VARCHAR(50) NULL
+)
+;
+
+
+CREATE TABLE t_Cuenta_Persona
+(
+	idCuentaPersona      VARCHAR(41) NOT NULL,
+	num_cta              VARCHAR(50) NOT NULL,
+	fecha                VARCHAR(50) NOT NULL,
+	estado               VARCHAR(10) NOT NULL,
+	observaciones        VARCHAR(500) NULL,
+	ip_user              VARCHAR(50) NOT NULL,
+	id_user              VARCHAR(50) NOT NULL,
+	date_user            VARCHAR(50) NOT NULL,
+	codigo_cuenta        VARCHAR(10) NOT NULL,
+	id_user_pk           VARCHAR(50) NOT NULL,
+	interes              DECIMAL(20,2) NULL,
+	cod_moneda           VARCHAR(41) NOT NULL,
+	saldo                DECIMAL(20,2) NULL,
+	saldo_sin_interes    DECIMAL(20,2) NULL,
+	fecha_actualizacion  VARCHAR(50) NULL,
+        FECHA_CAP           VARCHAR(50) NULL
+)
+;
+
+
+CREATE TABLE t_Tipo_Cuenta
+(
+	codigo_cuenta        VARCHAR(10) NOT NULL,
+	descripcion          VARCHAR(100) NOT NULL,
+	ip_user              VARCHAR(50) NOT NULL,
+	id_user              VARCHAR(50) NOT NULL,
+	date_user            VARCHAR(50) NOT NULL,
+	cod_para_num_cuenta  VARCHAR(10) NOT NULL
+)
+;
+
+
+
+ALTER TABLE t_Suma_Moneda ADD CONSTRAINT PK_t_Suma_Moneda
+	PRIMARY KEY (idSumaMoneda)
+;
+
+ALTER TABLE t_Detalle_Suma ADD CONSTRAINT PK_t_Suma_Monedas
+	PRIMARY KEY (idDetalleSuma)
+;
+
+ALTER TABLE t_SobreGiro ADD CONSTRAINT PK_t_SobreGiro
+	PRIMARY KEY (idSobreGiro)
+;
+
+ALTER TABLE t_Certificado ADD CONSTRAINT PK_t_Certificado
+	PRIMARY KEY (idCertificado)
+;
+
+ALTER TABLE t_Tipo_Credito ADD CONSTRAINT PK_t_Tipo_Credito
+	PRIMARY KEY (idTipoCredito)
+;
+
+ALTER TABLE t_Denominacion_Moneda ADD CONSTRAINT PK_t_Denominacion_Moneda
+	PRIMARY KEY (idDenominacionMoneda)
+;
+
+ALTER TABLE t_Registro_Otros ADD CONSTRAINT PK_t_Registro_Otros
+	PRIMARY KEY (idRegistroOtros)
+;
+
+ALTER TABLE t_Utilidad ADD CONSTRAINT PK_t_Utilidad
+	PRIMARY KEY (idUtilidad)
+;
+
+ALTER TABLE t_patrimonio ADD CONSTRAINT PK_t_patrimonio
+	PRIMARY KEY (idPatrimonio)
+;
+
+ALTER TABLE t_balancexmoneda ADD CONSTRAINT PK_t_balancexmoneda
+	PRIMARY KEY (idBalance)
+;
+
+ALTER TABLE t_tasa ADD CONSTRAINT PK_t_tasa
+	PRIMARY KEY (idTasa)
+;
+
+ALTER TABLE t_Contrato ADD CONSTRAINT PK_t_Contrato
+	PRIMARY KEY (idContrato)
+;
+
+ALTER TABLE t_Cobranza ADD CONSTRAINT PK_t_Cobranza
+	PRIMARY KEY (idCobranza)
+;
+
+ALTER TABLE t_Detalle_Prestamo ADD CONSTRAINT PK_t_Detalle_Prestamo
+	PRIMARY KEY (idDetallePrestamo)
+;
+
+ALTER TABLE t_Detalle_Cuenta_Persona ADD CONSTRAINT PK_t_Detalle_Cuenta_Persona
+	PRIMARY KEY (idDetalleCuentaPersona)
+;
+
+ALTER TABLE t_Registro_Prestamo ADD CONSTRAINT PK_t_prestamo
+	PRIMARY KEY (idPrestamo)
+;
+
+ALTER TABLE t_Transferencia_Caja ADD CONSTRAINT PK_t_Transferencia_Caja
+	PRIMARY KEY (idTransferenciaCaja)
+;
+
+ALTER TABLE t_Sesion ADD CONSTRAINT PK_t_Sesion
+	PRIMARY KEY (idSession)
+;
+
+ALTER TABLE t_Categoria_Persona ADD CONSTRAINT PK_t_Categoria_Persona
+	PRIMARY KEY (idCategoriaPersona)
+;
+
+ALTER TABLE t_Control_Tipo ADD CONSTRAINT PK_t_Control_Tipo
+	PRIMARY KEY (idControlTipo)
+;
+
+ALTER TABLE t_Control_Modulo ADD CONSTRAINT PK_t_Control_Modulo
+	PRIMARY KEY (idControlModulo)
+;
+
+ALTER TABLE t_Departamento ADD CONSTRAINT PK_Departamento
+	PRIMARY KEY (idDepartamento)
+;
+
+ALTER TABLE t_Provincia ADD CONSTRAINT PK_Provincia
+	PRIMARY KEY (idProvincia)
+;
+
+ALTER TABLE t_Distrito ADD CONSTRAINT PK_Distrito
+	PRIMARY KEY (idDistrito)
+;
+
+ALTER TABLE t_Moneda ADD CONSTRAINT PK_Moneda
+	PRIMARY KEY (cod_moneda)
+;
+
+ALTER TABLE t_Tipo_Cambio ADD CONSTRAINT PK_Tipo_Cambio
+	PRIMARY KEY (idTipoCambio)
+;
+
+ALTER TABLE t_Tipo_Operacion ADD CONSTRAINT PK_Tipo_Operacion
+	PRIMARY KEY (codigo_tipo_operacion)
+;
+
+ALTER TABLE t_Registro_Compra_Venta ADD CONSTRAINT PK_Registro_Compra_Venta
+	PRIMARY KEY (idRegistroCompraVenta)
+;
+
+ALTER TABLE t_Registro_Giro ADD CONSTRAINT PK_Registro_Giro
+	PRIMARY KEY (idregistro)
+;
+
+ALTER TABLE t_Operacion ADD CONSTRAINT PK_Operacion
+	PRIMARY KEY (id_operacion)
+;
+
+ALTER TABLE t_Registro_Deposito_Retiro ADD CONSTRAINT PK_Registro_Deposito_Retiro
+	PRIMARY KEY (idDepositoRetiro)
+;
+
+ALTER TABLE t_Detalle_Caja ADD CONSTRAINT PK_Detalle_Caja
+	PRIMARY KEY (idDetalleCaja)
+;
+
+ALTER TABLE t_filial ADD CONSTRAINT PK_filial
+	PRIMARY KEY (cod_filial)
+;
+
+ALTER TABLE t_Caja ADD CONSTRAINT PK_Caja
+	PRIMARY KEY (cod_caja)
+;
+
+ALTER TABLE t_Persona_Caja ADD CONSTRAINT PK_Persona_Caja
+	PRIMARY KEY (idPersonaCaja)
+;
+
+ALTER TABLE t_Modulo ADD CONSTRAINT PK_Modulo
+	PRIMARY KEY (idModulo)
+;
+
+ALTER TABLE t_Cuenta_Acceso ADD CONSTRAINT PK_Cuenta_Acceso
+	PRIMARY KEY (id_acceso)
+;
+
+ALTER TABLE t_Tipo_Persona ADD CONSTRAINT PK_Tipo_Persona
+	PRIMARY KEY (idTipoPersona)
+;
+
+ALTER TABLE t_Persona ADD CONSTRAINT PK_t_Persona
+	PRIMARY KEY (id_user_pk)
+;
+
+ALTER TABLE t_Cuenta_Persona ADD CONSTRAINT PK_Cuenta_Persona
+	PRIMARY KEY (idCuentaPersona)
+;
+
+ALTER TABLE t_Tipo_Cuenta ADD CONSTRAINT PK_Tipo_Cuenta
+	PRIMARY KEY (codigo_cuenta)
+;
+
+
+
+ALTER TABLE t_Detalle_Suma ADD CONSTRAINT FK_t_Detalle_Sum_t_Denominacio
+	FOREIGN KEY (idDenominacionMoneda) REFERENCES t_Denominacion_Moneda (idDenominacionMoneda)
+;
+
+ALTER TABLE t_Detalle_Suma ADD CONSTRAINT FK_t_Detalle_Sum_t_Suma_Moneda
+	FOREIGN KEY (idSumaMoneda) REFERENCES t_Suma_Moneda (idSumaMoneda)
+;
+
+ALTER TABLE t_SobreGiro ADD CONSTRAINT FK_t_SobreGiro_t_Cuenta_Perso
+	FOREIGN KEY (idCuentaPersona) REFERENCES t_Cuenta_Persona (idCuentaPersona)
+;
+
+ALTER TABLE t_Certificado ADD CONSTRAINT FK_t_Certificado_t_Registro_D
+	FOREIGN KEY (idDepositoRetiro) REFERENCES t_Registro_Deposito_Retiro (idDepositoRetiro)
+;
+
+ALTER TABLE t_Denominacion_Moneda ADD CONSTRAINT FK_t_Denominacion_Mon_t_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_Registro_Otros ADD CONSTRAINT FK_t_Registro_Ot_t_Persona_Caj
+	FOREIGN KEY (idPersonaCaja) REFERENCES t_Persona_Caja (idPersonaCaja)
+;
+
+ALTER TABLE t_Registro_Otros ADD CONSTRAINT FK_t_Registro_Otro_t_Operacion
+	FOREIGN KEY (id_operacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Utilidad ADD CONSTRAINT FK_t_Utilidad_t_balancexmoneda
+	FOREIGN KEY (idBalance) REFERENCES t_balancexmoneda (idBalance)
+;
+
+ALTER TABLE t_patrimonio ADD CONSTRAINT FK_t_patrimonio_t_balancexmon
+	FOREIGN KEY (idBalance) REFERENCES t_balancexmoneda (idBalance)
+;
+
+ALTER TABLE t_balancexmoneda ADD CONSTRAINT FK_t_balancexmoneda_t_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_tasa ADD CONSTRAINT FK_t_tasa_t_Tipo_Cambio
+	FOREIGN KEY (idTipoCambio) REFERENCES t_Tipo_Cambio (idTipoCambio)
+;
+
+ALTER TABLE t_Contrato ADD CONSTRAINT FK_t_Contrato_t_Registro_Pres
+	FOREIGN KEY (idPrestamo) REFERENCES t_Registro_Prestamo (idPrestamo)
+;
+
+ALTER TABLE t_Cobranza ADD CONSTRAINT FK_t_Cobranza_t_Detalle_Prest
+	FOREIGN KEY (idDetallePrestamo) REFERENCES t_Detalle_Prestamo (idDetallePrestamo)
+;
+
+ALTER TABLE t_Cobranza ADD CONSTRAINT FK_t_Cobranza_t_Operacion
+	FOREIGN KEY (idOperacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Detalle_Prestamo ADD CONSTRAINT FK_t_Detalle_Pre_t_Registro_Pr
+	FOREIGN KEY (idPrestamo) REFERENCES t_Registro_Prestamo (idPrestamo)
+;
+
+ALTER TABLE t_Detalle_Cuenta_Persona ADD CONSTRAINT FK_t_Detalle_Cue_t_Cuenta_Pers
+	FOREIGN KEY (idCuentaPersona) REFERENCES t_Cuenta_Persona (idCuentaPersona)
+;
+
+ALTER TABLE t_Registro_Prestamo ADD CONSTRAINT FK_t_Registro_Pr_t_Cuenta_Pers
+	FOREIGN KEY (idCuentaPersona) REFERENCES t_Cuenta_Persona (idCuentaPersona)
+;
+
+ALTER TABLE t_Registro_Prestamo ADD CONSTRAINT FK_t_Registro_Pr_t_Tipo_Credit
+	FOREIGN KEY (idTipoCredito) REFERENCES t_Tipo_Credito (idTipoCredito)
+;
+
+ALTER TABLE t_Registro_Prestamo ADD CONSTRAINT FK_t_Registro_Pres_t_Operacion
+	FOREIGN KEY (idOperacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Transferencia_Caja ADD CONSTRAINT FK_t_Transferencia_Ca_t_OPER
+	FOREIGN KEY (cod_moneda) REFERENCES T_OPERACION (ID_OPERACION)
+;
+
+ALTER TABLE t_Transferencia_Caja ADD CONSTRAINT FK_t_Transferencia_Caja_t_Caja
+	FOREIGN KEY (cod_caja) REFERENCES t_Caja (cod_caja)
+;
+
+ALTER TABLE t_Sesion ADD CONSTRAINT FK_t_Sesion_Cuenta_Acceso
+	FOREIGN KEY (id_acceso) REFERENCES t_Cuenta_Acceso (id_acceso)
+;
+
+ALTER TABLE t_Control_Tipo ADD CONSTRAINT FK_t_Control_Tip_t_Tipo_Person
+	FOREIGN KEY (idTipoPersona) REFERENCES t_Tipo_Persona (idTipoPersona)
+;
+
+ALTER TABLE t_Control_Tipo ADD CONSTRAINT FK_t_Control_Tipo_t_Persona
+	FOREIGN KEY (id_user_pk) REFERENCES t_Persona (id_user_pk)
+;
+
+ALTER TABLE t_Control_Modulo ADD CONSTRAINT FK_t_Control_Mod_t_Tipo_Person
+	FOREIGN KEY (idTipoPersona) REFERENCES t_Tipo_Persona (idTipoPersona)
+;
+
+ALTER TABLE t_Control_Modulo ADD CONSTRAINT FK_t_Control_Modulo_Modulo
+	FOREIGN KEY (idModulo) REFERENCES t_Modulo (idModulo)
+;
+
+ALTER TABLE t_Provincia ADD CONSTRAINT FK_Provincia_Departamento
+	FOREIGN KEY (idDepartamento) REFERENCES t_Departamento (idDepartamento)
+;
+
+ALTER TABLE t_Distrito ADD CONSTRAINT FK_Distrito_Provincia
+	FOREIGN KEY (idProvincia) REFERENCES t_Provincia (idProvincia)
+;
+
+ALTER TABLE t_Tipo_Cambio ADD CONSTRAINT FK_Tipo_Cambio_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_Registro_Compra_Venta ADD CONSTRAINT FK_Registro_Compra_Tipo_Cambio
+	FOREIGN KEY (idTipoCambio) REFERENCES t_Tipo_Cambio (idTipoCambio)
+;
+
+ALTER TABLE t_Registro_Compra_Venta ADD CONSTRAINT FK_Registro_Compra_V_Operacion
+	FOREIGN KEY (id_operacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Registro_Giro ADD CONSTRAINT FK_Registro_Giro_Operacion
+	FOREIGN KEY (id_operacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Registro_Giro ADD CONSTRAINT FK_t_Registro_Giro_t_filial
+	FOREIGN KEY (cod_Filial) REFERENCES t_filial (cod_filial)
+;
+
+ALTER TABLE t_Registro_Giro ADD CONSTRAINT FK_t_Registro_Giro_t_Persona
+	FOREIGN KEY (id_user_pk_origen) REFERENCES t_Persona (id_user_pk)
+;
+
+ALTER TABLE t_Operacion ADD CONSTRAINT FK_Operacion_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_Operacion ADD CONSTRAINT FK_t_Operacion_t_Persona_Caja
+	FOREIGN KEY (idPersonaCaja) REFERENCES t_Persona_Caja (idPersonaCaja)
+;
+
+ALTER TABLE t_Operacion ADD CONSTRAINT FK_Operacion_Tipo_Operacion
+	FOREIGN KEY (codigo_tipo_operacion) REFERENCES t_Tipo_Operacion (codigo_tipo_operacion)
+;
+
+ALTER TABLE t_Registro_Deposito_Retiro ADD CONSTRAINT FK_Registro_Deposito_Operacion
+	FOREIGN KEY (id_operacion) REFERENCES t_Operacion (id_operacion)
+;
+
+ALTER TABLE t_Registro_Deposito_Retiro ADD CONSTRAINT FK_t_Registro_De_t_Cuenta_Pers
+	FOREIGN KEY (idCuentaPersona) REFERENCES t_Cuenta_Persona (idCuentaPersona)
+;
+
+ALTER TABLE t_Detalle_Caja ADD CONSTRAINT FK_Detalle_Caja_Caja
+	FOREIGN KEY (cod_caja) REFERENCES t_Caja (cod_caja)
+;
+
+ALTER TABLE t_Detalle_Caja ADD CONSTRAINT FK_t_Detalle_Caja_t_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_filial ADD CONSTRAINT FK_t_filial_t_Distrito
+	FOREIGN KEY (idDistrito) REFERENCES t_Distrito (idDistrito)
+;
+
+ALTER TABLE t_Caja ADD CONSTRAINT FK_Caja_filial
+	FOREIGN KEY (cod_filial) REFERENCES t_filial (cod_filial)
+;
+
+ALTER TABLE t_Persona_Caja ADD CONSTRAINT FK_Persona_Caja_Caja
+	FOREIGN KEY (cod_caja) REFERENCES t_Caja (cod_caja)
+;
+
+ALTER TABLE t_Persona_Caja ADD CONSTRAINT FK_t_Persona_Caja_t_Persona
+	FOREIGN KEY (id_user_pk) REFERENCES t_Persona (id_user_pk)
+;
+
+ALTER TABLE t_Cuenta_Acceso ADD CONSTRAINT FK_t_Cuenta_Acceso_t_Persona
+	FOREIGN KEY (id_user_pk) REFERENCES t_Persona (id_user_pk)
+;
+
+ALTER TABLE t_Persona ADD CONSTRAINT FK_Persona_t_Categoria_Persona
+	FOREIGN KEY (idCategoriaPersona) REFERENCES t_Categoria_Persona (idCategoriaPersona)
+;
+
+ALTER TABLE t_Cuenta_Persona ADD CONSTRAINT FK_Cuenta_Persona_Moneda
+	FOREIGN KEY (cod_moneda) REFERENCES t_Moneda (cod_moneda)
+;
+
+ALTER TABLE t_Cuenta_Persona ADD CONSTRAINT FK_t_Cuenta_Persona_t_Persona
+	FOREIGN KEY (id_user_pk) REFERENCES t_Persona (id_user_pk)
+;
+
+ALTER TABLE t_Cuenta_Persona ADD CONSTRAINT FK_Cuenta_Persona_Tipo_Cuenta
+	FOREIGN KEY (codigo_cuenta) REFERENCES t_Tipo_Cuenta (codigo_cuenta)
+;
+
+ALTER TABLE t_Transaccion ADD CONSTRAINT PK_t_Transaccion
+	PRIMARY KEY (idTransaccion)
+;
+DROP TABLE t_Transaccion_c 
+;
+CREATE TABLE t_Transaccion_c
+(
+	idTransCapita        VARCHAR(41) NOT NULL,
+	tipo_operacion       VARCHAR(50) NULL,
+	fecha                VARCHAR(50) NULL,
+	fechaUltima          VARCHAR(50) NULL
+)
+;
+
+
+ALTER TABLE t_Transaccion_c ADD CONSTRAINT PK_t_Transaccion_c
+	PRIMARY KEY (idTransCapita)
+;
+
+INSERT INTO T_TRANSACCION_C (IDTRANSCAPITA, TIPO_OPERACION, FECHA, FECHAULTIMA)
+	VALUES (to_char(CURRENT_TIMESTAMP, 'yyyymmddhh24missUS'), 'CAPITALIZACION', to_char(CURRENT_TIMESTAMP, 'yyyy/mm/dd'),  to_char(CURRENT_TIMESTAMP, 'yyyy/mm/dd'))

@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TBalancexmoneda" table="t_balancexmoneda" schema="public">
+        <id name="idbalance" type="string">
+            <column name="idbalance" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TMoneda" class="org.finance.bank.bean.TMoneda" fetch="select">
+            <column name="cod_moneda" length="41" not-null="true" />
+        </many-to-one>
+        <property name="activoCajaybanco" type="big_decimal">
+            <column name="activo_cajaybanco" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="activoCuentaxcobrar" type="big_decimal">
+            <column name="activo_cuentaxcobrar" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="pasivo" type="big_decimal">
+            <column name="pasivo" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="encaje" type="big_decimal">
+            <column name="encaje" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="PRespaldo" type="big_decimal">
+            <column name="p_respaldo" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="10" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="fd" type="date">
+            <column name="fd" length="13" />
+        </property>
+        <property name="patrimonio" type="big_decimal">
+            <column name="patrimonio" precision="20" scale="4" />
+        </property>
+        <property name="patrimonioActual" type="big_decimal">
+            <column name="patrimonio_actual" precision="20" scale="4" />
+        </property>
+        <set name="TUtilidads" inverse="true">
+            <key>
+                <column name="idbalance" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TUtilidad" />
+        </set>
+        <set name="TPatrimonioTransits" inverse="true">
+            <key>
+                <column name="idbalance" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TPatrimonioTransit" />
+        </set>
+    </class>
+</hibernate-mapping>

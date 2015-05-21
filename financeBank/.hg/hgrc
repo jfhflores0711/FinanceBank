@@ -1,0 +1,7 @@
+[paths]
+default = https://oscarmy:7dend1983@bitbucket.org/oscarmy/financebank
+default-push = https://oscarmy:7dend1983@bitbucket.org/oscarmy/financebank
+
+[ui]
+username = oscar@OSCAR-PC
+

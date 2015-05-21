@@ -1,0 +1,444 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.finance.bank.bean.TCategoriaPersona;
+import org.finance.bank.bean.TFilial;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TPersona;
+import org.finance.bank.bean.TPersonaCaja;
+import org.finance.bank.bean.TRegistroGiro;
+import org.finance.bank.bean.TTipoOperacion;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+import org.finance.bank.util.numeroOperacion;
+
+/**
+ *
+ * @author ronald
+ */
+public class Sprocesar extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        HttpSession session = request.getSession(true);
+        DAOGeneral dao = new DAOGeneral();
+        String idpc=session.getAttribute("USER_ID_PERSONA_CAJA").toString();
+        String idForInitNewestTable = DateUtil.convertDateId(idpc,Sprocesar.class.getSimpleName());
+        try {
+            String idpersona_e = "";
+            if (request.getParameter("idpersona_e") != null && !request.getParameter("idpersona_e").equals("")) {
+                idpersona_e = request.getParameter("idpersona_e").toString();
+            }
+            String categoria_e = "";
+            if (request.getParameter("categoria_e") != null && !request.getParameter("categoria_e").equals("")) {
+                categoria_e = request.getParameter("categoria_e").toString();
+            }
+            String dni_e = ".";
+            if (request.getParameter("dni_e") != null && !request.getParameter("dni_e").equals("")) {
+                dni_e = request.getParameter("dni_e").toString();
+            }
+            String ruc_e = ".";
+            if (request.getParameter("ruc_e") != null && !request.getParameter("ruc_e").equals("")) {
+                ruc_e = request.getParameter("ruc_e").toString();
+            }
+            String nombres_e = ".";
+            if (request.getParameter("nombres_e") != null && !request.getParameter("nombres_e").equals("")) {
+                nombres_e = request.getParameter("nombres_e").toString();
+            }
+            String apellidos_e = ".";
+            if (request.getParameter("apellidos_e") != null && !request.getParameter("apellidos_e").equals("")) {
+                apellidos_e = request.getParameter("apellidos_e").toString();
+            }
+            String email_e = ".";
+            if (request.getParameter("email_e") != null && !request.getParameter("email_e").equals("")) {
+                email_e = request.getParameter("email_e").toString();
+            }
+            String ubigeo_e = ".";
+            if (request.getParameter("ubigeo_e") != null && !request.getParameter("ubigeo_e").equals("")) {
+                ubigeo_e = request.getParameter("ubigeo_e").toString();
+            }
+            String telefono_e = ".";
+            if (request.getParameter("telefono_e") != null && !request.getParameter("telefono_e").equals("")) {
+                telefono_e = request.getParameter("telefono_e").toString();
+            }
+            String celular_e = ".";
+            if (request.getParameter("celular_e") != null && !request.getParameter("celular_e").equals("")) {
+                celular_e = request.getParameter("celular_e").toString();
+            }
+            String direccion_e = ".";
+            if (request.getParameter("direccion_e") != null && !request.getParameter("direccion_e").equals("")) {
+                direccion_e = request.getParameter("direccion_e").toString();
+            }
+            String idpersona_r = "";
+            if (request.getParameter("idpersona_r") != null && !request.getParameter("idpersona_r").equals("")) {
+                idpersona_r = request.getParameter("idpersona_r").toString();
+            }
+            String categoria_r = "";
+            if (request.getParameter("categoria_r") != null && !request.getParameter("categoria_r").equals("")) {
+                categoria_r = request.getParameter("categoria_r").toString();
+            }
+            String dni_r = ".";
+            if (request.getParameter("dni_r") != null && !request.getParameter("dni_r").equals("")) {
+                dni_r = request.getParameter("dni_r").toString();
+            }
+            String ruc_r = ".";
+            if (request.getParameter("ruc_r") != null && !request.getParameter("ruc_r").equals("")) {
+                ruc_r = request.getParameter("ruc_r").toString();
+            }
+            String nombres_r = ".";
+            if (request.getParameter("nombres_r") != null && !request.getParameter("nombres_r").equals("")) {
+                nombres_r = request.getParameter("nombres_r").toString();
+            }
+            String apellidos_r = ".";
+            if (request.getParameter("apellidos_r") != null && !request.getParameter("apellidos_r").equals("")) {
+                apellidos_r = request.getParameter("apellidos_r").toString();
+            }
+            String email_r = ".";
+            if (request.getParameter("email_r") != null && !request.getParameter("email_r").equals("")) {
+                email_r = request.getParameter("email_r").toString();
+            }
+            String ubigeo_r = ".";
+            if (request.getParameter("ubigeo_r") != null && !request.getParameter("ubigeo_r").equals("")) {
+                ubigeo_r = request.getParameter("ubigeo_r").toString();
+            }
+            String telefono_r = ".";
+            if (request.getParameter("telefono_r") != null && !request.getParameter("telefono_r").equals("")) {
+                telefono_r = request.getParameter("telefono_r").toString();
+            }
+            String celular_r = ".";
+            if (request.getParameter("celular_r") != null && !request.getParameter("celular_r").equals("")) {
+                celular_r = request.getParameter("celular_r").toString();
+            }
+            String direccion_r = ".";
+            if (request.getParameter("direccion_r") != null && !request.getParameter("direccion_r").equals("")) {
+                direccion_r = request.getParameter("direccion_r").toString();
+            }
+            TCategoriaPersona ctg = (TCategoriaPersona) dao.load(TCategoriaPersona.class, categoria_e);
+            String estado = "ACTIVO";
+            TPersona eCliente = null;
+            if (!idpersona_e.equals("")) {
+                eCliente = (TPersona) dao.load(TPersona.class, idpersona_e);
+            }
+            if (eCliente == null) {
+                eCliente = new TPersona();
+                eCliente.setIdUserPk("e");
+                eCliente.setTCategoriaPersona(ctg);
+                eCliente.setDocIdentidad(dni_e);
+                eCliente.setRuc(ruc_e);
+                eCliente.setNombre(nombres_e.toUpperCase());
+                eCliente.setApellidos(apellidos_e.toUpperCase());
+                eCliente.setEmail(email_e);
+                eCliente.setUbigeo(ubigeo_e);
+                eCliente.setTelefono(telefono_e);
+                eCliente.setCelular(celular_e);
+                eCliente.setDireccion(direccion_e.toUpperCase());
+                eCliente.setEstado(estado);
+                eCliente.setIdUser(session.getAttribute("USER_ID").toString());
+                eCliente.setIpUser(session.getAttribute("USER_IP").toString());
+                eCliente.setDateUser(DateUtil.getNOW_S());
+            }
+            TCategoriaPersona ctg_r = (TCategoriaPersona) dao.load(TCategoriaPersona.class, categoria_r);
+            TPersona rCliente = null;
+            if (!idpersona_r.equals("")) {
+                rCliente = (TPersona) dao.load(TPersona.class, idpersona_r);
+            }
+            if (rCliente == null) {
+                rCliente = new TPersona();
+                rCliente.setIdUserPk("r");
+                rCliente.setTCategoriaPersona(ctg_r);
+                rCliente.setDocIdentidad(dni_r);
+                rCliente.setRuc(ruc_r);
+                rCliente.setNombre(nombres_r.toUpperCase());
+                rCliente.setApellidos(apellidos_r.toUpperCase());
+                rCliente.setEmail(email_r);
+                rCliente.setUbigeo(ubigeo_r);
+                rCliente.setTelefono(telefono_r);
+                rCliente.setCelular(celular_r);
+                rCliente.setDireccion(direccion_r.toUpperCase());
+                rCliente.setEstado(estado);
+                rCliente.setIdUser(session.getAttribute("USER_ID").toString());
+                rCliente.setIpUser(session.getAttribute("USER_IP").toString());
+                rCliente.setDateUser(DateUtil.getNOW_S());
+            }
+            String importe = "";
+            if (request.getParameter("importe") != null && !request.getParameter("importe").equals("")) {
+                importe = request.getParameter("importe").toString();
+            }
+            String fpago_importe = "";
+            if (request.getParameter("fpago_importe") != null && !request.getParameter("fpago_importe").equals("")) {
+                fpago_importe = request.getParameter("fpago_importe").toString();
+            }
+            String comision = "";
+            if (request.getParameter("comision") != null && !request.getParameter("comision").equals("")) {
+                comision = request.getParameter("comision").toString();
+            }
+            String fpago_comision = "";
+            if (request.getParameter("fpago_comision") != null && !request.getParameter("fpago_comision").equals("")) {
+                fpago_comision = request.getParameter("fpago_comision").toString();
+            }
+            String pagador_comision = "";
+            if (request.getParameter("pagador_comision") != null && !request.getParameter("pagador_comision").equals("")) {
+                pagador_comision = request.getParameter("pagador_comision").toString();
+            }
+            if (pagador_comision == null || pagador_comision.length() == 0) {
+                return;
+            }
+            String cod_moneda = "PEN";
+            if (request.getParameter("cod_moneda") != null && !request.getParameter("cod_moneda").equals("")) {
+                cod_moneda = request.getParameter("cod_moneda").toString();
+            }
+            String cod_filial = "0501";
+            if (request.getParameter("cod_filial") != null && !request.getParameter("cod_filial").equals("")) {
+                cod_filial = request.getParameter("cod_filial").toString();
+            }
+            String idcuentapersona = "";
+            if (request.getParameter("idcuentapersona") != null && !request.getParameter("idcuentapersona").equals("")) {
+                idcuentapersona = request.getParameter("idcuentapersona").toString();
+            }
+            if (eCliente.getIdUserPk() != null && rCliente.getIdUserPk() != null) {
+                TPersonaCaja pcaja = (TPersonaCaja) dao.load(TPersonaCaja.class, idpc);
+                TOperacion operacion = new TOperacion();
+                operacion.setIdOperacion(idForInitNewestTable);
+                operacion.setDescripcion("GIRO " + cod_filial);
+                operacion.setFecha(DateUtil.getNOW_S());
+                TTipoOperacion tipoOper = (TTipoOperacion) dao.load(TTipoOperacion.class, "TIPC5");
+                operacion.setTTipoOperacion(tipoOper);
+                operacion.setEstado("ACTIVO");
+                operacion.setNumeroOperacion(numeroOperacion.getNumber(session.getAttribute("USER_CODFILIAL").toString(), session.getAttribute("USER_CODCAJA").toString()));
+                TMoneda moneda = (TMoneda) dao.load(TMoneda.class, cod_moneda);
+                operacion.setTMoneda(moneda);
+                operacion.setIdUser(session.getAttribute("USER_ID").toString());
+                operacion.setIpUser(session.getAttribute("USER_IP").toString());
+                operacion.setDateUser(DateUtil.getNOW_S());
+                operacion.setTPersonaCaja(pcaja);
+                operacion.setSaldofinal(BigDecimal.ZERO);
+                operacion.setFd(new Date());
+                dao.persist(operacion);
+                TRegistroGiro giro = new TRegistroGiro();
+                giro.setIdregistro(idForInitNewestTable);
+                if (eCliente.getIdUserPk().equals("e")) {
+                    TPersona n = (TPersona) dao.load(TPersona.class, "20110404094329213499");
+                    giro.setTPersona(n);
+                } else {
+                    giro.setTPersona(eCliente);
+                }
+                if (rCliente.getIdUserPk().equals("r")) {
+                    giro.setIdUserPkDestino("20110404094329213499");
+                } else {
+                    giro.setIdUserPkDestino(rCliente.getIdUserPk());
+                }
+                giro.setFecha(DateUtil.getNOW_S());
+                BigDecimal IMPORTE = new BigDecimal(importe);
+                giro.setImporte(IMPORTE);
+                giro.setTOperacion(operacion);
+                giro.setFpagoImporte(fpago_importe);
+                BigDecimal COMISION = new BigDecimal(comision);
+                giro.setComision(COMISION);
+                if (!pagador_comision.equals("PEMISOR")) {
+                    fpago_comision = "0";
+                }
+                giro.setFpagoComision(fpago_comision);
+                giro.setPagadorComision(pagador_comision);
+                giro.setFechaEntrega("0");
+                giro.setIdUser(session.getAttribute("USER_ID").toString());
+                giro.setIpUser(session.getAttribute("USER_IP").toString());
+                giro.setDateUser(DateUtil.getNOW_S());
+                giro.setEstado("ESPERA");
+                giro.setIdcuentapersona(idcuentapersona);
+                TFilial filial = (TFilial) dao.load(TFilial.class, cod_filial);
+                giro.setTFilial(filial);
+                giro.setGirador(eCliente.getNombre() + "|" + eCliente.getApellidos());
+                giro.setRecibidor(rCliente.getNombre() + "|" + rCliente.getApellidos());
+                dao.persist(giro);
+                session.setAttribute("ID_REGISTRO_GIRO", giro.getIdregistro());
+//                String hql2 = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + pcaja.getTCaja().getCodCaja() + "' "
+//                        + " AND TMoneda.codMoneda ='" + cod_moneda + "' ";
+//                TDetalleCaja detallecajaD = (TDetalleCaja) dao.findAll(hql2).get(0);
+//                adminCapital capital = new adminCapital(giro.getTOperacion().getTMoneda().getCodMoneda(), session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+//                if (idcuentapersona.equals("0")) {
+////              ************** ACTUALIZANDO LOS MONTOS DE LA CAJA **************
+//                    Double addMonto = detallecajaD.getMontoFinal().doubleValue() + IMPORTE.doubleValue();
+//                    if (pagador_comision.equals("PEMISOR") && fpago_comision.equals("EFECTIVO")) {
+//                        addMonto = detallecajaD.getMontoFinal().doubleValue() + IMPORTE.doubleValue() + COMISION.doubleValue();
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue() + Double.parseDouble(comision);
+//                        Double k = p.getPatrimonioActual().doubleValue() + Double.parseDouble(comision);
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue();
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                        TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                        xp.setPatrimonioActual(new BigDecimal(k));
+//                        dao.update();
+//                    } else if (pagador_comision.equals("PEMISOR") && fpago_comision.equals("DESCONTAR")) {
+//                        addMonto = Double.parseDouble(detallecajaD.getMontoFinal() + "") + IMPORTE.doubleValue();// - Double.parseDouble(COMISION + "");
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue();
+//                        Double k = p.getPatrimonioActual().doubleValue() + Double.parseDouble(comision);
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue() - Double.parseDouble(comision);
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                        TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                        xp.setPatrimonioActual(new BigDecimal(k));
+//                        dao.update();
+//                    } else if (pagador_comision.equals("PRECEPTOR")) {
+//                        //Falta algo
+//                        //addMonto = Double.parseDouble(detallecajaD.getMontoFinal() + "") + Double.parseDouble(IMPORTE + "");// - Double.parseDouble(COMISION + "");
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue();
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue() - Double.parseDouble(comision);
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                    } else {
+//                        return;
+//                    }
+//                    BigDecimal ntotal = new BigDecimal(addMonto);
+//                    detallecajaD.setMontoFinal(ntotal);
+//                    detallecajaD.setDateUser(DateUtil.getNOW_S());
+//                    dao.update();
+//                } else {
+////              ************** ACTUALIZAR CUENTA PERSONA **************
+//                    TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, idcuentapersona);
+//                    /*try {
+//                    CheckCapital.checkSaldoCapitalizacion(idcuentapersona, session);
+//                    } catch (ParseException ex) {
+//                    Logger.getLogger(Sprocesar.class.getName()).log(Level.SEVERE, null, ex);
+//                    }*/
+//                    Double addMonto = cuenta.getSaldo().doubleValue() - IMPORTE.doubleValue() - COMISION.doubleValue();
+//                    if (pagador_comision.equals("PEMISOR") && fpago_comision.equals("EFECTIVO")) {
+//                        addMonto = cuenta.getSaldo().doubleValue() - IMPORTE.doubleValue() - COMISION.doubleValue();
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue() + Double.parseDouble(comision);
+//                        Double k = p.getPatrimonioActual().doubleValue() + Double.parseDouble(comision);
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue();
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                        TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                        xp.setPatrimonioActual(new BigDecimal(k));
+//                        dao.update();
+//                    } else if (pagador_comision.equals("PEMISOR") && fpago_comision.equals("DESCONTAR")) {
+//                        addMonto = Double.parseDouble(cuenta.getSaldo() + "") - IMPORTE.doubleValue() - COMISION.doubleValue();
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue();
+//                        Double k = p.getPatrimonioActual().doubleValue() + Double.parseDouble(comision);
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue() - Double.parseDouble(comision);
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                        TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                        xp.setPatrimonioActual(new BigDecimal(k));
+//                        dao.update();
+//                    } else if (pagador_comision.equals("PRECEPTOR")) {
+//                        addMonto = cuenta.getSaldo().doubleValue() - IMPORTE.doubleValue();
+//                        TPatrimonio p = capital.ponerAsiento();
+//                        Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + IMPORTE.doubleValue();
+//                        Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() + IMPORTE.doubleValue() - Double.parseDouble(comision);
+//                        TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                        xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                        xbm.setPasivo(new BigDecimal(cxp));
+//                        dao.update();
+//                    } else {
+//                        return;
+//                    }
+//                    BigDecimal ntotal = new BigDecimal(addMonto);
+//                    cuenta.setSaldo(ntotal);
+//                    cuenta.setSaldoSinInteres(ntotal);
+//                    dao.update();
+//                    TOperacion o = (TOperacion) dao.load(TOperacion.class, iOp);
+//                    o.setSaldofinal(ntotal);
+//                    dao.update();
+//                }
+            }
+        } finally {
+            out.close();
+        }
+    }
+
+// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+
+
+
+
+
+
+
+
+
+
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+
+
+
+
+
+
+
+
+
+
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+
+
+
+
+
+    }// </editor-fold>
+}

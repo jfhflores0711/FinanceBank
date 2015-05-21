@@ -1,0 +1,469 @@
+<%-- 
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : Oscar
+--%>
+<%@page session="true" import="org.finance.bank.util.*,org.finance.bank.model.*,java.util.*, java.math.*"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title><%=(DateUtil.getDateTime("yyyymmddhhmmssS", new Date()))%>|financeBank! </title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href="css/francesGral.css" rel="stylesheet" type="text/css" media="All">
+        <link href="css/francesScreen.css" rel="stylesheet" type="text/css" media="screen">
+        <link href="css/francesPrint.css" rel="stylesheet" type="text/css" media="print">
+        <script type="text/javascript">
+            //Script original de KarlanKas para forosdelweb.com
+            if (history.forward(1)){location.replace(history.forward(1))}
+        </script>
+        <!--script type="text/javascript">
+            //creamos la variable ventana_secundaria que contendrá una referencia al popup que vamos a abrir
+            //la creamos como variable global para poder acceder a ella desde las distintas funciones
+            var ventana_secundaria;
+            function abrirVentanac(){
+                //guardo la referencia de la ventana para poder utilizarla luego
+                ventana_secundaria = window.open("contrato.htm?contrato_postback=1&contratoGen="+document.getElementById("contratoGen").value,"contrato","width=800,height=840,menubar=yes,resizable=yes,scrollbars=yes,status=yes");
+                document.getElementById("contrato2").disabled=false;
+                document.getElementById("sinContrato").disabled=true;
+            }
+            function cerrarVentanac(){
+                //la referencia de la ventana es el objeto window del popup. Lo utilizo para acceder al método close
+                if(ventana_secundaria)
+                    ventana_secundaria.close()
+            }
+        </script>
+        <script type="text/javascript">
+            function printDes(){
+                window.open("comprobantePrestamo.htm?mensaje=ok", "ticketp", "width=900,height=600,menubar=yes,resizable=yes,scrollbars=yes,status=yes")
+            }
+        </script-->
+        <script type="text/javascript">
+            <!-- //Begin
+            function formatCurrency(num) {
+                num = num.toString().replace(/\$|\,/g,'');
+                if(isNaN(num)) num = "0";
+                cents = Math.floor((num*100+0.5)%100);
+                num = Math.floor(num).toString();
+                if(cents < 10) cents = "0" + cents;
+                for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+                    num = num.substring(0,num.length-(4*i+3))+','+num.substring(num.length-(4*i+3));
+                return (num + '.' + cents);
+            }
+            // End -->
+        </script>
+        <script type="text/javascript">
+            function letras(c,d,u){
+                var centenas,decenas,decom;
+                var lc="";var ld="";var lu="";
+                centenas=eval(c);decenas=eval(d);decom=eval(u);
+                switch(centenas){
+                    case 0: lc="";break;
+                    case 1:
+                        if (decenas==0 && decom==0)
+                            lc="Cien";
+                        else
+                            lc="Ciento ";
+                        break;
+                    case 2: lc="Doscientos ";break;
+                    case 3: lc="Trescientos ";break;
+                    case 4: lc="Cuatrocientos ";break;
+                    case 5: lc="Quinientos ";break;
+                    case 6: lc="Seiscientos ";break;
+                    case 7: lc="Setecientos ";break;
+                    case 8: lc="Ochocientos ";break;
+                    case 9: lc="Novecientos ";break;
+                }
+                switch(decenas){
+                    case 0: ld="";break;
+                    case 1:switch(decom){
+                    case 0:ld="Diez";break;
+                    case 1:ld="Once";break;
+                    case 2:ld="Doce";break;
+                    case 3:ld="Trece";break;
+                    case 4:ld="Catorce";break;
+                    case 5:ld="Quince";break;
+                    case 6:ld="Dieciseis";break;
+                    case 7:ld="Diecisiete";break;
+                    case 8:ld="Dieciocho";break;
+                    case 9:ld="Diecinueve";break;
+                }
+                break;
+            case 2:ld="Veinte";break;
+            case 3:ld="Treinta";break;
+            case 4:ld="Cuarenta";break;
+            case 5:ld="Cincuenta";break;
+            case 6:ld="Sesenta";break;
+            case 7:ld="Setenta";break;
+            case 8:ld="Ochenta";break;
+            case 9:ld="Noventa";break;
+        }
+        switch(decom){
+            case 0: lu="";break;
+            case 1: lu="Un";break;
+            case 2: lu="Dos";break;
+            case 3: lu="Tres";break;
+            case 4: lu="Cuatro";break;
+            case 5: lu="Cinco";break;
+            case 6: lu="Seis";break;
+            case 7: lu="Siete";break;
+            case 8: lu="Ocho";break;
+            case 9: lu="Nueve";break;
+        }
+        if (decenas==1){
+            return lc+ld;
+        }
+        if (decenas==0 || decom==0){
+            return lc+" "+ld+lu;
+        }
+        else{
+            if(decenas==2){
+                ld="Veinti";
+                return lc + ld + lu.toLowerCase();
+            }else{
+                return lc+ld+" y "+lu
+            }
+        }
+    }
+    function getNumberLiteral(n){
+        var m0,cm,dm,um,cmi,dmi,umi,ce,de,un,hlp,decimal;
+        if (isNaN(n)) {
+            alert("La Cantidad debe ser un valor Numérico.");
+            return null
+        }
+        m0= parseInt(n/ 1000000000000); rm0=n% 1000000000000;
+        m1= parseInt(rm0/100000000000); rm1=rm0%100000000000;
+        m2= parseInt(rm1/10000000000); rm2=rm1%10000000000;
+        m3= parseInt(rm2/1000000000); rm3=rm2%1000000000;
+        cm= parseInt(rm3/100000000); r1= rm3%100000000;
+        dm= parseInt(r1/10000000); r2= r1% 10000000;
+        um= parseInt(r2/1000000); r3= r2% 1000000;
+        cmi=parseInt(r3/100000); r4= r3% 100000;
+        dmi=parseInt(r4/10000); r5= r4% 10000;
+        umi=parseInt(r5/1000); r6= r5% 1000;
+        ce= parseInt(r6/100); r7= r6% 100;
+        de= parseInt(r7/10); r8= r7% 10;
+        un= parseInt(r8/1);
+        //r9=r8%1;//999123456789
+        if (n< 1000000000000 && n>=1000000000){
+            tmp=n.toString();
+            s=tmp.length;
+            tmp1=tmp.slice(0,s-9);
+            tmp2=tmp.slice(s-9,s);
+            tmpn1=getNumberLiteral(tmp1);
+            tmpn2=getNumberLiteral(tmp2);
+            if(tmpn1.indexOf("Un")>=0)
+                pred=" Billón ";
+            else
+                pred=" Billones ";
+            return tmpn1+ pred +tmpn2;
+        }
+        if (n<10000000000 && n>=1000000){
+            mldata=letras(cm,dm,um);
+            hlp=mldata.replace("Un","*");
+            if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                mldata=mldata.replace("Uno","un");
+                mldata+=" Millones ";
+            } else {
+                mldata="Un Millón ";
+            }
+            mdata=letras(cmi,dmi,umi);
+            cdata=letras(ce,de,un);
+            if(mdata!="	"){
+                if (n == 1000000) {
+                    mdata=mdata.replace("Uno","un") + "de";
+                } else {
+                    mdata=mdata.replace("Uno","un")+" mil ";
+                }
+            }
+            return (mldata+mdata+cdata);
+        }
+        if (n<1000000 && n>=1000){
+            mdata=letras(cmi,dmi,umi);
+            cdata=letras(ce,de,un);
+            hlp=mdata.replace("Un","*");
+            if (hlp.indexOf("*")<0 || hlp.indexOf("*")>3){
+                mdata=mdata.replace("Uno","un");
+                return (mdata +" mil "+cdata);
+            }
+            else
+                return ("Mil "+ cdata);
+        }
+        if (n<1000 && n>=1){
+            return (letras(ce,de,un));
+        }
+        if (n==0){
+            return " Cero";
+        }
+        return "No disponible";
+    }
+        </script>
+        <%
+                    /*TCuentaPersona tcuentaPrestamo = null;
+                    TTipoOperacion ttOperacion = null;
+                    TMoneda tmoneda = null;
+                    TPersonaCaja tpCaja = null;
+                    TOperacion toperacion = null;
+                    String tmp;
+                    tmp = request.getParameter("xl_postback");
+                    if (tmp != null) {
+
+                    } else {
+                        if (session.getAttributeNames().hasMoreElements()) {
+                            session.invalidate();
+                        }
+                    }*/
+        %>
+        <style type="text/css">
+            #content{
+                width:1100px;
+            }
+            #sidebar{
+                width:200px;
+            }
+            #main{
+                width:900px;
+            }
+        </style>
+    </head><!-- Header end -->
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset><legend>&nbsp;</legend>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">Cuadro de Amortizacion financeBank</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                var fecha=new Date();
+                var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                        document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="meta">
+                        <p>Casa de cambios || INVERSIONES VENTURA</p>
+                    </div>
+                    <%
+                                            /*BigDecimal sa = BigDecimal.ZERO;
+                                            tpCaja = (TPersonaCaja) sess.load(TPersonaCaja.class, session.getAttribute("USER_ID_PERSONA_CAJA").toString());
+                                            ttOperacion = (TTipoOperacion) sess.load(TTipoOperacion.class, "TIPC6");
+                                            
+                                            
+                                            */
+                    %>
+                    <div class="story">
+                        <form id="formc" name="formc" method="post" action=""> <div style="display:none">
+                                <!--input name="xl_sheet_no" id="xl_sheet_no" type="hidden"
+                                       value="<=calc.getPanel_to_show()%>"
+                                       -->
+                                <input name="xl_postback" id="xl_postback" type="hidden" value="1">
+                            </div>
+                            <div class="eebuttonbar_top">
+                                <input class="eebuttons" type="button" value="Imprimir" name="xl_print_top" onclick="window.print();">
+                            </div>
+                            <div>
+                                <table border="0">
+                                    <tr>
+                                        <td colspan="2" class="ee106">CRONOGRAMA DE PAGOS, CON PERIODO DE <=periodo%> DÍAS</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="ee130">TASA DE INTERÉS COMPENSATORIA EFECTIVA ANUAL A 360 DÍAS: <%/*=DateUtil.eedisplayPercentND(Math.pow(1 + calc.getXLEW_1_3_2() / 12, 12) - 1.0D, 2)*/%> </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <hr>
+                            <div id="panel1" style='display:<%--= (tmp==null) ? "block" : "none"--%>'>
+                                <table style='border-collapse:collapse' border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+                                    <col width="78.00" /><col width="130.00" /><col width="120.00" /><col width="115.00" /><col width="135.00" /><col width="244.00" /><col width="1.00" />
+                                    <tr style='height:17pt'>
+                                        <td class='ee100'>Desembolso:</td>
+                                        <td class='ee100'>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                    <tr style='height:13pt'>
+                                        <td class='ee100'>
+                                            Plazo :
+                                        </td>
+                                        <td class='ee100'>&nbsp;</td>
+                                    </tr>
+                                    <tr style='height:14pt'>
+                                        <td class='ee100'>
+                                            TEA:
+                                        </td>
+                                        <td class='ee100'>&nbsp;</td>
+                                    </tr>
+                                </table><table>
+                                    <tr style='height:14pt'>
+                                        <td class='ee115'>
+                                            Mes cuota
+                                        </td>
+                                        <td class='ee118'>
+                                            Cuota Mensual
+                                        </td>
+                                        <td class='ee115'>
+                                            Intereses
+                                        </td>
+                                        <td class='ee115'>
+                                            Amortizacion
+                                        </td>
+                                        <td class='ee115'>
+                                            Capital Pendiente
+                                        </td>
+                                        <td class='ee115'>
+                                            Vencimiento:
+                                        </td>
+                                        <td class='ee100'>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                    <%--
+                                                            if (calc.regPrestamo != null) {
+                                                                double[] tt = {0D, 0D, 0D};
+                                                                for (int x = 0; x < (((int) Math.round(calc.getXLEW_1_2_2())) + 1); x++) {
+                                                                    if (x == 0) {
+                                                                        out.write("<tr style='height:13pt'><td class='ee131'>");
+                                                                        out.write(calc.regPrestamo[x][0]);
+                                                                        out.write("</td><td class='ee120' colspan='3'>");
+                                                                        out.write(calc.regPrestamo[x][1]);
+                                                                        out.write("</td><td class='ee126'>");
+                                                                        out.write(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][3].replace(" ", "")), 2).replace(",", " "));
+                                                                        out.write("</td><td class='ee126'>");
+                                                                        out.write(DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(calc.regPrestamo[x][4])));
+                                                                        out.write("</td><td class='ee100'>&nbsp;</td></tr>");
+                                                                    } else {
+                                                                        out.write("<tr style='height:13pt'><td class='ee131'>");
+                                    %>
+                                    <%=x%>
+                                    <%
+                                                                                                    out.write("</td><td class='ee131'>");
+                                                                                                    tt[0] += Double.parseDouble(calc.regPrestamo[x][0]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][0]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                    out.write("</td><td class='ee119'>");
+                                                                                                    tt[1] += Double.parseDouble(calc.regPrestamo[x][1]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][1]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                    out.write("</td><td class='ee119'>");
+                                                                                                    tt[2] += Double.parseDouble(calc.regPrestamo[x][2]);
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][2]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                    out.write("</td><td class='ee119'>");
+                                    %>
+                                    <%=(moneda + " " + CurrencyConverter.formatToMoneyUS(Double.parseDouble(calc.regPrestamo[x][3]), 2).replace(",", " "))%>
+                                    <%
+                                                                                                    out.write("</td><td class='ee130'>");
+                                    %>
+                                    <%=(DateUtil.eedatefmt(DateUtil.fmtdate13, Double.parseDouble(calc.regPrestamo[x][4])))%>
+                                    <%
+                                                                        out.write("</td><td class='ee100'>&nbsp;</td></tr>");
+                                                                    }
+                                                                }
+                                                                out.write("<tr style='height:13pt'><td class='ee103'>");
+                                                                out.write("TOTAL:");
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[0], 2));
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[1], 2));
+                                                                out.write("</td><td class='ee103'>");
+                                                                out.write(CurrencyConverter.formatToMoneyUS(tt[2], 2));
+                                                                out.write("</td><td class='ee103'>------");
+                                                                out.write("</td><td class='ee103'>------</td><td>&nbsp;</td></tr>");
+                                                            }
+                                    --%>
+                                </table></div><br><hr>
+                            <div class="cl">
+                                <p>AMIGO CLIENTE, UD. PUEDE CANCELAR SUS CUOTAS EN CUALQUIERA DE NUESTRAS OFICINAS, PARA LO CUAL DEBE TENER LA CONSIDERACIÓN DEL COBRO DE UNA COMISIÓN, QUE ES DE 1.5% DEL MONTO APROBADO AL MOMENTO DEL DESEMBOLSO.</p>
+                                <p style="font-weight:bold">SI UD. TUVIERA ALGÚN RECLAMO Y/O DENUNCIA SOBRE NUESTROS SERVICIOS, REALÍCELO EN PRIMERA INSTANCIA A TRAVÉS DE NUESTRAS OFICINAS DE ATENCIÓN AL CLIENTE Y/O NUESTRA PÁGINA WEB. LA SBS E
+                                    INDECOPI, REPRESENTAN LA SEGUNDA INSTANCIA DE RESOLUCIÓN DE RECLAMOS AL QUE PUEDA RECURRIR.</p></div>
+                            <div class="eebuttonbar_bottom">
+                                <input class="eebuttons" type="button" value="Imprimir" name="xl_print_bottom" onclick="window.print();">
+                                <input class="eebuttons" type="button" value="Imprimir Comprobante" name="xl_bottom" onclick="printDes();">
+                                <span style="margin-left:1px;"> Disfrute el préstamo! </span>
+                            </div>
+                            <script language="javascript" type="text/javascript">
+                        function reset_onclick(x){
+                            document.formc.reset();
+                            postcode();
+                        }
+                        function postcode(){};
+                        function eequerystring(){
+                            var querystring=document.location.search;
+                            if(querystring.length>0){
+                                variables=(querystring.substring(1)).split("&");
+                                var variable;
+                                var key;
+                                var value;
+                                for(var ii=0;ii<variables.length;ii++){
+                                    variable=variables[ii].split("=");
+                                    key=unescape(variable[0]);
+                                    value=unescape(variable[1]);
+                                    if(document.formc[key]!=null){
+                                        document.formc[key].value=value;
+                                    }
+                                }
+                            }
+                        }
+                        function initial_update(){
+                            postcode('');
+                            eequerystring();
+                        }
+                            </script>
+                        </form>
+                    </div>
+                </div>
+                <div id="conContrato">
+                    <blockquote>
+                        <blockquote>
+                            <blockquote>
+                                <blockquote>
+                                    <blockquote>
+                                        <form name="form1" method="post" action="">
+                                            <input type="checkbox" id="sinContrato" name="sinContrato" value="" onclick="contratos();" >
+                                            <p id="habilitar">Habilitar contrato.</p><p id="inhabilitar" style="display:none;">Inhabilitar contrato.</p><br />
+                                            <span>
+                                                <input type="button" id="contrato" name="abrirContrato" value="Contrato" disabled onclick="abrirVentanac();">
+                                                <input name="cerrarContrato" id="contrato2" type="button" disabled onClick="cerrarVentanac();this.disabled=true" value="Cerrar Contrato">
+                                            </span>
+                                            <input type="hidden" id="contratoGen" name="contratoGen" value="<=tcontrato.getIdcontrato()%>">
+                                        </form>
+                                        <p>&nbsp;</p>
+                                    </blockquote>
+                                </blockquote>
+                            </blockquote>
+                        </blockquote>
+                    </blockquote>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+        <%--
+                    }
+        --%>
+
+        <%@include file="../common/footer.jsp" %>
+        <noscript>The browser does not support JavaScript. The calculations created using financeBank will not work. Please access the web page using another browser.<p></p></noscript>
+    </body>
+</html>

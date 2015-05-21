@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TLogFinance" table="t_log_finance" schema="public">
+        <id name="idlogfinance" type="string">
+            <column name="idlogfinance" length="50" />
+            <generator class="assigned" />
+        </id>
+        <property name="tipoOperacion" type="string">
+            <column name="tipo_operacion" length="50" not-null="true">
+                <comment>Id de la ultima Operacion en la caja</comment>
+            </column>
+        </property>
+        <property name="referencia" type="string">
+            <column name="referencia" length="250">
+                <comment>Patrimonio inicial en caracteres</comment>
+            </column>
+        </property>
+        <property name="monto" type="big_decimal">
+            <column name="monto" precision="20" scale="4" not-null="true">
+                <comment>Patrimonio actual en la caja (K)</comment>
+            </column>
+        </property>
+        <property name="patrimonio" type="big_decimal">
+            <column name="patrimonio" precision="20" scale="4" not-null="true">
+                <comment>Patrimonio Inicial de la caja (Ki)</comment>
+            </column>
+        </property>
+        <property name="activoCajaybanco" type="big_decimal">
+            <column name="activo_cajaybanco" precision="20" scale="4" not-null="true">
+                <comment>Caja y bancos de la caja (CyB)</comment>
+            </column>
+        </property>
+        <property name="activoCuentaxcobrar" type="big_decimal">
+            <column name="activo_cuentaxcobrar" precision="20" scale="4">
+                <comment>Cuenta por Cobra de la Caja (CxC)</comment>
+            </column>
+        </property>
+        <property name="pasivo" type="big_decimal">
+            <column name="pasivo" precision="20" scale="4" not-null="true">
+                <comment>Cuentas por Pagar de la Caja (CxP)</comment>
+            </column>
+        </property>
+        <property name="encaje" type="big_decimal">
+            <column name="encaje" precision="20" scale="4" not-null="true">
+                <comment>Sobregiros en Caja (SG)</comment>
+            </column>
+        </property>
+        <property name="PRespaldo" type="big_decimal">
+            <column name="p_respaldo" precision="20" scale="4">
+                <comment>Pr&#195;&#169;stamos desembolsados en caja (PR)</comment>
+            </column>
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" />
+        </property>
+        <property name="cajero" type="string">
+            <column name="cajero" length="50" />
+        </property>
+        <property name="observacion" type="string">
+            <column name="observacion" length="50" />
+        </property>
+        <property name="filial" type="string">
+            <column name="filial" length="50" />
+        </property>
+        <property name="montoInicial" type="big_decimal">
+            <column name="monto_inicial" precision="20" scale="4" />
+        </property>
+        <property name="montoFinal" type="big_decimal">
+            <column name="monto_final" precision="20" scale="4" />
+        </property>
+        <property name="montoEntregado" type="big_decimal">
+            <column name="monto_entregado" precision="20" scale="4" />
+        </property>
+        <property name="montoRecibido" type="big_decimal">
+            <column name="monto_recibido" precision="20" scale="4" />
+        </property>
+    </class>
+</hibernate-mapping>

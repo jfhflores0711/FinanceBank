@@ -1,0 +1,433 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.finance.bank.bean.TCategoriaPersona;
+import org.finance.bank.bean.TDepartamento;
+import org.finance.bank.bean.TFilial;
+import org.finance.bank.model.dao.DAOGeneral;
+
+/**
+ *Carga catálogos en general como: CAJA, FILIAL y PERSONA
+ * @author ZAMORA
+ */
+public class SAdminCatalogo extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        DAOGeneral dao=new DAOGeneral();
+        request.getSession(true);
+        try {
+            String catalogo = request.getParameter("catalogo");
+            if (catalogo == null || "0".equals(catalogo)) {
+                out.print("&nbsp;");
+                out.close();
+                return;
+            }
+            out.println("<table id='tcontenedor'>");
+            out.println("<tr><td width='50%' valign='top'>");
+            if (catalogo.equals("FILIAL")) {
+                List result  = dao.findAll("from TFilial order by codFilial");
+                Iterator it = result.iterator();
+                out.println("<div id='divCatalogoElement'>");
+                out.println("<div id='menu'>");
+                out.println("<ul>");
+                int i = 0;
+                while (it.hasNext()) {
+                    TFilial filial = (TFilial) it.next();
+                    i = i + 1;
+                    out.println("<li style='cursor: pointer' id='li" + i + "'><a id='a" + i + "' onclick=\"selected('" + i + "'); verDetalleCatalogo('" + filial.getCodFilial() + "');\">" + filial.getCodFilial() + " " + filial.getNombre());
+                    out.println("</a></li>");
+                }
+                out.println("</ul>");
+                out.println("</div>");
+                out.println("</div>");
+            } else if (catalogo.equals("CAJA")) {
+                List result = dao.findAll("from TFilial order by codFilial");
+                                Iterator it = result.iterator();
+                out.println("<div id='divCatalogoElement'>");
+                out.println("<table id='tTipoFilial' name='tTipoFilial' class='tabla' border='0' width='100%'>");
+                out.println("<tr>");
+                out.println("<td>");
+                int i = 0;
+                if (result.size() > 0) {
+                    out.println("<select id='selmiFilial' onclick='mostrarcaja();'><option value='0'>(Seleccione Filial)</option>");
+                    while (it.hasNext()) {
+                        TFilial filial = (TFilial) it.next();
+                        i = i + 1;
+                        out.println("<option value='" + filial.getCodFilial() + "'>" + filial.getNombre() + "</option>");
+                    }
+                    out.println("</select></td>");
+                } else {
+                    out.println("Aún no hay un filial creado!</th>");
+                }
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("<div id='divMisCajas' style='overflow:auto;height:420px'>");
+                out.println("<div id='menu'>");
+                out.println("<ul>");
+                out.println("<li>");
+                out.println("</li>");
+                out.println("<ul>");
+                out.println("</div>");
+                out.println("</div>");
+            } else if (catalogo.equals("MONEDA")) {
+                out.print("MONEDA--NON USE HERE");
+                out.close();
+                return;                
+            } else if (catalogo.equals("PERSONA")) {
+                out.println("<div id='divCatalogoElement'>");
+                out.println("<table id='tTipoFilial' name='tTipoFilial' class='tabla' border='0' width='100%'>");
+                out.println("<tr>");
+                out.println("<th><select id='selPersona'>"
+                        + "<option>NOMBRE</option>"
+                        + "<option>APELLIDO</option>"
+                        + "<option>DNI</option></select>"
+                        + "<input type='text' id='txtPersona' name='txtPersona' value=''><input type='button' id='btnBuscar' onclick='mostrarpersona();' value='Buscar'>");
+                out.println("</th>");
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("<div id='divMisPersonas' style='overflow:auto;height:420px'>");
+                out.println("</div>");
+
+            } else if ("PERSC".equals(catalogo)) {
+                List result = dao.findAll("from TFilial order by codFilial");
+                Iterator it = result.iterator();
+                out.println("<div id='divCatalogoElement'>");
+                out.println("<table id='tTipoFilial' name='tTipoFilial' class='tabla' border='0' width='100%'>");
+                out.println("<tr>");
+                out.println("<td>");
+                int i = 0;
+                if (result.size() > 0) {
+                    out.println("<select id='selmiFilial' onclick='mostrarpersc();'><option value='0'>(Seleccione Filial)</option>");
+                    while (it.hasNext()) {
+                        TFilial filial = (TFilial) it.next();
+                        i = i + 1;
+                        out.println("<option value='" + filial.getCodFilial() + "'>" + filial.getNombre() + "</option>");
+                    }
+                    out.println("</select></td>");
+                } else {
+                    out.println("Aún no hay un filial creado!</th>");
+                }
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("<div id='divMisCajas' style='overflow:auto;height:420px'>");
+                out.println("<div id='menu'>");
+                out.println("<ul>");
+                out.println("<li style='cursor: pointer'>");
+                out.println("</li>");
+                out.println("<ul>");
+                out.println("</div>");
+                out.println("</div>");
+            }
+            out.println("</td>");
+            out.println("<td width='10%'><center>");
+            out.println("<hr style='background-color: #1E90FF;height: 1px;'><input type='button' id='cmdNuevo' name='cmdNuevo' value='Nuevo' onclick='nuevoCatalogo();'><hr style='background-color: #1E90FF;height: 1px;'><input type='button' id='cmdGuardar' name='cmdGuardar' value='Guardar' onclick='guardarCatalogo();' disabled><hr style='background-color: #1E90FF;height: 1px;'>");
+            out.println("<input type='button' id='cmdActualizar' name='cmdActualizar' value='Actualizar' onclick='actualizarCatalogo();' disabled><hr style='background-color: #1E90FF;height: 1px;'><input type='button' id='cmdEliminar' name='cmdEliminar' value='Eliminar' onclick='eliminarCatalogo();' disabled><hr style='background-color: #1E90FF;height: 1px;'>");
+            out.println("</center></td>");
+            out.println("<td width='40%'>");
+            if (catalogo.equals("FILIAL")) {
+                out.println("<div id='divCatalogoDetalle' style='vertical-align:top'>");
+                out.println("<form id='formDetalle' method='post' action=''>");
+                out.println("<table id='tCatalogoDetalle' name='tCatalogoDetalle' class='tabla' border='1' style='vertical-align:top'>");
+                out.println("<tr>");
+                out.println("<th colspan='2'><font color='#385b88' style='font-size: 12px;'><b>Detalle Filial:</b></font>");
+                out.println("</th>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Codigo</b></font></td>");
+                out.println("<td><table><tr><td><input type='text' id='txtCodigo' name='txtCodigo' value='' disabled></td><td style='color:red'>*</td></tr></table></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Nombre</b></font></td>");
+                out.println("<td><table><tr><td><input type='text' id='txtNombre' name='txtNombre' value='' disabled></td><td style='color:red'>*</td></tr></table></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Direci&oacute;n</b></font></td>");
+                out.println("<td><input type='text' id='txtDireccion' name='txtDireccion' value='' disabled></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Estado</b></font></td>");
+                out.println("<td>");
+                out.println("<select id='selEstado' name='selEstado'>");
+                out.println("<option>ACTIVO</option>");
+                out.println("<option>INACTIVO</option>");
+                out.println("</option>");
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Teléfono</b></font></td>");
+                out.println("<td><input type='text' id='txtTelefono' name='txtTelefono' value='' onkeypress='return soloNumeroTelefonico(event);' disabled></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Codigo para numero cuenta</b></font></td>");
+                out.println("<td><table><tr><td><input type='text' id='txtCodNumCuenta' name='txtCodNumCuenta' value='' disabled></td><td style='color:red'>*</td></tr></table></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Departamento</b></font></td>");
+                out.println("<td>");
+                List result = dao.findAll("from TDepartamento");
+                Iterator it = result.iterator();
+                out.println("<select id='seldepartamento' name='seldepartamento' onchange='listarProvincia()'>");
+                out.println("<option value='0'>(Seleccione Departamento)</option>");
+                while (it.hasNext()) {
+                    TDepartamento departamento = (TDepartamento) it.next();
+                    out.println("<option value='" + departamento.getIddepartamento() + "'>" + departamento.getDescripcion() + "</option>");
+                }
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Provincia</b></font></td>");
+                out.println("<td>");
+                out.println("<div id='divprovincia'>");
+                out.println("<select id='selprovincia' name='selprovincia' disabled>");
+                out.println("<option value=''>Seleccione Provincia</option>");
+                out.println("</select>");
+                out.println("</div>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Distrito</b></font></td>");
+                out.println("<td>");
+                out.println("<div id='divDistrito'>");
+                out.println("<select id='seldistrito' name='seldistrito' disabled>");
+                out.println("<option value=''>Seleccione Distrito</option>");
+                out.println("</select>");
+                out.println("</div>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td>");
+                out.println("<input type='text' id='txtcatalogo' name='txtcatalogo' value='" + catalogo + "'>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td><div id='divrptaInsertar'>");
+                out.println("<input type='text' id='txtRptaInsertar' name='txtRptaInsertar' value='NO'>");
+                out.println("</div></td>");
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("</form>");
+                out.println("</div>");
+            } else if (catalogo.equals("CAJA")) {
+                out.println("<div id='divCatalogoDetalle' style='vertical-align:top'>");
+                out.println("<form id='formDetalle' method='post' action=''>");
+                out.println("<table id='tCatalogoDetalle' name='tCatalogoDetalle' class='tabla' border='1' style='vertical-align:top'>");
+                out.println("<tr>");
+                out.println("<th colspan='2'><font color='#385b88' style='font-size: 12px;'><b>Detalle Caja:</b></font>");
+                out.println("</th>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Codigo</b></font></td>");
+                out.println("<td><table><tr><td><input type='text' id='txtCodigo' name='txtCodigo' value='' disabled></td><td style='color:red'>*</td></tr></table></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Nombre</b></font></td>");
+                out.println("<td><table><tr><td><input type='text' id='txtNombre' name='txtNombre' value='' disabled></td><td style='color:red'>*</td></tr></table></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Filial</b></font></td>");
+                out.println("<td><div id='ulfi'>");
+                out.println("<input id='ulfit' type='hidden' value='0'>");
+               List result = dao.findAll("from TFilial fil where fil.estado='ACTIVO'");
+                                Iterator it = result.iterator();
+                out.println("<select id='selfilial' name='selfilial'>");
+                while (it.hasNext()) {
+                    TFilial filial = (TFilial) it.next();
+                    out.println("<option value='" + filial.getCodFilial() + "'>" + filial.getNombre() + "</option>");
+                }
+                out.println("</select>");
+                out.println("</div></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Tipo</b></font></td>");
+                out.println("<td>");
+                out.println("<select id='selTipo' name='selTipo'>");
+                out.println("<option value='PRIMARY'>PRIMARIA</option>");
+                out.println("<option value='SECONDARY'>SECUNDARIA</option>");
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Estado</b></font></td>");
+                out.println("<td>");
+                out.println("<select id='selEstado' name='selEstado'>");
+                out.println("<option>ACTIVO</option>");
+                out.println("<option>INACTIVO</option>");
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td>");
+                out.println("<input type='text' id='txtcatalogo' name='txtcatalogo' value='" + catalogo + "'>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td><div id='divrptaInsertar'>");
+                out.println("<input type='text' id='txtExisteCat' name='txtExisteCat' value='NO'>");
+                out.println("<input type='text' id='txtRptaInsertar' name='txtRptaInsertar' value='NO'>");
+                out.println("</div></td>");
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("</form>");
+                out.println("</div>");
+            } else if (catalogo.equals("MONEDA")) {
+                out.print("");
+                out.close();
+                return ;
+            } else if (catalogo.equals("PERSONA") ||catalogo.equals("PERSC")) {
+                out.println("<div id='divCatalogoDetalle' style='vertical-align:top'>");
+                out.println("<form id='formDetalle' method='post' action=''>");
+                out.println("<table id='tCatalogoDetalle' name='tCatalogoDetalle' class='tabla' border='1' style='vertical-align:top'>");
+                out.println("<tr>");
+                out.println("<th colspan='2'><font color='#385b88' style='font-size: 12px;'><b>Detalle Persona:</b></font>");
+                out.println("</th>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Id</b></font></td>");
+                out.println("<td><input type='text' id='txtId' name='txtId' value='' disabled></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>DNI</b></font></td>");
+                out.println("<td><input type='text' id='txtDNI' name='txtDNI' disabled value='' onblur=\"buscarcuenta(document.getElementById('txtDNI').value,'DNI');\" onkeypress='return solonumeros(event);' maxlength='8'><font color=red>*</font></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>RUC</b></font></td>");
+                out.println("<td><input type='text' id='txtRUC' name='txtRUC' disabled value='' onblur=\"buscarcuenta(document.getElementById('txtRUC').value,'RUC');\" onkeypress='return solonumeros(event);' maxlength='12'></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Nombre</b></font></td>");
+                out.println("<td><input type='text' id='txtNombre' name='txtNombre' disabled value=''><font color=red>*</font></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Apellidos</b></font></td>");
+                out.println("<td><input type='text' id='txtApellidos' name='txtApellidos' disabled value=''><font color=red>*</font></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Email</b></font></td>");
+                out.println("<td><input type='text' id='txtEmail' name='txtEmail' disabled value=''></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Ubigeo</b></font></td>");
+                out.println("<td><input type='text' id='txtUbigeo' name='txtUbigeo' disabled value='' onkeypress='return solonumeros(event);'></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Telefono</b></font></td>");
+                out.println("<td><input type='text' id='txtTelefono' disabled name='txtTelefono' value='' onkeypress='return soloNumeroTelefonico(event);'></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Celular</b></font></td>");
+                out.println("<td><input type='text' id='txtCelular' disabled name='txtCelular' value='' onkeypress='return soloNumeroTelefonico(event);'></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Url foto</b></font></td>");
+                out.println("<td><input type='file' id='txtUrlFoto' name='txtUrlFoto' value='' maxlength='200' onfocus='enviarsession();' accept='image/jpg;image/jpeg;image/gif;image/png;image/bmp'/></td>");
+                out.println("</tr>");
+                out.println("<tr id='trFoto' style='display:none'>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>foto</b></font></td>");
+                out.println("<td><img id='imgfoto' src=''></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Url firma</b></font></td>");
+                out.println("<td><input type='file' id='txtUrlFirma' name='txtUrlFirma' value='' maxlength='200' onfocus='enviarsession();' accept='image/jpg;image/jpeg;image/gif;image/png;image/bmp'/></td>");
+                out.println("</tr>");
+                out.println("<tr id='trFirma' style='display:none'>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>foto</b></font></td>");
+                out.println("<td><img src=''></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Direcci&oacute;n</b></font></td>");
+                out.println("<td><input type='text' id='txtDireccion' disabled name='txtDireccion' value=''></td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Estado</b></font></td>");
+                out.println("<td>");
+                out.println("<select id='selEstado' name='selEstado'>");
+                out.println("<option>ACTIVO</option>");
+                out.println("<option>INACTIVO</option>");
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr>");
+                out.println("<tr>");
+                out.println("<td><font color='#385b88' style='font-size: 12px;'><b>Categoria</b></font></td>");
+                out.println("<td>");
+                List result = dao.findAll("from TCategoriaPersona");
+                Iterator it = result.iterator();
+                out.println("<select id='selCategPersona' name='selCategPersona'>");
+                while (it.hasNext()) {
+                    TCategoriaPersona catper = (TCategoriaPersona) it.next();
+                    out.println("<option value='" + catper.getIdcategoriapersona() + "'>" + catper.getDescripcion() + "</option>");
+                }
+                out.println("</select>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td>");
+                out.println("<input type='text' id='txtcatalogo' name='txtcatalogo' value='" + catalogo + "'>");
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("<tr style='display:none'>");
+                out.println("<td><div id='divrptaInsertar'>");
+                out.println("<input type='text' id='txtRptaInsertar' name='txtRptaInsertar' value='NO'>");
+                out.println("</div></td>");
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("</form>");
+                out.println("</div>");
+            }
+            out.println("</td>");
+            out.println("</tr>");
+            out.println("</table>");
+        } finally {
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

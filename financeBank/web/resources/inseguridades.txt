@@ -1,0 +1,30 @@
+http://192.168.1.65:8084/financeBank/SDepositoRetiro2?tipoBusqueda=&contenido=BUDIEL
+http://192.168.1.65:8084/financeBank/SDepositoRetiro2?tipoBusqueda=NOMBRE&contenido=ELOY
+http://192.168.1.65:8084/financeBank/SBuscarCuenta?idpersona_e=20100315094415602289
+http://192.168.1.65:8084/financeBank/SDetallePersona?idpersona=20100305083607167190
+http://192.168.1.65:8084/financeBank/SListarDistrito?iddep=20100302173524776952
+http://192.168.1.65:8084/financeBank/SListarProvincia?iddep=20100302173523907981
+http://192.168.1.65:8084/financeBank/SMostrarCaja?codfili=0501
+http://192.168.1.65:8084/financeBank/SNodo?idgrupo=20100305083224944395
+http://192.168.1.65:8084/financeBank/SNuevaCuenta?parameter=41748156&tipoB=DNI
+http://192.168.1.65:8084/financeBank/SNuevaCuenta?parameter=10801490544&tipoB=
+http://192.168.1.65:8084/financeBank/Sbuscarpersona?categoria=20100226175816694292&er=E&ruc=10417481561&dni=41748156
+http://192.168.1.65:8084/financeBank/SAdminCatalogo?catalogo=CAJA
+http://192.168.1.65:8084/financeBank/SAdminCatalogo?catalogo=MONEDA
+http://192.168.1.65:8084/financeBank/SAdminCatalogo?catalogo=PERSONA
+http://192.168.1.65:8084/financeBank/SAdminCatalogoDetalle?cat=0501&catalogo=FILIAL
+http://192.168.1.65:8084/financeBank/SAdminCatalogoDetalle?cat=CA002&catalogo=CAJA
+http://192.168.1.65:8084/financeBank/SAdminCatalogoDetalle?cat=PEN&catalogo=MONEDA
+http://192.168.1.65:8084/financeBank/SAdminCatalogoDetalle?cat=20100305083607167190&catalogo=PERSONA
+http://192.168.1.65:8084/financeBank/SBuscarTasa?mIni=USD&mFin=PEN
+http://192.168.1.65:8084/financeBank/SBuscarTasa?mIni=PEN&mFin=EUR&especial=true
+
+
+Tambien :
+SActualizarModulos
+SActualizarPersona
+
+RECOMENDACION:
+Revisar todos los Servlets con un manual de SEGURIDAD.
+
+Oscar

@@ -1,0 +1,29 @@
+/* 
+    Document   : FrancesScreen
+    Created on : 26-feb-2010, 15:53:09
+    Author     : oscar
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+
+.eebuttonbar_top {
+    margin-bottom:6px;
+    padding-bottom:6px;
+    border-bottom: 2px solid blue
+}
+.eebuttonbar_bottom {
+    margin-top:6px;
+    padding-top:6px;
+    border-top: 2px solid blue
+}
+.eetabs {
+    display:block;
+    font-family : Arial;
+    font-size : 10.00pt
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TSumaMoneda" table="t_suma_moneda" schema="public">
+        <id name="idsumamoneda" type="string">
+            <column name="idsumamoneda" length="50" />
+            <generator class="assigned" />
+        </id>
+        <property name="estado" type="string">
+            <column name="estado" length="50" />
+        </property>
+        <property name="idoperacion" type="string">
+            <column name="idoperacion" length="50" not-null="true" />
+        </property>
+        <set name="TDetalleSumas" inverse="true">
+            <key>
+                <column name="idsumamoneda" length="50" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetalleSuma" />
+        </set>
+    </class>
+</hibernate-mapping>

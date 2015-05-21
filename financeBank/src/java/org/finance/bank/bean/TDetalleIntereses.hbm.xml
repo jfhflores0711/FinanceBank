@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TDetalleIntereses" table="t_detalle_intereses" schema="public">
+        <id name="iddetalleintereses" type="string">
+            <column name="iddetalleintereses" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCuentaPersona" class="org.finance.bank.bean.TCuentaPersona" fetch="select">
+            <column name="idcuentapersona" length="41" not-null="true" />
+        </many-to-one>
+        <property name="montoint" type="big_decimal">
+            <column name="montoint" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" not-null="true" />
+        </property>
+        <property name="tipo" type="string">
+            <column name="tipo" length="50" not-null="true" />
+        </property>
+        <property name="numOrden" type="string">
+            <column name="num_orden" length="50" not-null="true" />
+        </property>
+        <property name="montoBase" type="big_decimal">
+            <column name="monto_base" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="montoFinal" type="big_decimal">
+            <column name="monto_final" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="montoTotal" type="big_decimal">
+            <column name="monto_total" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="tasaInt" type="big_decimal">
+            <column name="tasa_int" precision="10" scale="4" not-null="true" />
+        </property>
+        <property name="dias" type="java.lang.Integer">
+            <column name="dias" precision="5" scale="0" />
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TCargosPrestamo" table="t_cargos_prestamo" schema="public">
+        <id name="idcargosprestamo" type="string">
+            <column name="idcargosprestamo" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCargosAdmin" class="org.finance.bank.bean.TCargosAdmin" fetch="select">
+            <column name="idcargosadmin" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TRegistroPrestamo" class="org.finance.bank.bean.TRegistroPrestamo" fetch="select">
+            <column name="idregistroprestamo" length="41" not-null="true" />
+        </many-to-one>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="200" not-null="true" />
+        </property>
+        <property name="monto" type="big_decimal">
+            <column name="monto" precision="20" />
+        </property>
+        <property name="montoPagado" type="big_decimal">
+            <column name="monto_pagado" precision="20" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="50" />
+        </property>
+        <property name="fd" type="timestamp">
+            <column name="fd" length="29" />
+        </property>
+    </class>
+</hibernate-mapping>

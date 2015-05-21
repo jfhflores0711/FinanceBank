@@ -1,0 +1,1174 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.finance.bank.bean.TCobranza;
+import org.finance.bank.bean.TCuentaPersona;
+import org.finance.bank.bean.TDetalleCaja;
+import org.finance.bank.bean.TMoneda;
+import org.finance.bank.bean.TOperacion;
+import org.finance.bank.bean.TRegistroCompraVenta;
+import org.finance.bank.bean.TRegistroDepositoRetiro;
+import org.finance.bank.bean.TRegistroGiro;
+import org.finance.bank.bean.TRegistroOtros;
+import org.finance.bank.bean.TRegistroPrestamo;
+import org.finance.bank.bean.TSobregiro;
+import org.finance.bank.bean.TTransferenciaCaja;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+
+/**
+ *
+ * @author roger
+ */
+public class SExtornarOperacion extends HttpServlet {
+
+    /**
+     * ProcessRequest del servlet ExtornarOperacion: (SELF EXTORNO)
+     * Este proceso lleva las siguinetes acciones a cabo:
+     * El Primero es Cambiar de estado a la operacion para que no se tenga que usar
+     * como parte contable de la caja. lo cual es necesario pasar los parámetros
+     * siguientes: El Id de la operación, ya que esto es muy intrínseco al sistema y luego
+     * el id del administrador que se ha autentificado para dicha operacion.
+     *
+     * Además es necesario la manipulación de los asientos respectivos realizados por la caja
+     * en el día, esto ya no se puede usar cuando la caja está cerrada.
+     * Aunque no hay mecanismos de verificación de la caja en el día; aunque posteriormente se usará este
+     * método de seguridad en las sesiones, por el momento es lógico trabajar y superar algunas
+     * limitaciones que se han mostrado en el sistema mismo.
+     *
+     * A través del response se puede Extornar todas las operaciones
+     *
+     **/
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(true);
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        String caja1 = session.getAttribute("USER_CODCAJA").toString();
+        String idForInitNewestTable = DateUtil.convertDateId(caja1, SExtornarOperacion.class.getSimpleName());
+        String idAdminExtorno = session.getAttribute("ID_USER_ADMIN_AUTORIZER").toString();
+        DAOGeneral dao = new DAOGeneral();
+        String IdAdminExtorno = request.getParameter("userAdminExt");
+        if (IdAdminExtorno == null) {
+            IdAdminExtorno = idAdminExtorno;
+        }
+        String relleno = "";
+        try {
+            if (request.getParameter("IdOperacion") != null || !request.getParameter("IdOperacion").equals("")) {
+                idForInitNewestTable = request.getParameter("IdOperacion").toString();
+            } else {
+                out.print("ERROR GENERAL: NO HAY NADA QUE EXTORNAR!!!<input id='txtExtorno' name='txtExtorno' type='hidden' value='NO'>");
+                out.close();
+                dao.cerrarSession();
+                return;
+            }
+            TOperacion op = (TOperacion) dao.load(TOperacion.class, idForInitNewestTable);
+            if (op == null) {
+                out.print("ERROR: NO HAY NADA QUE EXTORNAR!!!<input id='txtExtorno' name='txtExtorno' type='hidden' value='NO'>");
+                out.close();
+                dao.cerrarSession();
+                return;
+            }
+            int chain = (int) Integer.parseInt(op.getTTipoOperacion().getCodigoTipoOperacion().substring(4));
+            if (chain == 11 || chain == 12 || chain == 13 || chain == 14) {
+                out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                out.close();
+                dao.cerrarSession();
+                return;
+            }
+            op.setEstado("EXTORNADO");
+            op.setFechaExtornacion(DateUtil.getNOW_S());
+            op.setIdAdminExtorno(idAdminExtorno);
+            dao.update();
+//            boolean estado = false;
+            switch (chain) {
+                case 1:
+                    TRegistroCompraVenta compra = (TRegistroCompraVenta) dao.load(TRegistroCompraVenta.class, idForInitNewestTable);
+                    if (compra.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        out.close();
+                        dao.cerrarSession();
+                        return;
+                    }
+                    compra.setEstado("EXTORNADO");
+                    dao.update();
+//                    String xDCcompraId = iniDetalleCaja.detalleActivaCaja(caja1, op.getTMoneda().getCodMoneda());
+                    TDetalleCaja xDCcompra = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + op.getTMoneda().getCodParaNumCuenta() + "00");
+                    xDCcompra.setMontoFinal(new BigDecimal(xDCcompra.getMontoFinal().doubleValue() - compra.getMontoRecibido().doubleValue()));
+                    dao.update();
+//                    String xDCcompraId2 = iniDetalleCaja.detalleActivaCaja(caja1, "PEN");
+                    TDetalleCaja xDCcompra2 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + ((TMoneda) dao.load(TMoneda.class, "PEN")).getCodParaNumCuenta() + "00");
+                    xDCcompra2.setMontoFinal(new BigDecimal(xDCcompra2.getMontoFinal().doubleValue() + compra.getMontoEntregado().doubleValue()));
+                    dao.update();
+//                    estado = true;
+                    relleno = "COMPRA EXTORNADA CORRECTAMENTE!!<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>";
+                    break;
+                case 2:
+                    TRegistroCompraVenta venta = (TRegistroCompraVenta) dao.load(TRegistroCompraVenta.class, idForInitNewestTable);
+                    if (venta.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        dao.cerrarSession();
+                        out.close();
+                        return;
+                    }
+                    venta.setEstado("EXTORNADO");
+                    dao.update();
+//                    String xDCVentaId = iniDetalleCaja.detalleActivaCaja(caja1, op.getTMoneda().getCodMoneda());
+                    TDetalleCaja detallecajav = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + op.getTMoneda().getCodParaNumCuenta() + "00");
+                    detallecajav.setMontoFinal(new BigDecimal(detallecajav.getMontoFinal().doubleValue() + venta.getMontoEntregado().doubleValue()));
+                    dao.update();
+//                    String xDCVentaId2 = iniDetalleCaja.detalleActivaCaja(caja1, "PEN");
+                    TDetalleCaja xDCVenta2 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + caja1 + ((TMoneda) dao.load(TMoneda.class, "PEN")).getCodParaNumCuenta() + "00");
+                    xDCVenta2.setMontoFinal(new BigDecimal(xDCVenta2.getMontoFinal().doubleValue() - venta.getMontoRecibido().doubleValue()));
+                    dao.update();
+//                    estado = true;
+                    relleno = "VENTA EXTORNADA CORRECTAMENTE!!<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>";
+                    break;
+                case 3:
+                    TRegistroDepositoRetiro deposito = (TRegistroDepositoRetiro) dao.load(TRegistroDepositoRetiro.class, idForInitNewestTable);
+                    deposito.setDateUser(DateUtil.getNOW_S());
+                    deposito.setEstado("EXTORNADO");
+                    dao.update();
+                    TCuentaPersona cuentaDeposito = (TCuentaPersona) dao.load(TCuentaPersona.class, deposito.getTCuentaPersona().getIdcuentapersona());
+                    cuentaDeposito.setSaldo(cuentaDeposito.getSaldo().subtract(deposito.getImporte()));
+                    cuentaDeposito.setSaldoSinInteres(cuentaDeposito.getSaldoSinInteres().subtract(deposito.getImporte()));
+                    dao.update();
+//                    TDetalleCaja xDCDeposito = (TDetalleCaja) dao.load(TDetalleCaja.class, iniDetalleCaja.detalleActivaCaja(op.getTPersonaCaja().getTCaja().getCodCaja(), deposito.getTCuentaPersona().getTMoneda().getCodMoneda()));
+                    TDetalleCaja xDCDeposito = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + op.getTPersonaCaja().getTCaja().getCodCaja() + deposito.getTCuentaPersona().getTMoneda().getCodParaNumCuenta() + "00");
+                    xDCDeposito.setMontoFinal(xDCDeposito.getMontoFinal().subtract(deposito.getImporte()));
+                    xDCDeposito.setMontoRecibido(xDCDeposito.getMontoRecibido().subtract(deposito.getImporte()));
+                    dao.update();
+                    relleno += "<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>";
+                    break;
+                case 4:
+                    TRegistroDepositoRetiro retiro = (TRegistroDepositoRetiro) dao.load(TRegistroDepositoRetiro.class, idForInitNewestTable);
+                    retiro.setEstado("EXTORNADO");
+                    retiro.setDateUser(DateUtil.getNOW_S());
+                    dao.update();
+                    BigDecimal sRetiro = retiro.getTCuentaPersona().getSaldo();
+                    boolean isSgRet = false;
+                    if (sRetiro.doubleValue() < 0D) {
+                        isSgRet = true;
+                    }
+                    TCuentaPersona cuentaRetiro = (TCuentaPersona) dao.load(TCuentaPersona.class, retiro.getTCuentaPersona().getIdcuentapersona());
+                    cuentaRetiro.setSaldo(cuentaRetiro.getSaldo().add(retiro.getImporte()));
+                    cuentaRetiro.setSaldoSinInteres(cuentaRetiro.getSaldoSinInteres().add(retiro.getImporte()));
+                    if (!isSgRet) {
+                        cuentaRetiro.setEstado("ACTIVO");
+                    }
+                    dao.update();
+//                    TDetalleCaja detaCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, iniDetalleCaja.detalleActivaCaja(op.getTPersonaCaja().getTCaja().getCodCaja(),
+//                            retiro.getTCuentaPersona().getTMoneda().getCodMoneda()));
+                    TDetalleCaja detaCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + op.getTPersonaCaja().getTCaja().getCodCaja() + retiro.getTCuentaPersona().getTMoneda().getCodParaNumCuenta() + "00");
+                    detaCaja.setMontoFinal(detaCaja.getMontoFinal().add(retiro.getImporte()));
+                    detaCaja.setMontoEntregado(detaCaja.getMontoEntregado().subtract(retiro.getImporte()));
+                    dao.update();
+                    TSobregiro sgretiro = (TSobregiro) dao.load(TSobregiro.class, idForInitNewestTable);
+                    if (sgretiro != null) {
+                        sgretiro.setEstado("EXTORNADO");
+                        dao.update();
+                    }
+                    relleno += "<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>";
+                    break;
+                case 5:
+                    TRegistroGiro giro = (TRegistroGiro) dao.load(TRegistroGiro.class, idForInitNewestTable);
+                    if (giro.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        out.close();
+                        dao.cerrarSession();
+                        return;
+                    }
+                    giro.setEstado("EXTORNADO");
+                    dao.update();
+                    break;
+                case 6:
+                    TRegistroPrestamo rp = (TRegistroPrestamo) dao.load(TRegistroPrestamo.class, idForInitNewestTable);
+                    if ("EXTORNADO".equals(rp.getEstado())) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                    } else {
+                        rp.setEstado("EXTORNADO");
+                        dao.update();
+                        BigDecimal misaldos3 = rp.getTCuentaPersona().getSaldo();
+                        TCuentaPersona cuenta2 = (TCuentaPersona) dao.load(TCuentaPersona.class, rp.getTCuentaPersona().getIdcuentapersona());
+                        misaldos3 = misaldos3.add(rp.getMonto());
+                        cuenta2.setSaldo(misaldos3);
+                        cuenta2.setSaldoSinInteres(misaldos3);
+                        cuenta2.setEstado("ACTIVO");
+                        dao.update();
+//                        String idIniDcxp = iniDetalleCaja.detalleActivaCaja(op.getTPersonaCaja().getTCaja().getCodCaja(), rp.getTCuentaPersona().getTMoneda().getCodMoneda());
+                        TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + op.getTPersonaCaja().getTCaja().getCodCaja() + rp.getTCuentaPersona().getTMoneda().getCodParaNumCuenta() + "00");
+                        dep.setMontoFinal(dep.getMontoFinal().add(rp.getMonto()));
+                        dep.setMontoEntregado(dep.getMontoEntregado().subtract(rp.getMonto()));
+                        dao.update();
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                    }
+                    break;
+                case 7:
+                    TCobranza c = (TCobranza) dao.load(TCobranza.class, idForInitNewestTable);
+                    if ("EXTORNADO".equals(c.getEstado())) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                    } else {
+                        c.setEstado("EXTORNADO");
+                        dao.update();
+                        BigDecimal misaldos3 = c.getTDetallePrestamo().getTRegistroPrestamo().getTCuentaPersona().getSaldo();
+                        TCuentaPersona cuenta3 = (TCuentaPersona) dao.load(TCuentaPersona.class, c.getTDetallePrestamo().getTRegistroPrestamo().getTCuentaPersona().getIdcuentapersona());
+                        misaldos3 = misaldos3.subtract(c.getTDetallePrestamo().getMontoCapital());
+                        cuenta3.setSaldo(misaldos3);
+                        cuenta3.setSaldoSinInteres(misaldos3);
+                        cuenta3.setEstado("PRESTAMO");
+                        dao.update();
+//                        TDetalleCaja detaCaja3 = (TDetalleCaja) dao.load(TDetalleCaja.class, iniDetalleCaja.detalleActivaCaja(op.getTPersonaCaja().getTCaja().getCodCaja(), c.getTOperacion().getTMoneda().getCodMoneda()));
+                        TDetalleCaja detaCaja3 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + op.getTPersonaCaja().getTCaja().getCodCaja() + c.getTOperacion().getTMoneda().getCodParaNumCuenta() + "00");
+                        detaCaja3.setMontoFinal(detaCaja3.getMontoFinal().subtract(c.getTDetallePrestamo().getMontoTotal()));
+                        detaCaja3.setMontoRecibido(detaCaja3.getMontoRecibido().subtract(c.getTDetallePrestamo().getMontoTotal()));
+                        dao.update();
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                    }
+                    break;
+                case 8:
+                    try {
+                        TRegistroGiro giro_cobro = (TRegistroGiro) dao.findAll("TRegistroGiro where idoperacioncobro='" + idForInitNewestTable + "'").get(0);
+                        giro_cobro.setEstado("ESPERA");
+                        dao.update();
+                    } catch (Exception ex) {
+                        out.print("FALLO DEL OBJETO!!!");
+                    }
+                    break;
+                case 9:
+                    TTransferenciaCaja ttc = (TTransferenciaCaja) dao.load(TTransferenciaCaja.class, idForInitNewestTable);
+                    if ("CAPITAL SOCIAL".equals(ttc.getTipo())) {
+                        out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                        out.close();
+                        dao.cerrarSession();
+                        return;
+                    }
+                    if (ttc.getEstado().equals("EXTORNADO")) {
+                        out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                        dao.cerrarSession();
+                        out.close();
+                        return;
+                    }
+                    String first = ttc.getEstado();
+                    ttc.setEstado("EXTORNADO");
+                    ttc.setFecha(DateUtil.getNOW_S());
+                    dao.update();
+//                    String dca = iniDetalleCaja.detalleActivaCaja(ttc.getTCaja().getCodCaja(), ttc.getTOperacion().getTMoneda().getCodMoneda());
+                    TDetalleCaja xCaja1 = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + ttc.getTCaja().getCodCaja() + ttc.getTOperacion().getTMoneda().getCodParaNumCuenta() + "00");
+                    xCaja1.setMontoFinal(xCaja1.getMontoFinal().add(ttc.getMonto()));
+                    dao.update();
+                    if (!first.equals("ABORTED")) {
+                        TOperacion op2 = (TOperacion) dao.load(TOperacion.class, ttc.getIdope());
+                        op2.setEstado("EXTORNADO");
+                        op2.setIdAdminExtorno(idAdminExtorno);
+                        op2.setFechaExtornacion(DateUtil.getNOW_S());
+                        dao.update();
+                        TDetalleCaja desca = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + ttc.getCodCajaDestino() + ttc.getTOperacion().getTMoneda().getCodParaNumCuenta() + "00");
+                        if (ttc.getTipo().equals("911")) {
+                            desca.setMontoInicial(desca.getMontoInicial().subtract(ttc.getMonto()));
+                        }
+                        desca.setMontoFinal(desca.getMontoFinal().subtract(ttc.getMonto()));
+                        dao.update();
+                    }
+                    relleno += "<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>";
+                    break;
+                case 10:
+                    TRegistroOtros ro = (TRegistroOtros) dao.load(TRegistroOtros.class, idForInitNewestTable);
+                    ro.setEstado("EXTORNADO");
+                    dao.update();
+//                    TDetalleCaja detallecaja = (TDetalleCaja) dao.load(TDetalleCaja.class,
+//                            iniDetalleCaja.detalleActivaCaja(op.getTPersonaCaja().getTCaja().getCodCaja(), op.getTMoneda().getCodMoneda()));
+                    TDetalleCaja detallecaja = (TDetalleCaja) dao.load(TDetalleCaja.class, DateUtil.getDate(op.getFd()).replaceAll("/", "") + op.getTPersonaCaja().getTCaja().getCodCaja() + op.getTMoneda().getCodParaNumCuenta() + "00");
+                    detallecaja.setMontoFinal(detallecaja.getMontoFinal().add(ro.getMonto()));
+                    detallecaja.setMontoEntregado(detallecaja.getMontoEntregado().subtract(ro.getMonto()));
+                    detallecaja.setDateUser(DateUtil.getNOW_S());
+                    dao.update();
+                    out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+                    out.close();
+                    return;
+//                    break;
+                case 11:
+                    out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                    out.close();
+                    dao.cerrarSession();
+//                    break;
+                    return;
+                case 12:
+                    out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                    out.close();
+                    dao.cerrarSession();
+                    break;
+                case 13:
+                    out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                    out.close();
+                    dao.cerrarSession();
+                    return;
+//                    break;
+                case 14:
+                    out.println("ERROR:<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+                    out.close();
+                    dao.cerrarSession();
+                    return;
+//                    break;
+                default:
+                    relleno = "ERROR: NO hay NADA que extornar!!!<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>";
+            }
+//            String IdOperacion = idForInitNewestTable;
+//            TOperacion operacion = (TOperacion) dao.load(TOperacion.class, idForInitNewestTable);
+//            String tipo = operacion.getTTipoOperacion().getCodigoTipoOperacion();
+//            String type = operacion.getTTipoOperacion().getNombre();
+            /****** EXTORNANDO TRANSFERENCIA ENTRE CAJAS *******/
+//            if (tipo.equals("TIPC9")) {
+//                Set xTtc = operacion.getTTransferenciaCajas();
+//                if (xTtc.isEmpty()) {
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+//                    out.close();
+//                    return;
+//                }
+//                TTransferenciaCaja ttc = (TTransferenciaCaja) dao.load(TTransferenciaCaja.class, ((TTransferenciaCaja) xTtc.iterator().next()).getIdtransferenciacaja());
+//                if ("CAPITAL SOCIAL".equals(ttc.getTipo())) {
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='NO'>");
+//                    out.close();
+//                    return;
+//                }
+//                ttc.setTipo("EXTORNADO");
+//                ttc.setFecha(DateUtil.getDateTime("yyyy/MM/dd HH:mm:ss", new Date()));
+//                dao.update();
+//                TOperacion opGC = (TOperacion) dao.load(TOperacion.class, operacion.getIdOperacion());
+//                opGC.setEstado("EXTORNADO");
+//                opGC.setFechaExtornacion(formatFecha.get());
+//                opGC.setIdAdminExtorno(idAdminExtorno);
+//                dao.update();
+//                String da = iniDetalleCaja.detalleActivaCaja(ttc.getTCaja().getCodCaja(), ttc.getTOperacion().getTMoneda().getCodMoneda());
+//                TDetalleCaja xdcUp = (TDetalleCaja) dao.load(TDetalleCaja.class, da);
+//                xdcUp.setEstado("INACTIVO");
+//                dao.update();
+//                Double addMonto = xdcUp.getMontoFinal().doubleValue() + ttc.getMonto().doubleValue();
+//                BigDecimal ntotal = new BigDecimal(addMonto);
+//                TDetalleCaja detallecaja1 = new TDetalleCaja();
+//                detallecaja1.setIddetallecaja(idForInitNewestTable);
+//                detallecaja1.setMontoInicial(ntotal);
+//                detallecaja1.setMontoFinal(ntotal);
+//                detallecaja1.setFechaTransaccion(formatFecha.get());
+//                detallecaja1.setTCaja(ttc.getTCaja());
+//                detallecaja1.setTMoneda(ttc.getTOperacion().getTMoneda());
+//                detallecaja1.setIdUser(myId);
+//                detallecaja1.setIpUser(myIp);
+//                detallecaja1.setDateUser(formatFecha.get());
+//                detallecaja1.setEstado("ACTIVO");
+//                dao.persist(detallecaja1);
+//                TDetalleCaja desca = (TDetalleCaja) dao.load(TDetalleCaja.class, ttc.getCodCajaDestino());
+//                desca.setEstado("INACTIVO");
+//                dao.update();
+//                Double reMonto = desca.getMontoFinal().doubleValue() - ttc.getMonto().doubleValue();
+//                BigDecimal retotal = new BigDecimal(reMonto);
+//                TDetalleCaja detallecaja2 = new TDetalleCaja();
+//                detallecaja2.setIddetallecaja(DateUtil.convertDateId());
+//                detallecaja2.setMontoInicial(retotal);
+//                detallecaja2.setMontoFinal(retotal);
+//                detallecaja2.setFechaTransaccion(formatFecha.get());
+//                detallecaja2.setTCaja(desca.getTCaja());
+//                detallecaja2.setTMoneda(ttc.getTOperacion().getTMoneda());
+//                detallecaja2.setIdUser(myId);
+//                detallecaja2.setIpUser(myIp);
+//                detallecaja2.setDateUser(formatFecha.get());
+//                detallecaja2.setEstado("ACTIVO");
+//                dao.persist(detallecaja2);
+////                    adminCapital adminK = new adminCapital(detallecaja1.getTMoneda().getCodMoneda(), myId, request.getRemoteAddr());
+////                    TPatrimonio pat = adminK.ponerAsiento();
+////                    TLogFinance newLog = new TLogFinance();
+////                    newLog.setIdlogfinance(DateUtil.convertDateId());
+////                    newLog.setActivoCajaybanco(pat.getTBalancexmoneda().getActivoCajaybanco());
+////                    newLog.setActivoCuentaxcobrar(pat.getTBalancexmoneda().getActivoCuentaxcobrar());
+////                    newLog.setCajero(ntotal.toString());
+////                    newLog.setEncaje(pat.getTBalancexmoneda().getEncaje());
+////                    newLog.setFecha(DateUtil.getNOW_S());
+////                    newLog.setFilial(ttc.getTCaja().getTFilial().getCodFilial());
+////                    newLog.setMonto(ttc.getMonto());
+////                    newLog.setObservacion(detallecaja2.getMontoFinal().toString());
+////                    newLog.setPRespaldo(pat.getTBalancexmoneda().getPRespaldo());
+////                    newLog.setPasivo(pat.getTBalancexmoneda().getPasivo());
+////                    newLog.setPatrimonio(pat.getPatrimonioActual());
+////                    newLog.setTipoOperacion(idForInitNewestTable);
+////                    newLog.setReferencia(pat.getPatrimonio().toString());
+////                    dao.persist(newLog);
+////                }
+//                out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                out.close();
+//                operacion.setEstado("EXTORNADO");
+//                operacion.setFechaExtornacion(formatFecha.get());
+//                operacion.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//        return;
+//            }
+            /****** EXTORNANDO TIPC3 o TIPC4 *******/
+//            if ("DEPOSITO".equals(type) || "RETIRO".equals(type)) {
+//                String hql = "from TRegistroDepositoRetiro RegDepRet where RegDepRet.TOperacion='" + IdOperacion + "'";
+//                TRegistroDepositoRetiro DepRet = (TRegistroDepositoRetiro) dao.findAll(hql).get(0);
+//                TRegistroDepositoRetiro regDepRet = (TRegistroDepositoRetiro) dao.load(TRegistroDepositoRetiro.class, DepRet.getIddepositoretiro());
+//                regDepRet.setEstado("EXTORNADO");
+//                dao.update();
+//                BigDecimal misaldos = DepRet.getTCuentaPersona().getSaldo();
+//                BigDecimal misaldosSinInteres = DepRet.getTCuentaPersona().getSaldoSinInteres();
+            /****** EXTORNANDO TIPC4 *******/
+//                if ("RETIRO".equals(type)) {
+//                    adminCapital adminK = new adminCapital(DepRet.getTOperacion().getTMoneda().getCodMoneda(), myId, myIp);
+//                    TPatrimonio pa1 = adminK.ponerAsiento();
+//                    Double xsg = misaldos.doubleValue() + DepRet.getImporte().doubleValue();
+//                    Double fR = pa1.getTBalancexmoneda().getActivoCajaybanco().doubleValue() + DepRet.getImporte().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(fR));
+//                    dao.update();
+//                    if (misaldos.doubleValue() < 0.0D) {
+//                        if (xsg > 0) {
+//                            Double fCxC = pa1.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() - DepRet.getImporte().doubleValue() + xsg;
+//                            Double sg = pa1.getTBalancexmoneda().getEncaje().doubleValue() + xsg - DepRet.getImporte().doubleValue();
+//                            Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue() + xsg;
+//                            Double kr = pa1.getPatrimonioActual().doubleValue() - xsg + DepRet.getImporte().doubleValue();
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            xbmCC.setEncaje(new BigDecimal(sg));
+//                            dao.update();
+//                            TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                            xp.setPatrimonioActual(new BigDecimal(kr));
+//                            dao.update();
+//                        } else {
+//                            Double fCxC = pa1.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() - DepRet.getImporte().doubleValue();
+//                            Double sg = pa1.getTBalancexmoneda().getEncaje().doubleValue() - DepRet.getImporte().doubleValue();
+//                            Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue();
+//                            Double kr = pa1.getPatrimonioActual().doubleValue() + DepRet.getImporte().doubleValue();
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            xbmCC.setEncaje(new BigDecimal(sg));
+//                            dao.update();
+//                            TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                            xp.setPatrimonioActual(new BigDecimal(kr));
+//                            dao.update();
+//                        }
+//                    } else {
+//                        Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue() + DepRet.getImporte().doubleValue();
+//                        TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                        xbmCC.setPasivo(new BigDecimal(pasivo));
+//                        dao.update();
+//                    }
+//                    if (xsg < 0.0D) {
+//                        if (DepRet.getTCuentaPersona().getSaldo().doubleValue() < 0) {
+//                            Double fCxC = pa1.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() - DepRet.getImporte().doubleValue() + DepRet.getTCuentaPersona().getSaldo().doubleValue();
+//                            Double sg = pa1.getTBalancexmoneda().getEncaje().doubleValue() - DepRet.getImporte().doubleValue() + DepRet.getTCuentaPersona().getSaldo().doubleValue();
+//                            Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue() + DepRet.getTCuentaPersona().getSaldo().doubleValue();
+//                            Double kr = pa1.getPatrimonioActual().doubleValue() - DepRet.getTCuentaPersona().getSaldo().doubleValue() + DepRet.getImporte().doubleValue();
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            xbmCC.setEncaje(new BigDecimal(sg));
+//                            dao.update();
+//                            TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                            xp.setPatrimonioActual(new BigDecimal(kr));
+//                            dao.update();
+//                        } else {
+//                            Double fCxC = pa1.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() + DepRet.getImporte().doubleValue();
+//                            Double sg = pa1.getTBalancexmoneda().getEncaje().doubleValue() - DepRet.getImporte().doubleValue();
+//                            Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue();
+//                            Double kr = pa1.getPatrimonioActual().doubleValue() + DepRet.getImporte().doubleValue();
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            xbmCC.setEncaje(new BigDecimal(sg));
+//                            dao.update();
+//                            TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                            xp.setPatrimonioActual(new BigDecimal(kr));
+//                            dao.update();
+//                        }
+//                    } else {
+//                        Double pasivo = pa1.getTBalancexmoneda().getPasivo().doubleValue() + DepRet.getImporte().doubleValue();
+//                        TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                        xbmCC.setPasivo(new BigDecimal(pasivo));
+//                        dao.update();
+//                    }
+            /****** EXTORNANDO TIPC3*******/
+//                } else {
+//                    adminCapital adminK = new adminCapital(DepRet.getTOperacion().getTMoneda().getCodMoneda(), myId, myIp);
+//                    TPatrimonio pa2 = adminK.ponerAsiento();
+//                    Double xsg = DepRet.getTCuentaPersona().getSaldo().doubleValue() - DepRet.getImporte().doubleValue();
+//                    Double fR = pa2.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - DepRet.getImporte().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(fR));
+//                    dao.update();
+//                    if (xsg < 0.0D) {
+//                        if (DepRet.getTCuentaPersona().getSaldo().doubleValue() > 0) {
+//                            Double fCxC = pa2.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() - DepRet.getTCuentaPersona().getSaldo().doubleValue();
+//                            Double sg = pa2.getTBalancexmoneda().getEncaje().doubleValue() - DepRet.getTCuentaPersona().getSaldo().doubleValue();
+//                            Double pasivo = pa2.getTBalancexmoneda().getPasivo().doubleValue() - DepRet.getTCuentaPersona().getSaldo().doubleValue() - DepRet.getImporte().doubleValue();
+//                            Double kr = pa2.getPatrimonioActual().doubleValue() - DepRet.getImporte().doubleValue() + (DepRet.getTCuentaPersona().getSaldo().doubleValue() + DepRet.getImporte().doubleValue());
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            xbmCC.setEncaje(new BigDecimal(sg));
+//                            dao.update();
+//                            TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa2.getIdpatrimonio());
+//                            xp.setPatrimonioActual(new BigDecimal(kr));
+//                            dao.update();
+//                        } else {
+//                            Double pasivo = pa2.getTBalancexmoneda().getPasivo().doubleValue() - DepRet.getImporte().doubleValue();
+//                            TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                            xbmCC.setPasivo(new BigDecimal(pasivo));
+//                            dao.update();
+//                        }
+//                    } else {
+//                        //Double fCxC = pa2.getTBalancexmoneda().getActivoCuentaxcobrar().doubleValue() + DepRet.getImporte().doubleValue();
+//                        //Double sg = pa2.getTBalancexmoneda().getEncaje().doubleValue() + DepRet.getImporte().doubleValue();
+//                        Double pasivo = pa2.getTBalancexmoneda().getPasivo().doubleValue() - DepRet.getImporte().doubleValue();
+//                        //Double kr = pa2.getPatrimonioActual().doubleValue() - DepRet.getImporte().doubleValue();
+//                        TBalancexmoneda xbmCC = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                        //xbmCC.setActivoCuentaxcobrar(new BigDecimal(fCxC));
+//                        xbmCC.setPasivo(new BigDecimal(pasivo));
+//                        //xbmCC.setEncaje(new BigDecimal(sg));
+//                        dao.update();
+//                        //TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, pa2.getIdpatrimonio());
+//                        //xp.setPatrimonioActual(new BigDecimal(kr));
+//                        //dao.update();
+//                    }
+//                }
+            /****** EXTORNANDO TIPC4*******/
+//                if ("RETIRO".equals(type)) {
+//                    boolean sg = false;
+//                    if (misaldos.doubleValue() < 0D) {
+//                        sg = true;
+//                    }
+//                    misaldos = misaldos.add(DepRet.getImporte());
+//                    misaldosSinInteres = misaldosSinInteres.add(DepRet.getImporte());
+//                    TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, DepRet.getTCuentaPersona().getIdcuentapersona());
+//                    cuenta.setSaldo(misaldos);
+//                    cuenta.setSaldoSinInteres(misaldosSinInteres);
+//                    if (!sg) {
+//                        cuenta.setEstado("ACTIVO");
+//                    }
+//                    dao.update();
+//                    TDetalleCaja detaCaja = (TDetalleCaja) dao.findAll("from TDetalleCaja detcaja where detcaja.TCaja='" + operacion.getTPersonaCaja().getTCaja().getCodCaja() + "' AND detcaja.estado='ACTIVO' AND detcaja.TMoneda='" + DepRet.getTCuentaPersona().getTMoneda().getCodMoneda() + "'").get(0);
+//                    BigDecimal mimonto = BigDecimal.ZERO;
+//                    mimonto = detaCaja.getMontoFinal();
+//                    mimonto = mimonto.add(DepRet.getImporte());
+//                    TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, detaCaja.getIddetallecaja());
+//                    dep.setMontoFinal(mimonto);
+//                    dao.update();
+//                    adminCapital adminK = new adminCapital(detaCaja.getTMoneda().getCodMoneda(), myId, request.getRemoteAddr());
+//                    TPatrimonio pat = adminK.ponerAsiento();
+//                    TLogFinance newLog = new TLogFinance();
+//                    newLog.setIdlogfinance(idForInitNewestTable);
+//                    newLog.setActivoCajaybanco(pat.getTBalancexmoneda().getActivoCajaybanco());
+//                    newLog.setActivoCuentaxcobrar(pat.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                    newLog.setCajero(dep.getMontoFinal().toString());
+//                    newLog.setEncaje(pat.getTBalancexmoneda().getEncaje());
+//                    newLog.setFecha(DateUtil.getNOW_S());
+//                    newLog.setFilial(detaCaja.getTCaja().getTFilial().getCodFilial());
+//                    newLog.setMonto(DepRet.getImporte());
+//                    newLog.setObservacion("0.00");
+//                    newLog.setPRespaldo(pat.getTBalancexmoneda().getPRespaldo());
+//                    newLog.setPasivo(pat.getTBalancexmoneda().getPasivo());
+//                    newLog.setPatrimonio(pat.getPatrimonioActual());
+//                    newLog.setTipoOperacion(DepRet.getTOperacion().getIdOperacion());
+//                    newLog.setReferencia(pat.getPatrimonio().toString());
+//                    dao.persist(newLog);
+//                }
+//                hql = "from TSobregiro sg where sg.TCuentaPersona='" + DepRet.getTCuentaPersona().getIdcuentapersona() + "' AND sg.estado='ACTIVO' order by dateUser desc";
+//                List resul = dao.findAll(hql);
+//                Iterator it = resul.iterator();
+//                int z = resul.size();
+//                BigDecimal prestamo = BigDecimal.ZERO;
+//                BigDecimal prestamoSinInteres = BigDecimal.ZERO;
+//                BigDecimal saldoquetenia = BigDecimal.ZERO;
+//                BigDecimal saldoqueteniasininteres = BigDecimal.ZERO;
+//                String idSobreGiro = "";
+//                if (z > 0 && DepRet.getTOperacion().getTTipoOperacion().getNombre().equals("RETIRO")) {
+//                    if (it.hasNext()) {
+//                        TSobregiro sobregiro = (TSobregiro) it.next();
+//                        prestamo = sobregiro.getMontoActual();
+//                        prestamoSinInteres = sobregiro.getMontoSinInteres();
+//                        saldoquetenia = DepRet.getImporte().subtract(prestamo);
+//                        misaldos = saldoquetenia;
+//                        saldoqueteniasininteres = DepRet.getImporte().subtract(prestamoSinInteres);
+//                        misaldosSinInteres = saldoqueteniasininteres;
+//                        idSobreGiro = sobregiro.getIdsobregiro();
+//                    }
+//                    TSobregiro sg = (TSobregiro) dao.load(TSobregiro.class, idSobreGiro);
+//                    sg.setEstado("EXTORNADO");
+//                    dao.update();
+//                }
+            /****** EXTORNANDO TIPC4*******/
+//                if ("DEPOSITO".equals(type)) {
+//                    misaldos = misaldos.subtract(DepRet.getImporte());
+//                    misaldosSinInteres = misaldosSinInteres.subtract(DepRet.getImporte());
+//                    TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, DepRet.getTCuentaPersona().getIdcuentapersona());
+//                    cuenta.setSaldo(misaldos);
+//                    cuenta.setSaldoSinInteres(misaldosSinInteres);
+//                    dao.update();
+//                    TDetalleCaja detaCaja = (TDetalleCaja) dao.findAll("from TDetalleCaja detcaja where detcaja.TCaja='" + operacion.getTPersonaCaja().getTCaja().getCodCaja() + "' AND detcaja.estado='ACTIVO' AND detcaja.TMoneda='" + DepRet.getTCuentaPersona().getTMoneda().getCodMoneda() + "'").get(0);
+//                    BigDecimal mimonto = BigDecimal.ZERO;
+//                    mimonto = detaCaja.getMontoFinal();
+//                    mimonto = mimonto.subtract(DepRet.getImporte());
+//                    TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, detaCaja.getIddetallecaja());
+//                    dep.setMontoFinal(mimonto);
+//                    dao.update();
+//                    adminCapital adminK = new adminCapital(detaCaja.getTMoneda().getCodMoneda(), myId, request.getRemoteAddr());
+//                    TPatrimonio pat = adminK.ponerAsiento();
+//                    TLogFinance newLog = new TLogFinance();
+//                    newLog.setIdlogfinance(idForInitNewestTable);
+//                    newLog.setActivoCajaybanco(pat.getTBalancexmoneda().getActivoCajaybanco());
+//                    newLog.setActivoCuentaxcobrar(pat.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                    newLog.setCajero(dep.getMontoFinal().toString());
+//                    newLog.setEncaje(pat.getTBalancexmoneda().getEncaje());
+//                    newLog.setFecha(DateUtil.getNOW_S());
+//                    newLog.setFilial(dep.getTCaja().getTFilial().getCodFilial());
+//                    newLog.setMonto(DepRet.getImporte());
+//                    newLog.setObservacion("0.00");
+//                    newLog.setPRespaldo(pat.getTBalancexmoneda().getPRespaldo());
+//                    newLog.setPasivo(pat.getTBalancexmoneda().getPasivo());
+//                    newLog.setPatrimonio(pat.getPatrimonioActual());
+//                    newLog.setTipoOperacion(DepRet.getTOperacion().getIdOperacion());
+//                    newLog.setReferencia(pat.getPatrimonio().toString());
+//                    dao.persist(newLog);
+//                }
+//                out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                out.close();
+//                operacion.setEstado("EXTORNADO");
+//                operacion.setFechaExtornacion(formatFecha.get());
+//                operacion.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//                return;
+            /****** EXTORNANDO TIPC6*******/
+//            } else
+//                if ("PRESTAMO".equals(type)) {
+//                TRegistroPrestamo trp = (TRegistroPrestamo) dao.findAll("from TRegistroPrestamo Regp where Regp.TOperacion='" + IdOperacion + "'").get(0);
+//                TRegistroPrestamo rp = (TRegistroPrestamo) dao.load(TRegistroPrestamo.class, trp.getIdprestamo());
+//                if ("EXTORNADO".equals(rp.getEstado())) {
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                } else {
+//                    rp.setEstado("EXTORNADO");
+//                    dao.update();
+//                    BigDecimal misaldos = rp.getTCuentaPersona().getSaldo();
+//                    TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, rp.getTCuentaPersona().getIdcuentapersona());
+//                    misaldos = misaldos.add(rp.getMonto());
+//                    cuenta.setSaldo(misaldos);
+//                    cuenta.setSaldoSinInteres(misaldos);
+//                    cuenta.setEstado("ACTIVO");
+//                    dao.update();
+//                    TDetalleCaja detaCaja = (TDetalleCaja) dao.findAll("from TDetalleCaja detcaja where detcaja.TCaja='" + operacion.getTPersonaCaja().getTCaja().getCodCaja() + "' AND detcaja.estado='ACTIVO' AND detcaja.TMoneda='" + rp.getTCuentaPersona().getTMoneda().getCodMoneda() + "'").get(0);
+//                    BigDecimal mimonto = BigDecimal.ZERO;
+//                    mimonto = detaCaja.getMontoFinal();
+//                    mimonto = mimonto.add(rp.getMonto());
+//                    TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, detaCaja.getIddetallecaja());
+//                    dep.setMontoFinal(mimonto);
+//                    dao.update();
+////                    String codmoneda = rp.getTCuentaPersona().getTMoneda().getCodMoneda();
+////                    adminCapital adminK = new adminCapital(codmoneda, myId, myIp);
+////                    Double importe = rp.getMonto().doubleValue();
+////                    TPatrimonio xp = adminK.ponerAsiento();
+////                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, xp.getTBalancexmoneda().getIdbalance());
+////                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() + importe));
+////                    xbm.setActivoCuentaxcobrar(new BigDecimal(xbm.getActivoCuentaxcobrar().doubleValue() - importe));
+////                    xbm.setPRespaldo(new BigDecimal(xbm.getPRespaldo().doubleValue() - importe));
+////                    dao.update();
+////                    TPatrimonio px = (TPatrimonio) dao.load(TPatrimonio.class, xp.getIdpatrimonio());
+////                    px.setPatrimonioActual(new BigDecimal(px.getPatrimonioActual().doubleValue() + importe));
+////                    dao.update();
+////                    adminCapital adminK = new adminCapital(detaCaja.getTMoneda().getCodMoneda(), myId, request.getRemoteAddr());
+////                TPatrimonio pat = adminK.ponerAsiento();
+////                    TLogFinance newLog = new TLogFinance();
+////                    newLog.setIdlogfinance(idForInitNewestTable);
+////                    newLog.setActivoCajaybanco(px.getTBalancexmoneda().getActivoCajaybanco());
+////                    newLog.setActivoCuentaxcobrar(px.getTBalancexmoneda().getActivoCuentaxcobrar());
+////                    newLog.setCajero(dep.getMontoFinal().toString());
+////                    newLog.setEncaje(px.getTBalancexmoneda().getEncaje());
+////                    newLog.setFecha(DateUtil.getNOW_S());
+////                    newLog.setFilial(dep.getTCaja().getTFilial().getCodFilial());
+////                    newLog.setMonto(rp.getMonto());
+////                    newLog.setObservacion("0.00");
+////                    newLog.setPRespaldo(px.getTBalancexmoneda().getPRespaldo());
+////                    newLog.setPasivo(px.getTBalancexmoneda().getPasivo());
+////                    newLog.setPatrimonio(px.getPatrimonioActual());
+////                    newLog.setTipoOperacion(rp.getTOperacion().getIdOperacion());
+////                    newLog.setReferencia(px.getPatrimonio().toString());
+////                    dao.persist(newLog);
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                    operacion.setEstado("EXTORNADO");
+//                    operacion.setFechaExtornacion(formatFecha.get());
+//                    operacion.setIdAdminExtorno(IdAdminExtorno);
+//                    dao.update();
+//                    return;
+//                }
+            /****** EXTORNANDO TIPC7*******/
+//            } else
+//                if ("COBRANZA".equals(type)) {
+//                TCobranza cp = (TCobranza) dao.findAll("from TCobranza c where c.TOperacion='" + IdOperacion + "'").get(0);
+//                TCobranza c = (TCobranza) dao.load(TCobranza.class, cp.getIdcobranza());
+//                if ("EXTORNADO".equals(c.getEstado())) {
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                } else {
+//                    c.setEstado("EXTORNADO");
+//                    dao.update();
+//                    BigDecimal misaldos = c.getTDetallePrestamo().getTRegistroPrestamo().getTCuentaPersona().getSaldo();
+//                    TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, c.getTDetallePrestamo().getTRegistroPrestamo().getTCuentaPersona().getIdcuentapersona());
+//                    misaldos = misaldos.subtract(c.getTDetallePrestamo().getMontoCapital());
+//                    cuenta.setSaldo(misaldos);
+//                    cuenta.setSaldoSinInteres(misaldos);
+//                    cuenta.setEstado("PRESTAMO");
+//                    dao.update();
+//                    TDetalleCaja detaCaja = (TDetalleCaja) dao.findAll("from TDetalleCaja detcaja where detcaja.TCaja='" + operacion.getTPersonaCaja().getTCaja().getCodCaja() + "' AND detcaja.estado='ACTIVO' AND detcaja.TMoneda='" + c.getTOperacion().getTMoneda().getCodMoneda() + "'").get(0);
+//                    BigDecimal mimonto = BigDecimal.ZERO;
+//                    mimonto = detaCaja.getMontoFinal();
+//                    mimonto = mimonto.subtract(c.getTDetallePrestamo().getMontoTotal());
+//                    TDetalleCaja dep = (TDetalleCaja) dao.load(TDetalleCaja.class, detaCaja.getIddetallecaja());
+//                    dep.setMontoFinal(mimonto);
+//                    dao.update();
+//                    String codmoneda = c.getTOperacion().getTMoneda().getCodMoneda();
+////                    adminCapital adminK = new adminCapital(codmoneda, myId, myIp);
+////                    Double importe = c.getTDetallePrestamo().getMontoCapital().doubleValue();
+////                    double interes = c.getTDetallePrestamo().getInteresPrestamo().doubleValue();
+////                    double itf = Double.parseDouble(c.getTDetallePrestamo().getItf());
+////                    double mora = c.getTDetallePrestamo().getInteresMoratorio().doubleValue();
+////                    double otros = Double.parseDouble(c.getTDetallePrestamo().getInteresComp()) + DateUtil.round(PrestamoUtil.calCom(c.getTDetallePrestamo().getMontoCapital().doubleValue(), Double.parseDouble(c.getTDetallePrestamo().getComision())), 2);
+////                    TPatrimonio p = adminK.ponerAsiento();
+////                    Double a = importe;
+////                    Double b = otros + itf + interes + mora;
+////                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+////                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() - a - b));
+////                    xbm.setActivoCuentaxcobrar(new BigDecimal(xbm.getActivoCuentaxcobrar().doubleValue() + importe));
+////                    xbm.setPRespaldo(new BigDecimal(xbm.getPRespaldo().doubleValue() + importe));
+////                    dao.update();
+////                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+////                    xp.setPatrimonioActual(new BigDecimal(xp.getPatrimonioActual().doubleValue() - a - b));
+////                    dao.update();
+////                    TLogFinance newLog = new TLogFinance();
+////                    newLog.setIdlogfinance(idForInitNewestTable);
+////                    newLog.setActivoCajaybanco(xp.getTBalancexmoneda().getActivoCajaybanco());
+////                    newLog.setActivoCuentaxcobrar(xp.getTBalancexmoneda().getActivoCuentaxcobrar());
+////                    newLog.setCajero(dep.getMontoFinal().toString());
+////                    newLog.setEncaje(xp.getTBalancexmoneda().getEncaje());
+////                    newLog.setFecha(DateUtil.getNOW_S());
+////                    newLog.setFilial(dep.getTCaja().getTFilial().getCodFilial());
+////                    newLog.setMonto(new BigDecimal(a));
+////                    newLog.setObservacion(b.toString());
+////                    newLog.setPRespaldo(xp.getTBalancexmoneda().getPRespaldo());
+////                    newLog.setPasivo(xp.getTBalancexmoneda().getPasivo());
+////                    newLog.setPatrimonio(xp.getPatrimonioActual());
+////                    newLog.setTipoOperacion(c.getTOperacion().getIdOperacion());
+////                    newLog.setReferencia(xp.getPatrimonio().toString());
+////                    dao.persist(newLog);
+//                    out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");
+//                    operacion.setEstado("EXTORNADO");
+//                    operacion.setFechaExtornacion(formatFecha.get());
+//                    operacion.setIdAdminExtorno(IdAdminExtorno);
+//                    dao.update();
+//                    return;
+//                }
+//            }
+//            extornarRVB(operacion, tipo, IdAdminExtorno, session, out);
+            /****** EXTORNANDO COMPRA*******/
+//            op = operacion;
+//            if (tipo.equals("TIPC1")) {
+//                String hqlrcv = "from TRegistroCompraVenta where TOperacion.idOperacion ='" + op.getIdOperacion() + "'";
+//                TRegistroCompraVenta compra = (TRegistroCompraVenta) dao.findAll(hqlrcv).get(0);
+//                compra.setEstado("EXTORNADO");
+//                dao.update();
+//                TOperacion opC = (TOperacion) dao.load(TOperacion.class, compra.getTOperacion().getIdOperacion());
+//                opC.setEstado("EXTORNADO");
+//                opC.setFechaExtornacion(formatFecha.get());
+//                opC.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//                String hql = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + myCaja + "' "
+//                        + " AND TMoneda.codMoneda ='" + op.getTMoneda().getCodMoneda() + "' ";
+//                TDetalleCaja detallecaja = (TDetalleCaja) dao.findAll(hql).get(0);
+//                detallecaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() - compra.getMontoRecibido().doubleValue()));
+//                dao.update();
+//                String hql2 = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + myCaja + "' "
+//                        + " AND TMoneda.codMoneda ='PEN' ";
+//                TDetalleCaja detallecaja2 = (TDetalleCaja) dao.findAll(hql2).get(0);
+//                detallecaja2.setMontoFinal(new BigDecimal(detallecaja2.getMontoFinal().doubleValue() + compra.getMontoEntregado().doubleValue()));
+//                dao.update();
+//                TTipoCambio x0 = compra.getTTipoCambio();
+//                String moneda1 = x0.getTMoneda().getCodMoneda();
+//                Double montoR = compra.getMontoRecibido().doubleValue();
+//                String moneda2 = x0.getCodMonedaA();
+//                Double montoE = compra.getMontoEntregado().doubleValue();
+//                adminCapital capital = new adminCapital(moneda1, myId, myIp);
+//                TPatrimonio pa1 = capital.ponerAsiento();
+//                TBalancexmoneda xbm1 = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                Double f1 = xbm1.getActivoCajaybanco().doubleValue() - montoR;
+//                xbm1.setActivoCajaybanco(new BigDecimal(f1));
+//                dao.update();
+//                Double f2 = pa1.getPatrimonioActual().doubleValue() - montoR;
+//                TPatrimonio xp1 = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                xp1.setPatrimonioActual(new BigDecimal(f2));
+//                dao.update();
+//                TLogFinance newLog = new TLogFinance();
+//                newLog.setIdlogfinance(idForInitNewestTable);
+//                newLog.setActivoCajaybanco(xp1.getTBalancexmoneda().getActivoCajaybanco());
+//                newLog.setActivoCuentaxcobrar(xp1.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                newLog.setCajero(compra.getMontoRecibido().toString());
+//                newLog.setEncaje(xp1.getTBalancexmoneda().getEncaje());
+//                newLog.setFecha(DateUtil.getNOW_S());
+//                newLog.setFilial(detallecaja.getTCaja().getTFilial().getCodFilial());
+//                newLog.setMonto(compra.getMontoRecibido());
+//                newLog.setObservacion("" + compra.getMontoEntregado());
+//                newLog.setPRespaldo(xp1.getTBalancexmoneda().getPRespaldo());
+//                newLog.setPasivo(xp1.getTBalancexmoneda().getPasivo());
+//                newLog.setPatrimonio(xp1.getPatrimonioActual());
+//                newLog.setTipoOperacion(compra.getTOperacion().getIdOperacion());
+//                newLog.setReferencia(xp1.getPatrimonio().toString());
+//                dao.persist(newLog);
+//                adminCapital capital2 = new adminCapital(moneda2, myId, myIp);
+//                TPatrimonio pa2 = capital2.ponerAsiento();
+//                TBalancexmoneda xbm2 = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                Double f3 = xbm2.getActivoCajaybanco().doubleValue() + montoE;
+//                xbm2.setActivoCajaybanco(new BigDecimal(f3));
+//                dao.update();
+//                Double f4 = pa2.getPatrimonioActual().doubleValue() + montoE;
+//                TPatrimonio xp2 = (TPatrimonio) dao.load(TPatrimonio.class, pa2.getIdpatrimonio());
+//                xp2.setPatrimonioActual(new BigDecimal(f4));
+//                dao.update();
+//                TLogFinance newLog1 = new TLogFinance();
+//                newLog1.setIdlogfinance(DateUtil.convertDateId());
+//                newLog1.setActivoCajaybanco(xp2.getTBalancexmoneda().getActivoCajaybanco());
+//                newLog1.setActivoCuentaxcobrar(xp2.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                newLog1.setCajero(detallecaja2.getMontoFinal().toString());
+//                newLog1.setEncaje(xp2.getTBalancexmoneda().getEncaje());
+//                newLog1.setFecha(DateUtil.getNOW_S());
+//                newLog1.setFilial(detallecaja2.getTCaja().getTFilial().getCodFilial());
+//                newLog1.setMonto(compra.getMontoEntregado());
+//                newLog1.setObservacion("" + compra.getMontoRecibido());
+//                newLog1.setPRespaldo(xp2.getTBalancexmoneda().getPRespaldo());
+//                newLog1.setPasivo(xp2.getTBalancexmoneda().getPasivo());
+//                newLog1.setPatrimonio(xp2.getPatrimonioActual());
+//                newLog1.setTipoOperacion(compra.getTOperacion().getIdOperacion());
+//                newLog1.setReferencia(xp2.getPatrimonio().toString());
+//                dao.persist(newLog1);
+//            }
+            /****** EXTORNANDO VENTA*******/
+//            if (tipo.equals("TIPC2")) {
+//                String hqlrcv = "from TRegistroCompraVenta where TOperacion.idOperacion ='" + op.getIdOperacion() + "'";
+//                TRegistroCompraVenta venta = (TRegistroCompraVenta) dao.findAll(hqlrcv).get(0);
+//                TOperacion opV = (TOperacion) dao.load(TOperacion.class, venta.getTOperacion().getIdOperacion());
+//                opV.setEstado("EXTORNADO");
+//                opV.setFechaExtornacion(formatFecha.get());
+//                opV.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//                String hqlv = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+//                        + " AND TMoneda.codMoneda ='" + opV.getTMoneda().getCodMoneda() + "' ";
+//                TDetalleCaja detallecaja = (TDetalleCaja) dao.findAll(hqlv).get(0);
+//                detallecaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + venta.getMontoEntregado().doubleValue()));
+//                dao.update();
+//                String hql2v = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+//                        + " AND TMoneda.codMoneda ='PEN' ";
+//                TDetalleCaja detallecaja2 = (TDetalleCaja) dao.findAll(hql2v).get(0);
+//                detallecaja2.setMontoFinal(new BigDecimal(detallecaja2.getMontoFinal().doubleValue() - venta.getMontoRecibido().doubleValue()));
+//                dao.update();
+//                TTipoCambio x0 = venta.getTTipoCambio();
+//                String moneda1 = x0.getTMoneda().getCodMoneda();
+//                Double montoR = venta.getMontoRecibido().doubleValue();
+//                String moneda2 = x0.getCodMonedaA();
+//                Double montoE = venta.getMontoEntregado().doubleValue();
+//                adminCapital capital = new adminCapital(moneda1, session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+//                TPatrimonio pa1 = capital.ponerAsiento();
+//                TBalancexmoneda xbm1 = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa1.getTBalancexmoneda().getIdbalance());
+//                Double f1 = xbm1.getActivoCajaybanco().doubleValue() - montoR;
+//                xbm1.setActivoCajaybanco(new BigDecimal(f1));
+//                dao.update();
+//                Double f2 = pa1.getPatrimonioActual().doubleValue() - montoR;
+//                TPatrimonio xp1 = (TPatrimonio) dao.load(TPatrimonio.class, pa1.getIdpatrimonio());
+//                xp1.setPatrimonioActual(new BigDecimal(f2));
+//                dao.update();
+//                TLogFinance newLog = new TLogFinance();
+//                newLog.setIdlogfinance(idForInitNewestTable);
+//                newLog.setActivoCajaybanco(xp1.getTBalancexmoneda().getActivoCajaybanco());
+//                newLog.setActivoCuentaxcobrar(xp1.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                newLog.setCajero(detallecaja.getMontoFinal().toString());
+//                newLog.setEncaje(xp1.getTBalancexmoneda().getEncaje());
+//                newLog.setFecha(DateUtil.getNOW_S());
+//                newLog.setFilial(detallecaja.getTCaja().getTFilial().getCodFilial());
+//                newLog.setMonto(venta.getMontoRecibido());
+//                newLog.setObservacion("" + venta.getMontoEntregado());
+//                newLog.setPRespaldo(xp1.getTBalancexmoneda().getPRespaldo());
+//                newLog.setPasivo(xp1.getTBalancexmoneda().getPasivo());
+//                newLog.setPatrimonio(xp1.getPatrimonioActual());
+//                newLog.setTipoOperacion(venta.getTOperacion().getIdOperacion());
+//                newLog.setReferencia(xp1.getPatrimonio().toString());
+//                dao.persist(newLog);
+//                adminCapital capital2 = new adminCapital(moneda2, session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+//                TPatrimonio pa2 = capital2.ponerAsiento();
+//                TBalancexmoneda xbm2 = (TBalancexmoneda) dao.load(TBalancexmoneda.class, pa2.getTBalancexmoneda().getIdbalance());
+//                Double f3 = xbm2.getActivoCajaybanco().doubleValue() + montoE;
+//                xbm2.setActivoCajaybanco(new BigDecimal(f3));
+//                dao.update();
+//                Double f4 = pa2.getPatrimonioActual().doubleValue() + montoE;
+//                TPatrimonio xp2 = (TPatrimonio) dao.load(TPatrimonio.class, pa2.getIdpatrimonio());
+//                xp2.setPatrimonioActual(new BigDecimal(f4));
+//                dao.update();
+//                TLogFinance newLog1 = new TLogFinance();
+//                newLog1.setIdlogfinance(DateUtil.convertDateId());
+//                newLog1.setActivoCajaybanco(xp2.getTBalancexmoneda().getActivoCajaybanco());
+//                newLog1.setActivoCuentaxcobrar(xp2.getTBalancexmoneda().getActivoCuentaxcobrar());
+//                newLog1.setCajero(detallecaja2.getMontoFinal().toString());
+//                newLog1.setEncaje(xp2.getTBalancexmoneda().getEncaje());
+//                newLog1.setFecha(DateUtil.getNOW_S());
+//                newLog1.setFilial(detallecaja2.getTCaja().getTFilial().getCodFilial());
+//                newLog1.setMonto(venta.getMontoEntregado());
+//                newLog1.setObservacion("" + venta.getMontoRecibido());
+//                newLog1.setPRespaldo(xp2.getTBalancexmoneda().getPRespaldo());
+//                newLog1.setPasivo(xp2.getTBalancexmoneda().getPasivo());
+//                newLog1.setPatrimonio(xp2.getPatrimonioActual());
+//                newLog1.setTipoOperacion(venta.getTOperacion().getIdOperacion());
+//                newLog1.setReferencia(xp2.getPatrimonio().toString());
+//                dao.persist(newLog1);
+//            }
+            /****** EXTORNANDO GIRO*******/
+//            if (tipo.equals("TIPC5")) {
+//                String hqlrcv = "from TRegistroGiro where TOperacion.idOperacion ='" + op.getIdOperacion() + "'";
+//                TRegistroGiro giro = (TRegistroGiro) dao.findAll(hqlrcv).get(0);
+//                giro.setEstado("EXTORNADO");
+//                dao.update();
+//                TOperacion opG = (TOperacion) dao.load(TOperacion.class, giro.getTOperacion().getIdOperacion());
+//                opG.setEstado("EXTORNADO");
+//                opG.setFechaExtornacion(formatFecha.get());
+//                opG.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//            String hqlv = "from TDetalleCaja where estado ='ACTIVO'"
+//                    + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+//                    + " AND TMoneda.codMoneda ='" + opG.getTMoneda().getCodMoneda() + "' ";
+//            TDetalleCaja detallecaja = (TDetalleCaja) dao.findAll(hqlv).get(0);
+//            adminCapital capital = new adminCapital(opG.getTMoneda().getCodMoneda(), session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+//            if (giro.getIdcuentapersona().equals("0")) {
+//                Double addMonto = detallecaja.getMontoFinal().doubleValue() - giro.getImporte().doubleValue();
+//                if (giro.getPagadorComision().equals("PEMISOR") && giro.getFpagoComision().equals("EFECTIVO")) {
+//                    addMonto = detallecaja.getMontoFinal().doubleValue() - giro.getImporte().doubleValue() - giro.getComision().doubleValue();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue() - giro.getComision().doubleValue();
+//                    Double k = p.getPatrimonioActual().doubleValue() - giro.getComision().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(k));
+//                    dao.update();
+//                }
+//                if (giro.getPagadorComision().equals("PEMISOR") && giro.getFpagoComision().equals("DESCONTAR")) {
+//                    addMonto = detallecaja.getMontoFinal().doubleValue() - giro.getImporte().doubleValue();// + giro.getComision().doubleValue();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue();
+//                    Double k = p.getPatrimonioActual().doubleValue() - giro.getComision().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(k));
+//                    dao.update();
+//                }
+//                if (giro.getPagadorComision().equals("PRECEPTOR")) {
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                }
+//                BigDecimal ntotal = new BigDecimal(addMonto);
+//                TDetalleCaja detallecaja2 = (TDetalleCaja) dao.load(TDetalleCaja.class, detallecaja.getIddetallecaja());
+//                detallecaja2.setMontoFinal(ntotal);
+//                detallecaja2.setDateUser(formatFecha.get());
+//                dao.update();
+////                tr.commit();
+//            } else {
+//                TCuentaPersona cuenta = (TCuentaPersona) dao.load(TCuentaPersona.class, giro.getIdcuentapersona());
+//                Double addMonto = cuenta.getSaldo().doubleValue() + giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                if (giro.getPagadorComision().equals("PEMISOR") && giro.getFpagoComision().equals("EFECTIVO")) {
+//                    addMonto = cuenta.getSaldo().doubleValue() + giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue() - giro.getComision().doubleValue();
+//                    Double k = p.getPatrimonioActual().doubleValue() - giro.getComision().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(k));
+//                    dao.update();
+//                }
+//                if (giro.getPagadorComision().equals("PEMISOR") && giro.getFpagoComision().equals("DESCONTAR")) {
+//                    addMonto = cuenta.getSaldo().doubleValue() + giro.getImporte().doubleValue();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue();
+//                    Double k = p.getPatrimonioActual().doubleValue() - giro.getComision().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(k));
+//                    dao.update();
+//                }
+//                if (giro.getPagadorComision().equals("PRECEPTOR")) {
+//                    addMonto = cuenta.getSaldo().doubleValue() + giro.getImporte().doubleValue();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    Double iP = p.getTBalancexmoneda().getActivoCajaybanco().doubleValue() - giro.getImporte().doubleValue();
+//                    Double cxp = p.getTBalancexmoneda().getPasivo().doubleValue() - giro.getImporte().doubleValue() + giro.getComision().doubleValue();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(iP));
+//                    xbm.setPasivo(new BigDecimal(cxp));
+//                    dao.update();
+//                }
+//                BigDecimal ntotal = new BigDecimal(addMonto);
+//                TCuentaPersona cuenta2 = (TCuentaPersona) dao.load(TCuentaPersona.class, giro.getIdcuentapersona());
+//                cuenta2.setSaldo(ntotal);
+//                cuenta2.setSaldoSinInteres(ntotal);
+//                dao.update();
+//            }
+//            }
+            /****** EXTORNANDO COBROGIRO*******/
+//            if (tipo.equals("TIPC8")) {
+//                String hqlrcv = "from TRegistroGiro where idoperacioncobro ='" + op.getIdOperacion() + "'";
+//                TRegistroGiro giro_cobro = (TRegistroGiro) dao.findAll(hqlrcv).get(0);
+//                giro_cobro.setEstado("ESPERA");
+//                dao.update();
+//                TOperacion opGC = (TOperacion) dao.load(TOperacion.class, giro_cobro.getIdoperacioncobro());
+//                opGC.setEstado("EXTORNADO");
+//                opGC.setFechaExtornacion(formatFecha.get());
+//                opGC.setIdAdminExtorno(IdAdminExtorno);
+//                dao.update();
+//            adminCapital capital = new adminCapital(opGC.getTMoneda().getCodMoneda(), session.getAttribute("USER_ID").toString(), session.getAttribute("USER_IP").toString());
+//            if (giro_cobro.getPagadorComision().equals("PRECEPTOR")) {
+////                tr = sess.beginTransaction();
+//                String hql = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+//                        + " AND TMoneda.codMoneda ='" + giro_cobro.getTOperacion().getTMoneda().getCodMoneda() + "' ";
+//                TDetalleCaja detallecaja = (TDetalleCaja) dao.findAll(hql).get(0);
+//                if (giro_cobro.getFpagoComision().equals("DESCONTAR")) {
+//                    TDetalleCaja xCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, detallecaja.getIddetallecaja());
+//                    xCaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + giro_cobro.getImporte().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() + detallecaja.getMontoFinal().doubleValue()));
+//                    xbm.setPasivo(new BigDecimal(xbm.getPasivo().doubleValue() + detallecaja.getMontoFinal().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(xp.getPatrimonioActual().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                } else {
+//                    TDetalleCaja xCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, detallecaja.getIddetallecaja());
+//                    xCaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + giro_cobro.getImporte().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() - detallecaja.getMontoFinal().doubleValue()));
+//                    xbm.setPasivo(new BigDecimal(xbm.getPasivo().doubleValue() + detallecaja.getMontoFinal().doubleValue()));
+//                    dao.update();
+//                }
+//            } else {
+//                String hql = "from TDetalleCaja where estado ='ACTIVO'"
+//                        + " AND TCaja.codCaja ='" + session.getAttribute("USER_CODCAJA").toString() + "' "
+//                        + " AND TMoneda.codMoneda ='" + giro_cobro.getTOperacion().getTMoneda().getCodMoneda() + "' ";
+//                TDetalleCaja detallecaja = (TDetalleCaja) dao.findAll(hql).get(0);
+//                if (giro_cobro.getFpagoComision().equals("DESCONTAR")) {
+//                    TDetalleCaja xCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, detallecaja.getIddetallecaja());
+//                    xCaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + giro_cobro.getImporte().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() + detallecaja.getMontoFinal().doubleValue()));
+//                    xbm.setPasivo(new BigDecimal(xbm.getPasivo().doubleValue() + detallecaja.getMontoFinal().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio xp = (TPatrimonio) dao.load(TPatrimonio.class, p.getIdpatrimonio());
+//                    xp.setPatrimonioActual(new BigDecimal(xp.getPatrimonioActual().doubleValue() - giro_cobro.getComision().doubleValue()));
+//                    dao.update();
+//                } else {
+//                    detallecaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + giro_cobro.getImporte().doubleValue()));
+//                    dao.update();
+//                    TDetalleCaja xCaja = (TDetalleCaja) dao.load(TDetalleCaja.class, detallecaja.getIddetallecaja());
+//                    xCaja.setMontoFinal(new BigDecimal(detallecaja.getMontoFinal().doubleValue() + giro_cobro.getImporte().doubleValue()));
+//                    dao.update();
+//                    TPatrimonio p = capital.ponerAsiento();
+//                    TBalancexmoneda xbm = (TBalancexmoneda) dao.load(TBalancexmoneda.class, p.getTBalancexmoneda().getIdbalance());
+//                    xbm.setActivoCajaybanco(new BigDecimal(xbm.getActivoCajaybanco().doubleValue() + detallecaja.getMontoFinal().doubleValue()));
+//                    xbm.setPasivo(new BigDecimal(xbm.getPasivo().doubleValue() + detallecaja.getMontoFinal().doubleValue()));
+//                    dao.update();
+//                }
+//            }
+//            }
+//            out.println("<input id='txtExtorno' name='txtExtorno' type='text' value='SI'>");//
+//            operacion.setEstado("EXTORNADO");
+//            operacion.setFechaExtornacion(formatFecha.get());
+//            operacion.setIdAdminExtorno(IdAdminExtorno);
+//            dao.update();
+        } finally {
+            out.print(relleno);
+            out.close();
+            dao.cerrarSession();
+        }
+    }
+
+// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+
+
+
+
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+
+
+
+
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+
+
+    }
+    // </editor-fold>
+}
+

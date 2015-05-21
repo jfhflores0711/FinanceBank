@@ -1,0 +1,1129 @@
+<%--
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : eloy
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank Cambio de Moneda User</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <link href='css/tabla.css' rel='stylesheet' type='text/css' />
+        <link rel="stylesheet" href="css/form.css" media="screen" />
+        <script type="text/javascript" src="js/custom-form-elements.js"></script>
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript">
+            var MonedaINI="";
+            var MonedaFIN="";
+            function compraVenta(){
+                document.getElementById('monto1').disabled=false;
+                document.getElementById('monto2').disabled=false;
+                var j;
+                for (j=0;j<document.fcambio.cambio.length;j++){
+                    if (document.fcambio.cambio[j].checked)
+                        break;
+                }
+                ddeterioro='0.0';
+                document.getElementById('descuento_deterioro').value='0.0';
+                document.getElementById('descuento_deterioro').disabled=false;
+                if(j==2){
+                    window.alert("Seleccione el tipo de OPERACIÓN!!!");
+                    return;
+                }
+                var opcion = document.fcambio.cambio[j].value;
+                var moneda = document.fcambio.moneda[document.fcambio.moneda.selectedIndex].value;
+                var simbolo = document.fcambio.moneda[document.fcambio.moneda.selectedIndex].label;
+                if(opcion=='COMPRA'){                
+                    MonedaINI=moneda;
+                    MonedaFIN="PEN";
+                    document.getElementById('tipo1').innerHTML="<img src='images/cobrar.png' width='86' height='47' alt='cobrar'/> <br> COBRO";
+                    document.getElementById('tipo2').innerHTML="<img src='images/pagar.png' width='86' height='47' alt='cobrar'/> <br>PAGO";
+                }else{
+                    MonedaINI="PEN";
+                    MonedaFIN=moneda;
+                    document.getElementById('tipo1').innerHTML="<img src='images/pagar.png' width='86' height='47' alt='cobrar'/> <br>PAGO";
+                    document.getElementById('tipo2').innerHTML="<img src='images/cobrar.png' width='86' height='47' alt='cobrar'/> <br> COBRO";
+                }
+                document.getElementById('SinMonedaFIN').innerHTML="S/.";
+                document.getElementById('SinMonedaINI').innerHTML=simbolo;
+                document.getElementById('monto1button').label=moneda;
+                document.getElementById('monto2button').label="PEN";
+                buscarTasa(MonedaINI,MonedaFIN)
+            }
+
+            function buscarTasa(mIni,mFin) {
+                var especial=document.fcambio.tasaEspecial.checked
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SBuscarTasa?mIni="+mIni+"&mFin="+mFin+"&especial="+especial;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = procesar;
+                    req2.send(null);
+                }
+            }
+
+            function procesar(){
+                contenido = document.getElementById('factor');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                    document.getElementById('Tasa_Especial').value=req2.responseText;
+                    calculo();
+                }
+            }
+
+            function currencyFormat(fld, milSep, decSep, e) {
+                var key = '';
+                var i = 0,j = 0;
+                var len = 0,len2 = 0;
+                var strCheck = '0123456789';
+                var aux = '',aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode <= 20) return true;  // Enter,Delete
+                key = String.fromCharCode(whichCode);  // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false;  // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld.value = '';
+                if (len == 1) fld.value = '0'+ decSep + '0' + aux;
+                if (len == 2) fld.value = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - 2, len);
+                }
+                return false;
+            }
+
+            function currencyFormatF(fld, milSep, decSep) {
+                var len =0;
+                len = fld.value.length;
+                if(len==0){
+                    fld.value='0.00';
+                    return false;
+                }
+                if(fld.value=="."){
+                    fld.value='0.00';
+                    return false;
+                }
+                if(fld.value.substring(len-1, len)=="."){
+                    fld.value=fld.value.substring(0, len-1);
+                }
+                var ax=parseFloat(fld.value);
+                fld.value=ax;
+                return false;
+            }
+
+            function currencyFormat_decimal(fld, milSep, decSep, e, n_decimales ) {
+                var key = '';
+                var i =0, j = 0;
+                var len =0, len2 = 0;
+                var strCheck = '0123456789';
+                var aux ='', aux2 = '';
+                var whichCode = (window.Event) ? e.which : e.keyCode;
+                if (whichCode <= 18) return true;  // Enter,Delete
+                key = String.fromCharCode(whichCode);  // Get key value from key code
+                if (strCheck.indexOf(key) == -1) return false;  // Not a valid key
+                len = fld.value.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.value.charAt(i) != '0') && (fld.value.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.value.charAt(i))!=-1) aux += fld.value.charAt(i);
+                aux += key;
+                len = aux.length;
+                var n_cero='';
+                for(var u=0;u< n_decimales -len;u++){
+                    n_cero='0'+n_cero;
+                }
+                if (len == 0){fld.value = '';}else{fld.value = '0'+ decSep + n_cero + aux;}
+                if (len > n_decimales) {
+                    aux2 = '';
+                    for (j = 0, i = len - (n_decimales+1); i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld.value = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld.value += aux2.charAt(i);
+                    fld.value += decSep + aux.substr(len - n_decimales, len);
+                }
+                return false;
+            }
+
+            function currencyFormat2(fld, milSep, decSep) {
+                var key = '';
+                var i = 0,j = 0;
+                var len = 0,len2 = 0;
+                var strCheck = '0123456789';
+                var aux = '',aux2 = '';
+                len = fld.length;
+                for(i = 0; i < len; i++)
+                    if ((fld.charAt(i) != '0') && (fld.charAt(i) != decSep)) break;
+                aux = '';
+                for(; i < len; i++)
+                    if (strCheck.indexOf(fld.charAt(i))!=-1) aux += fld.charAt(i);
+                aux += key;
+                len = aux.length;
+                if (len == 0) fld = '';
+                if (len == 1) fld = '0'+ decSep + '0' + aux;
+                if (len == 2) fld = '0'+ decSep + aux;
+                if (len > 2) {
+                    aux2 = '';
+                    for (j = 0, i = len - 3; i >= 0; i--) {
+                        if (j == 3) {
+                            aux2 += milSep;
+                            j = 0;
+                        }
+                        aux2 += aux.charAt(i);
+                        j++;
+                    }
+                    fld = '';
+                    len2 = aux2.length;
+                    for (i = len2 - 1; i >= 0; i--)
+                        fld += aux2.charAt(i);
+                    fld += decSep + aux.substr(len - 2, len);
+                }
+                return fld;
+            }
+
+            function calculo(){
+                var monto1 =document.getElementById('monto1').value;
+                monto1 = monto1.replace(/,/gi, "");
+                var ddet = ddeterioro;
+                ddet = ddet.replace(/,/gi, "");
+                var factor = document.getElementById('factor').innerHTML;
+                if(document.fcambio.tasaEspecial.checked){
+                    factor = document.getElementById('Tasa_Especial').value;
+                }
+                var j;
+                for (j=0;j<document.fcambio.cambio.length;j++){
+                    if (document.fcambio.cambio[j].checked)
+                        break;
+                }
+                if(j==2){
+                    window.alert("Seleccione el tipo de OPERACIÓN!!!");
+                    return;
+                }
+                var opcion = document.fcambio.cambio[j].value;
+                if(opcion=='COMPRA'){
+                    var res = parseFloat(monto1) * parseFloat(factor);
+                    res= parseFloat(res)-parseFloat(ddet);
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    this.document.getElementById('monto2').value=currencyFormat2(Sres,',','.');
+                }else{
+                    var res = parseFloat(monto1) * parseFloat(factor);
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    this.document.getElementById('monto2').value=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            function calculo2(){
+                var monto1 =document.getElementById('monto2').value;
+                monto1 = monto1.replace(/,/gi, "");
+                var ddet = ddeterioro;
+                ddet = ddet.replace(/,/gi, "");
+                var factor =document.getElementById('factor').innerHTML;
+                if(document.fcambio.tasaEspecial.checked){
+                    factor =document.getElementById('Tasa_Especial').value;
+                }
+                var j;
+                for (j=0;j<document.fcambio.cambio.length;j++){
+                    if (document.fcambio.cambio[j].checked)
+                        break;
+                }
+                if(j==2){
+                    window.alert("Seleccione el tipo de OPERACIÓN!!!");
+                    return;
+                }
+                var opcion = document.fcambio.cambio[j].value;
+                if(opcion=='COMPRA'){
+                    var res =((parseFloat (monto1)+parseFloat (ddet))/parseFloat (factor));
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    this.document.getElementById('monto1').value=currencyFormat2(Sres,',','.');
+                }else{
+                    var res =parseFloat (monto1)/parseFloat (factor);
+                    res=res.toFixed(2);
+                    var Sres =""+res;
+                    this.document.getElementById('monto1').value=currencyFormat2(Sres,',','.');
+                }
+            }
+
+            var Aut = false;
+            function ventanaNueva() {
+                document.getElementById('Tasa_Especial').disabled=true;
+                if(!document.fcambio.tasaEspecial.checked){
+                    return;
+                }
+                document.fcambio.tasaEspecial.checked=false;
+                var j;
+                for (j=0;j<document.fcambio.cambio.length;j++){
+                    if (document.fcambio.cambio[j].checked)
+                        break;
+                }
+                if(j==2){
+                    window.alert("Seleccione el tipo de OPERACIÓN!!!");
+                    return;
+                }
+                document.getElementById("monto1").value='0.00';
+                document.getElementById("monto2").value='0.00';
+                Dialog.confirm($('login').innerHTML,
+                {   className:"alphacube",
+                    width:400,
+                    okLabel: "login",
+                    title: "Autorizar Usuario",
+                    cancelLabel: "cancel",
+                    onOk:function(){
+                        var user =document.getElementById('user').value;
+                        var pass =document.getElementById('passwd').value;
+                        document.getElementById('res').innerHTML='';
+                        Autorizar(user,pass);
+                        window.alert('¡¡ DATOS ENVIADOS !!');
+                        if(document.getElementById('res').innerHTML==1){
+                            Aut = true;
+                            document.getElementById("monto1").value='0.00';
+                            document.getElementById("monto2").value='0.00';
+                            document.getElementById('Tasa_Especial').disabled='';
+                            document.fcambio.tasaEspecial.checked=true;
+                            return true;
+                        }else{
+                            document.fcambio.tasaEspecial.checked=false;
+                            $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                            $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                            new Effect.Shake(Windows.focusedWindow.getId());
+                            document.getElementById('Tasa_Especial').disabled=true;
+                            return false;
+                        }
+                    }
+                });
+            }
+        
+            function Autorizar(login,contrasenia) {
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = procesar1;
+                    req2.send(null);
+                }
+            }
+        
+            function procesar1(){
+                contenido = document.getElementById('res');
+                contenido.innerHTML="Cargando los datos...";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText; 
+                }
+            }
+/*
+            function wait(msecs){
+                var start = new Date().getTime();
+                var cur = start;
+                while(cur - start < msecs){
+                    cur = new Date().getTime();
+                }
+            }
+*//*
+            function sleep(millisegundos) {
+                var inicio = new Date().getTime();
+                while ((new Date().getTime() - inicio) < millisegundos){
+                }
+            }
+*/
+            function RegistrarCambio() {
+                var j;
+                for (j=0;j<document.fcambio.cambio.length;j++){
+                    if (document.fcambio.cambio[j].checked)
+                        break;
+                }
+                if(j==2){
+                    window.alert("Aún no se puede registrar la OPERACIÓN!!!");
+                    return;
+                }
+                var opcion = document.fcambio.cambio[j].value;
+                var cod_moneda = document.fcambio.moneda[document.fcambio.moneda.selectedIndex].value;
+                var tasa = document.getElementById('Tasa_Especial').value;
+                var recibido;
+                var entregado;
+                var tipo;
+                if(opcion=='COMPRA'){
+                    recibido=document.getElementById('monto1').value;
+                    recibido = recibido.replace(/,/gi, "");
+                    entregado=document.getElementById('monto2').value;
+                    entregado = entregado.replace(/,/gi, "");
+                    tipo='COMPRA';
+                }else{
+                    recibido=document.getElementById('monto2').value;
+                    recibido = recibido.replace(/,/gi, "")
+                    entregado=document.getElementById('monto1').value;
+                    entregado = entregado.replace(/,/gi, "")
+                    tipo='VENTA';
+                }
+                if(recibido=='0.00'||entregado==""){
+                    window.alert("No se puede efectuar esta operacion");
+                    return;
+                }
+                var answer = window.confirm ("¿ESTA SEGURO REALIZAR ESTA OPERACION ?")
+                if (answer){
+                    req2 = null;
+                    if (window.XMLHttpRequest) {
+                        req2 = new XMLHttpRequest();
+                    }else if (window.ActiveXObject) {
+                        req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req2!=null){
+                        window.location="SRegistrarCambio?recibido="+recibido+
+                            "&entregado="+entregado+
+                            "&tipo="+tipo+
+                            "&cod_moneda="+cod_moneda+
+                            "&ddeterioro="+ddeterioro+
+                            "&razonSocial="+document.getElementById('txtRazonSocial').value+
+                            "&tasa="+tasa;
+                        disable();
+                    }
+                }
+            }
+
+            var NumeroMonto;
+            function sumarCalcular(codmoneda,n){
+                NumeroMonto = n;
+                req2 = false;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SSumarCalcular?codmoneda="+codmoneda;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = procesar2;
+                    req2.send(null);
+                }
+            }
+
+            function procesar2(){
+                contenido = document.getElementById('div_calcular');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+
+            function cerrar(){
+                document.getElementById('div_calcular').innerHTML ='';
+            }
+
+            function cal(n){
+                var monto= document.getElementById('montoMoneda'+n).value;
+                monto = monto.replace(/,/gi, "");
+                var cantidad= document.getElementById('Cantidad'+n).value;
+                cantidad = cantidad.replace(/,/gi, "");
+                var total =parseFloat (monto)*parseFloat (cantidad);
+                total=total.toFixed(2);
+                var Sres =""+total;
+                this.document.getElementById('totalDinero'+n).value=currencyFormat2(Sres,',','.');
+                if(document.getElementById('totalDinero'+n).value==''){document.getElementById('totalDinero'+n).value='0.00'}
+                return total
+            }
+
+            function calTotal(){
+                var limit = document.getElementById('sumaTotal').name;
+                var SumaTotal=0;
+                for(var i=0;i<limit;i++){
+                    SumaTotal=parseFloat(cal(i)) + parseFloat(SumaTotal);
+                }
+                SumaTotal=SumaTotal.toFixed(2);
+                var Sres =""+SumaTotal;
+                this.document.getElementById('sumaTotal').value=currencyFormat2(Sres,',','.');
+                this.document.getElementById('monto'+NumeroMonto).value=currencyFormat2(Sres,',','.');
+                if(NumeroMonto==1){
+                    calculo();
+                }else{
+                    calculo2();
+                }
+            }
+
+            function extornar(idReg,t){
+                Dialog.confirm($('login').innerHTML,
+                {   className:"alphacube",
+                    width:400,
+                    okLabel: "Login",
+                    title: "Autorizar Usuario",
+                    cancelLabel: "Cancelar",
+                    onOk:function(){
+                        var user =document.getElementById('user').value
+                        var pass =document.getElementById('passwd').value
+                        document.getElementById('res').innerHTML='';
+                        Autorizar(user,pass);
+                        window.alert('¡¡ DATOS ENVIADOS !!');
+                        if(document.getElementById('res').innerHTML==1){
+                            Aut = true;
+                            sExtornar(idReg,t);
+                            window.alert('¡¡SE REALIZO EL EXTORNO CON EXITO!!');
+                            document.fcambio.submit();
+                            return true;
+                        }else{
+                            $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                            $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                            new Effect.Shake(Windows.focusedWindow.getId());
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            function sExtornar(id,tipo) {
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                } else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SExtornoOp?id="+id+"&tipo="+tipo;
+                    req2.open("GET",url,true);
+                    req2.send(null);
+                }
+            }
+
+            function grabar(){
+                var limit = document.getElementById('sumaTotal').name;
+                var cadena="";
+                for(var i=0;i<limit;i++){
+                    var idDenominacion= document.getElementById('montoMoneda'+i).name;
+                    var cantidad= document.getElementById('Cantidad'+i).value;
+                    cadena=cadena+idDenominacion+"="+cantidad+" ";
+                }
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SGrabarSuma?cadena="+cadena;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = proc;
+                    req2.send(null);
+                }
+            }
+
+            function proc(){
+                contenido = document.getElementById('div_sumas');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+
+            function RecargarSumarCalcular(idSuma){
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SRecargarSuma?idSuma="+idSuma;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = RecargarProcesar;
+                    req2.send(null);
+                }
+            }
+
+            function RecargarProcesar(){
+                contenido = document.getElementById('div_calcular');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+
+            var ddeterioro='0.0';
+            function f_deterioro(d){
+                ddeterioro=d;
+                calculo();
+            }
+
+            function disable(){
+                document.getElementById('monto1').disabled=true;
+                document.getElementById('monto2').disabled=true;
+            }
+
+            function f_razonSocial(){
+                if(document.getElementById('razonSocial').checked){
+                    document.getElementById('txtRazonSocial').disabled=false;
+                }else{
+                    document.getElementById('txtRazonSocial').value ='';
+                    document.getElementById('txtRazonSocial').disabled=true;
+                }
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+            var eeisus=0;
+            var eetrue="VERDADERO";
+            var eefalse="FALSO";
+            var eedec=".";
+            var eeth=",";
+            var eedecreg=new RegExp("\\.","g");
+            var eethreg=new RegExp(",","g");
+            var eecurrencyreg=new RegExp("€","g");
+            var eepercentreg=new RegExp("%","g");
+            var fmtdaynamesshort=new Array("dom","lun","mar","mié","jue","vie","sáb");
+            var fmtdaynameslong=new Array("domingo","lunes","martes","miércoles","jueves","viernes","sábado");
+            var fmtmonthnamesshort=new Array("ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic");
+            var fmtmonthnameslong=new Array("enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre");
+            var fmtstrings=new Array(","," ","S/.","pta","€","/","$");
+            var fmtdate6=new Array(34,33,25,2);
+            var fmtdate7=new Array(25,2,33,35);
+            var fmtdate8=new Array(25,2,33,36);
+            var fmtdate9=new Array(7,37,3,37,11);
+            var fmtdate10=new Array(38,25,2);
+
+            function myIsNaN(x){
+                return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+            }
+
+            function round(n,nd){
+                if(isFinite(n)&&isFinite(nd)){
+                    var sign_n=(n<0)?-1:1;
+                    var abs_n=Math.abs(n);
+                    var factor=Math.pow(10,nd);
+                    return sign_n*Math.round(abs_n*factor)/factor;
+                }else{
+                    return NaN;
+                }
+            }
+
+            function b2s(b){
+                return b?eetrue:eefalse;
+            }
+
+            function eeparseFloat(str){
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeparsePercent(str){
+                var parts=String(str).split('%');
+                var tmp=String(parts[0]).replace(eedecreg,".");
+                var res=parseFloat(tmp)/100;if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+
+            function eedisplayFloat(x){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var str=String(x);
+                    if(near0RegExp.test(str)){
+                        x=round(x,8);
+                        str=String(x);
+                    }
+                    return str.replace(/\./g,eedec);
+                }
+            }
+
+            function eedisplayFloatV(x){
+                if(x=="")return x;
+                if(isFinite(x)){
+                    return eedisplayFloat(x);
+                }else{
+                    return x;
+                }
+            }
+
+            function eedisplayFloatND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }
+                    }else{
+                        return res;
+                    }
+                }
+            }
+
+            function eedisplayPercentND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    return eedisplayFloatND(x*100,nd)+'%';
+                }
+            }
+
+            function eeparseFloatTh(str){
+                str=String(str).replace(eethreg,"");
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eedisplayFloatNDTh(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        var res2=eeinsertThousand(parts[0].toString());
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }
+                    }else{
+                        return(eeinsertThousand(res.toString()));
+                    }
+                }
+            }
+
+            var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+
+            function eeparseFloatV(str){
+                if(str=="")
+                    return str;str=String(str).replace(eedecreg,".");
+                if(!eeparseFloatVreg.test(str)){
+                    return str;
+                }
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return str;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeinsertThousand(whole){
+                if(whole==""||whole.indexOf("e")>=0){
+                    return whole;
+                }else{
+                    var minus_sign="";
+                    if(whole.charAt(0)=="-"){
+                        minus_sign="-";
+                        whole=whole.substring(1);
+                    }
+                    var res="";
+                    var str_length=whole.length-1;
+                    for(var ii=0;ii<=str_length;ii++){
+                        if(ii>0&&ii%3==0){
+                            res=eeth+res;
+                        }
+                        res=whole.charAt(str_length-ii)+res;
+                    }
+                    return minus_sign+res;
+                }
+            }
+
+            function validar(e){
+                var obj=e.srcElement || e.target;
+                var tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo<14)return true;
+                var patron =/[\d.]/;
+                var tecla_valor = String.fromCharCode(tecla_codigo);
+                var control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true;
+                return patron.test(tecla_valor) &&  control;
+            }
+        </script>
+    </head>
+    <body>
+        <%@include file="../common/header.jsp" %>
+        <%
+                    session.setAttribute("CADENA_SUMA", "");
+                    request.setAttribute("idmenu", "20110228202911490823");
+                    String idpc = (String) session.getAttribute("USER_ID_PERSONA_CAJA");
+                    //String codcaja = (String) session.getAttribute("USER_CODCAJA");
+        %>
+        <div id="login" style="display:none">
+            <p>
+                <span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <p>
+                <span class="login_label">Usuario</span>
+                <span class="login_input">
+                    <input type="text" id="user"/>
+                </span>
+            </p>
+            <div style="clear:both"></div>
+            <p>
+                <span class="login_label">Contrase&ntilde;a</span>
+                <span class="login_input">
+                    <input type="password" id="passwd"/>
+                </span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <div id="res" style="display:none">
+            </div>
+        </div>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Client Account</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">MODULO DE CAMBIO DE MONEDA</h2>
+                    <div class="story">
+                        <form name="fcambio" action="">
+                            <br>
+                            <center>
+                                <table border='0' cellpadding='0' cellspacing='0' width="100%">
+                                    <tr>
+                                        <td valign="top" align="center">
+                                            <table border='0' cellpadding='4' cellspacing='4' class='tabla' bgcolor="#f1ffed">
+                                                <tr>
+                                                    <td align="right">
+                                                        Tasa Especial <input type="checkbox" name="tasaEspecial" id="tasaEspecial" value="ON" onchange="ventanaNueva();" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        Razon Social: <input type="checkbox" name="razonSocial" id="razonSocial" onchange="f_razonSocial();" />
+                                                        &nbsp;&nbsp;<input type="text" name="txtRazonSocial" id="txtRazonSocial" disabled/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td valign="top" width="100%">
+                                                        <fieldset>
+                                                            <legend style="font-size:12px"><b>CAMBIOS DE DINERO</b> </legend>
+                                                            <table border='0' cellpadding='5' cellspacing='5' class='tabla' width='100%'>
+                                                                <tr>
+                                                                    <td>
+                                                                        <table border="0" width='100%'>
+                                                                            <tr>
+                                                                                <td colspan="2">
+                                                                                    <fieldset>
+                                                                                        <table bgcolor="#ffffff" border="0" width="100%">
+                                                                                            <tr>
+                                                                                                <td >
+                                                                                                    <input type="radio" size="20" onclick="compraVenta();" name="cambio" value="COMPRA">
+                                                                                                </td>
+                                                                                                <td style="font-size:20px;font-weight:bold;color:#385B88">
+                                                                                                    COMPRA
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input type="radio" onclick="compraVenta();" name="cambio" value="VENTA" >
+                                                                                                </td>
+                                                                                                <td style="font-size:20px;font-weight:bold;color:#385B88">
+                                                                                                    VENTA
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </fieldset>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td align="right">
+                                                                                    <select name="moneda" style="font-size:20px" onchange="document.fcambio.submit()" >
+                                                                                        <%
+                                                                                                    String codigo = request.getParameter("moneda");
+                                                                                                    List Presult = d.findAll("from TMoneda where estado ='ACTIVO'");
+                                                                                                    Iterator itPmoneda = Presult.iterator();
+                                                                                                    String sel = "";
+                                                                                                    String nombreM = "";
+                                                                                                    String ColorM = "";
+                                                                                                    while (itPmoneda.hasNext()) {
+                                                                                                        TMoneda Moneda = (TMoneda) itPmoneda.next();
+                                                                                                        if (request.getParameter("moneda") == null) {
+                                                                                                            if (Moneda.getCodMoneda().equals("USD")) {
+                                                                                                                sel = "selected";
+                                                                                                                codigo = "USD";
+                                                                                                                nombreM = Moneda.getNombre();
+                                                                                                                ColorM = Moneda.getColor();
+                                                                                                            } else {
+                                                                                                                sel = "";
+                                                                                                            }
+                                                                                                        } else {
+                                                                                                            if (Moneda.getCodMoneda().equals(codigo)) {
+                                                                                                                sel = "selected";
+                                                                                                                nombreM = Moneda.getNombre();
+                                                                                                                ColorM = Moneda.getColor();
+                                                                                                            } else {
+                                                                                                                sel = "";
+                                                                                                            }
+                                                                                                        }
+                                                                                                        if (!Moneda.getCodMoneda().equals("PEN")) {
+                                                                                                            out.println("<option label='" + Moneda.getCodMoneda() + "(" + Moneda.getSimbolo() + ")' value='" + Moneda.getCodMoneda() + "' " + sel + ">" + Moneda.getSimbolo() + "</option>");
+                                                                                                        }
+                                                                                                    }
+                                                                                        %>
+                                                                                    </select>
+                                                                                    <%
+                                                                                                out.println("<script language='JavaScript'> document.getElementById('tasaEspecial').focus();</script>");
+                                                                                    %>
+                                                                                </td>
+                                                                                <td style="font-size:20px;font-weight:bold;color:<%=ColorM%>" align="left">
+                                                                                    <%=nombreM%>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="2" align="center">
+                                                                                    <fieldset>
+                                                                                        <table>
+                                                                                            <tr>
+                                                                                                <td id="factor" style="font-size:20px;font-weight:bold;color:<%=ColorM%>" colspan="5" align="center">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td>
+                                                                                                    <font color="#385B88" style="font-size:12px">Tasa Especial
+                                                                                                        <input id="Tasa_Especial" type="text" style="font-size:13px;width:100px;text-align:right;" name="Tasa_Especial" value="0.000" onKeyPress="return(currencyFormat_decimal(this,',','.',event,3));" onkeyup="calculo();" onfocus="this.select();" disabled />
+                                                                                                    </font>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td>
+                                                                                                    <font color="#385B88" style="font-size:12px">Descuento por deterioro
+                                                                                                        <input id="descuento_deterioro" type="text" style="font-size:12px;width:80px;text-align:right" name="descuento_deterioro" value="0.0" onKeyPress="return(currencyFormat_decimal(this,',','.',event,1))" onkeyup="f_deterioro(this.value)" disabled/>
+                                                                                                    </font>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </fieldset>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                <tr>
+                                                                    <td colspan="2" align="center">
+                                                                        <fieldset>
+                                                                            <table border="0" cellspacing="10" cellpadding="10" >
+                                                                                <tr>
+                                                                                    <td style="font-size:20px">
+                                                                                        <font color="#385B88" style="font-size:12px">
+                                                                                            <b>
+                                                                                                <div id="tipo1">
+                                                                                                </div>
+                                                                                            </b>
+                                                                                        </font>
+                                                                                    </td>
+                                                                                    <td style="font-size:20px;font-weight:bold;color:<%=ColorM%>" id="SinMonedaINI">
+                                                                                    </td>
+                                                                                    <td align="center" >
+                                                                                        <input id="monto1" type="text" style="font-size:20px;width:140px;text-align:right" name="monto1" value="0.00" onKeyPress="return validar(event);" onblur="currencyFormatF(this,',','.');calculo();" onfocus="this.select();" disabled/>
+                                                                                        <input id="monto1button" type="button" style="font-size:7px;" value="&#8721;" onclick="sumarCalcular(this.label,1)" />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td style="font-size:20px">
+                                                                                        <font color="#385B88" style="font-size:12px">
+                                                                                            <b>
+                                                                                                <div id="tipo2">
+                                                                                                </div>
+                                                                                            </b>
+                                                                                        </font>
+                                                                                    </td>
+                                                                                    <td style="font-size:20px;font-weight:bold;color:<%=ColorM%>" id="SinMonedaFIN">
+                                                                                    </td>
+                                                                                    <td align="center" >
+                                                                                        <input id="monto2" style="font-size:20px;width:140px;text-align:right;color:<%=ColorM%>" name="monto2" value="0.00" onKeyPress="return(currencyFormat(this,',','.',event))" onkeyup="calculo2();" disabled/>
+                                                                                        <input id="monto2button" type="button" style="font-size:7px;" value="&#8721;" onclick="sumarCalcular(this.label,2)" />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="4" align="center">
+                                                                                        <input id="inputsubmitx" size="1em" type="button" name="registrar" value="        EFECTUAR OPERACION          " onclick="RegistrarCambio();"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </fieldset>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                            <div id="div_sumas"></div>
+                                                        </fieldset>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td valign="top" align="center">
+                                            <fieldset>
+                                                <div id="div_calcular">
+                                                </div>
+                                            </fieldset>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+                            <br>
+                            <br>
+                            <fieldset>
+                                <table border="0" class='tabla' width="100%" cellpadding="5" cellspacing="5">
+                                    <tr>
+                                        <th width="17%" align="center" style="font-size:10px;color:#000000">Fecha</th>
+                                        <th width="22%" align="center" style="font-size:10px;color:#000000">N&deg; OP</th>
+                                        <th width="16%" align="center" style="font-size:10px;color:#000000">Operacion</th>
+                                        <th width="16%" align="center" style="font-size:10px;color:#000000">Monto</th>
+                                        <th width="16%" align="center" style="font-size:10px;color:#000000">Moneda</th>
+                                        <th width="19%" align="center" style="font-size:10px;color:#000000">&nbsp;</th>
+                                        <th width="1%" align="center" style="font-size:10px;color:#000000">&nbsp;</th>
+                                    </tr>
+                                </table>
+                                <div id='extorno' style='overflow-y:auto; height:100px;width:100%' >
+                                    <table border="0" class='tabla' width="100%" cellpadding="2" cellspacing="2">
+                                        <%
+                                                    String hql = "from TRegistroCompraVenta where TOperacion.TPersonaCaja.idpersonacaja='" + idpc + "' "
+                                                            + " AND TOperacion.TPersonaCaja.TCaja.codCaja='" + codcaja + "'"
+                                                            + " AND (TOperacion.TTipoOperacion.codigoTipoOperacion ='TIPC1' OR TOperacion.TTipoOperacion.codigoTipoOperacion ='TIPC2') AND estado='ACTIVO' AND TOperacion.estado='ACTIVO' AND fecha like '" + formatFecha.get().substring(0, 10) + "%' order by fecha desc";
+                                                    List resultOp = d.findAll(hql);
+                                                    Iterator itOp = resultOp.iterator();
+                                                    Double Monto = 0.00;
+                                                    String Tipo = "";
+                                                    int k = 0;
+                                                    while (itOp.hasNext()) {
+                                                        TRegistroCompraVenta opreg = (TRegistroCompraVenta) itOp.next();
+                                                        if (opreg.getTOperacion().getTTipoOperacion().getCodigoTipoOperacion().equals("TIPC1")) {
+                                                            Monto = opreg.getMontoRecibido().doubleValue();
+                                                            Tipo = "TIPC1";
+                                                        } else {
+                                                            Monto = opreg.getMontoEntregado().doubleValue();
+                                                            Tipo = "TIPC2";
+                                                        }
+                                                        if (k % 2 == 0) {
+                                                            out.println("<tr class='modo1'>");
+                                                        } else {
+                                                            out.println("<tr class='modo2'>");
+                                                        }
+                                        %>
+                                        <td width="20%" style="font-size:10px;"><%=opreg.getFecha()%></td>
+                                        <td width="20%" style="font-size:10px;"><%=opreg.getTOperacion().getNumeroOperacion()%></td>
+                                        <td width="20%" style="font-size:10px;"><%
+                                                                                                out.println(opreg.getTOperacion().getTTipoOperacion().getNombre() + " ");
+                                                                                                List lSumaM = d.findAll("from TSumaMoneda where idoperacion='" + opreg.getTOperacion().getIdOperacion() + "' ");
+                                                                                                Iterator itSumaM = lSumaM.iterator();
+                                                                                                int is = 0;
+                                                                                                while (itSumaM.hasNext()) {
+                                                                                                    TSumaMoneda sum = (TSumaMoneda) itSumaM.next();
+                                                                                                    out.println("<input id='sum" + is + "' type='button' style='font-size:7px;' value='S-" + is + "' onclick=\"RecargarSumarCalcular('" + sum.getIdsumamoneda() + "')\" />");
+                                                                                                    is++;
+                                                                                                }
+                                            %></td>
+                                        <td width="20%" style="font-size:10px;"><%=fm.formatMoneda(Monto)%></td>
+                                        <td width="20%" style="font-size:10px;"><%=opreg.getTOperacion().getTMoneda().getNombre()%></td>
+                                        <td width="19%" style="font-size:10px; text-align: right;"><input type="button" value="Extornar" onclick="extornar('<%=opreg.getIdregistrocompraventa().toString()%>','<%=Tipo%>')" /></td>
+                                            <% out.println("</tr>");
+                                                            k++;
+                                                        }%>
+                                    </table>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <form id="frmimprimir" name="frmimprimir" method="post" action="vercambiomoneda.htm">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

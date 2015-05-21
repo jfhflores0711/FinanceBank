@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TRegistroPrestamo" table="t_registro_prestamo" schema="public">
+        <id name="idprestamo" type="string">
+            <column name="idprestamo" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TCuentaPersona" class="org.finance.bank.bean.TCuentaPersona" fetch="select">
+            <column name="idcuentapersona" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TTipoCredito" class="org.finance.bank.bean.TTipoCredito" fetch="select">
+            <column name="idtipocredito" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TOperacion" class="org.finance.bank.bean.TOperacion" fetch="select">
+            <column name="idoperacion" length="41" not-null="true" />
+        </many-to-one>
+        <property name="monto" type="big_decimal">
+            <column name="monto" precision="20" not-null="true" />
+        </property>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" not-null="true" />
+        </property>
+        <property name="numeroCuotas" type="int">
+            <column name="numero_cuotas" precision="8" scale="0" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="20" not-null="true" />
+        </property>
+        <property name="tea" type="string">
+            <column name="tea" length="10" />
+        </property>
+        <property name="segDesg" type="string">
+            <column name="seg_desg" length="10" />
+        </property>
+        <property name="periodo" type="string">
+            <column name="periodo" length="10" />
+        </property>
+        <property name="tasaInteresPrestamo" type="big_decimal">
+            <column name="tasa_interes_prestamo" precision="20" scale="4" not-null="true" />
+        </property>
+        <property name="tasaInteresMoratorio" type="big_decimal">
+            <column name="tasa_interes_moratorio" precision="20" scale="4" />
+        </property>
+        <property name="itSuspenso" type="big_decimal">
+            <column name="it_suspenso" precision="20" />
+        </property>
+        <property name="fechaAprobacion" type="string">
+            <column name="fecha_aprobacion" length="50" />
+        </property>
+        <property name="numeroReprogramacion" type="int">
+            <column name="numero_reprogramacion" not-null="true" />
+        </property>
+        <property name="numeroRefinanciacion" type="java.lang.Integer">
+            <column name="numero_refinanciacion" />
+        </property>
+        <property name="tipoCuota" type="java.lang.Integer">
+            <column name="tipo_cuota" />
+        </property>
+        <property name="diaInicialPp" type="java.lang.Integer">
+            <column name="dia_inicial_pp" />
+        </property>
+        <property name="diasEntreCuotas" type="java.lang.Integer">
+            <column name="dias_entre_cuotas" />
+        </property>
+        <property name="aplicaSeguroDesgravamen" type="java.lang.Integer">
+            <column name="aplica_seguro_desgravamen" />
+        </property>
+        <property name="estadoSolicitud" type="java.lang.Integer">
+            <column name="estado_solicitud" />
+        </property>
+        <property name="fechaDesembolso" type="string">
+            <column name="fecha_desembolso" length="50" />
+        </property>
+        <property name="modoCalculos" type="java.lang.Integer">
+            <column name="modo_calculos" />
+        </property>
+        <property name="cargos" type="big_decimal">
+            <column name="cargos" precision="20" />
+        </property>
+        <property name="montoInteresComp" type="big_decimal">
+            <column name="monto_interes_comp" precision="20" />
+        </property>
+        <property name="fechaJudicial" type="string">
+            <column name="fecha_judicial" length="50" />
+        </property>
+        <property name="situacionCredito" type="java.lang.Integer">
+            <column name="situacion_credito" />
+        </property>
+        <property name="fechaSituacion" type="string">
+            <column name="fecha_situacion" length="50" />
+        </property>
+        <property name="fechaDembolsoAutorizacion" type="string">
+            <column name="fecha_dembolso_autorizacion" length="50" />
+        </property>
+        <set name="TCargosPrestamos" inverse="true">
+            <key>
+                <column name="idregistroprestamo" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TCargosPrestamo" />
+        </set>
+        <set name="TContratos" inverse="true">
+            <key>
+                <column name="idprestamo" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TContrato" />
+        </set>
+        <set name="TGarantiaClientes" inverse="true">
+            <key>
+                <column name="idregistroprestamo" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TGarantiaCliente" />
+        </set>
+        <set name="TDetallePrestamos" inverse="true">
+            <key>
+                <column name="idprestamo" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TDetallePrestamo" />
+        </set>
+    </class>
+</hibernate-mapping>

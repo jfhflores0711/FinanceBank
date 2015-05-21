@@ -1,0 +1,793 @@
+
+<%-- 
+    Document   : newjsp
+    Created on : 11/02/2010, 04:41:24 PM
+    Author     : eloy
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8" session="true"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="./images/favicon.ico" />
+        <title>FinanceBank</title>
+        <meta name="keywords" content="FinanceBank" />
+        <meta name="description" content="Sistema financiero" />
+        <link href="default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" language="javascript" src="js/colorPicker.js"></script>
+        <link rel="stylesheet" href="css/colorPicker.css" type="text/css" />
+        <script type="text/javascript" language="javascript" src="js/validacion.js"></script>
+        <script type="text/javascript" src="js/prototype.js"> </script>
+        <script type="text/javascript" src="js/effects.js"> </script>
+        <script type="text/javascript" src="js/window.js"> </script>
+        <script type="text/javascript" src="js/debug.js"> </script>
+        <link href="css/themes/default.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alert.css" rel="stylesheet" type="text/css"/>
+        <link href="css/themes/alphacube.css" rel="stylesheet" type="text/css"/>
+        <script language="JavaScript" type="text/JavaScript">
+            function GuardarTasaMoneda(n){
+                var tasav,tasac,tipo,codigo;
+                tasav=document.getElementById("ventaM"+n).value;
+                tasac=document.getElementById("compraM"+n).value;
+                tipo=document.getElementById("tipoT"+n).value;
+                codigo=document.getElementById("codmoneda"+n).innerHTML;
+                if(tasac==""){
+                    alert("LA TASA DE COMPRA ESTA VACIA");
+                }
+                if(tasav==""){
+                    alert("LA TASA DE VENTA ESTA VACIA");
+                }
+                if(tasav!=="" && tasac!==""){
+                    var req2 = null;
+                    if (window.XMLHttpRequest){
+                        req2 = new XMLHttpRequest();
+                    }else if (window.ActiveXObject){
+                        req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req2!=null){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SGuardarTasa?tasaventa="+tasav+"&tasacompra="+tasac+"&tipotasa="+tipo+"&codigomoneda="+codigo+"&num="+n;
+                        alert("TASAS DE MONEDA MODIFICADO SATISFACTORIAMENTE ");
+                        req2.open("GET",url,true);
+                        req2.send(null);
+                    }
+                    document.getElementById("ventaM"+n).value="";
+                    document.getElementById("compraM"+n).value="";
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var req1;
+            function GuardarMoneda(){
+                var nombreM,simboloM,codigoM,colorM;
+                nombreM=document.getElementById("txtNombre").value.toString().toUpperCase();
+                simboloM=document.getElementById("txtSimbolo").value.toString().toUpperCase();
+                codigoM=document.getElementById("txtCodigo").value.toString().toUpperCase();
+                colorM=document.getElementById("txtColor").value;
+                colorM =  colorM.replace(/#/gi, "")
+                if(nombreM==""){
+                    alert("INGRESAR NOMBRE DE LA MONEDA");
+                }
+                if(simboloM==""){
+                    alert("INGRESAR SIMBOLO DE LA MONEDA");
+                }
+                if(codigoM==""){
+                    alert("INGRESAR CODIGO DE LA MONEDA");
+                }
+                if(colorM==""){
+                    alert("INGRESAR COLOR DE LA MONEDA");
+                }
+                if(nombreM!=""&&simboloM!=""&&codigoM!=""&&colorM!=""){
+                    req1 = null;
+                    if (window.XMLHttpRequest){
+                        req1 = new XMLHttpRequest();
+                    }else if (window.ActiveXObject){
+                        req1 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req1!=null){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SGuardarMoneda?nombre="+nombreM+"&simbolo="+simboloM+"&codigo="+codigoM+"&color="+colorM;
+                        req1.open("GET",url,true);
+                        req1.onreadystatechange = procesarResppuestaG;
+                        req1.send(null);
+                        document.getElementById("txtNombre").value="";
+                        document.getElementById("txtSimbolo").value="";
+                        document.getElementById("txtCodigo").value="";
+                        document.getElementById("txtColor").value="";
+                    }
+                }
+            }
+
+            function procesarResppuestaG(){
+                contenido = document.getElementById('divdos');
+                contenido.innerHTML="Cargando los datos...";
+                if (req1.readyState==4 && req1.status==200) {
+                    contenido.innerHTML = req1.responseText;
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var req4;
+            function EliminarMoneda(n1){
+                if(window.confirm("Está seguro de eliminar")){
+                    var codigoM;
+                    codigoM=document.getElementById("codmoneda"+n1).innerHTML;
+                    req4 = null;
+                    if (window.XMLHttpRequest){
+                        req4 = new XMLHttpRequest();
+                    }else if (window.ActiveXObject){
+                        req4 = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(req4!=null){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SEliminarMonedas?codigo="+codigoM;
+                        req4.open("GET",url,true);
+                        req4.onreadystatechange = procesarResppuestae;
+                        req4.send(null);
+                    }
+                }
+            }
+
+            function procesarResppuestae(){
+                contenido = document.getElementById('divdos');
+                contenido.innerHTML="Cargando los datos...";
+                if (req4.readyState==4 && req4.status==200) {
+                    contenido.innerHTML = req4.responseText;
+                    window.alert("MONEDA DESHABILITADA SATISFACTORIAMENTE");
+                }                
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var reqm;
+            function ActivarMoneda(n2){
+                var codigoM;
+                codigoM=document.getElementById("codmoneda2"+n2).innerHTML;
+                reqm = false;
+                if (window.XMLHttpRequest){
+                    reqm = new XMLHttpRequest();
+                }else if (window.ActiveXObject){
+                    reqm = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(reqm!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SActivarMonedas?codigo="+codigoM;
+                    reqm.open("GET",url,true);
+                    reqm.onreadystatechange = procesarResppuestaa;
+                    reqm.send(null);
+                }
+            }
+
+            function procesarResppuestaa(){
+                contenido = document.getElementById('divdos');
+                contenido.innerHTML="Cargando los datos...";
+                if (reqm.readyState==4 && reqm.status==200) {
+                    contenido.innerHTML = reqm.responseText;
+                    window.alert("MONEDA HABILITADA SATISFACTORIAMENTE");
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var reqD;
+            function GuardarDenominacion(){
+                var tipoM,montoM,codigoM;
+                codigoM=document.getElementById("idCodigo").value;
+                tipoM=document.getElementById("idTipo").value;
+                montoM=document.getElementById("idMonto").value;
+                if(montoM==""){
+                    window.alert("INGRESAR MONTO");
+                }
+                if(montoM!=""){
+                    reqD = null;
+                    if (window.XMLHttpRequest){
+                        reqD = new XMLHttpRequest();
+                    }else if (window.ActiveXObject){
+                        reqD = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if(reqD!=null){
+                        var PATH = "<%= request.getContextPath()%>";
+                        var url = PATH + "/SDenominacionMonedas?tipo="+tipoM+"&monto="+montoM+"&codigo="+codigoM;
+                        reqD.open("GET",url,true);
+                        reqD.onreadystatechange = procesarResppuestaD;
+                        reqD.send(null);
+                    }
+                }
+            }
+
+            function procesarResppuestaD(){
+                contenido = document.getElementById('divdos');
+                contenido.innerHTML="Cargando los datos...";
+                if (reqD.readyState==4 && reqD.status==200) {
+                    contenido.innerHTML = reqD.responseText;
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            var req5;
+            function enviarsessionimagen(){
+                var foto;
+                foto=document.getElementById("ExaminarFoto").value;
+                if(foto==""){
+                    document.getElementById("cmdsubir").disabled=true;
+                    document.getElementById("cmdLimpiar").disabled=true;
+                }else{
+                    document.getElementById("cmdsubir").disabled=false;
+                    document.getElementById("cmdLimpiar").disabled=false;
+                }
+                req5 = null;
+                if (window.XMLHttpRequest) {
+                    req5 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req5 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req5!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SSubirArchivo?sfoto="+foto;
+                    req5.open("GET",url,true);
+                    req5.send(null);
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            function limpiarcelda(){
+                document.getElementById("ExaminarFoto").value="";
+                document.getElementById("ExaminarFirma").value="";
+                document.getElementById("cmdsubir").disabled=true;
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            function habilitar(){
+                var filastabla=document.getElementById('tablamoneda').rows.length;
+                for(var i=0;i<filastabla;i++){
+                    if(i>1&&i<filastabla){
+                        document.getElementById('eliminarTasa'+(i-2)).disabled=false;
+                    }
+                }
+            }
+        </script>
+        <script language="JavaScript" type="text/JavaScript">
+            function ventanaCodigo() {
+                Dialog.confirm($('login').innerHTML,
+                {   className:"alphacube",
+                    width:400,
+                    okLabel: "login",
+                    title: "Autorizar Usuario",
+                    cancelLabel: "cancel",
+                    onOk:function(){
+                        var user =document.getElementById('user').value
+                        var pass =document.getElementById('passwd').value
+                        document.getElementById('res').innerHTML='';
+                        Autoriza(user,pass);
+                        window.alert('¡¡ DATOS EN REVISIÓN !!')
+                        if(document.getElementById('res').innerHTML==1){
+                            Aut = true;
+                            var filastabla=document.getElementById('tablamoneda').rows.length;
+                            for(var i=0;i<filastabla;i++){
+                                if(i>1&&i<filastabla){
+                                    document.getElementById('eliminarTasa'+(i-2)).disabled=false;
+                                }
+                            }
+                            return true;
+                        }else{
+                            document.fcambio.tasaEspecial.checked=false;
+                            $('login_error_msg').innerHTML='Usuario o Contrase&ntilde;a incorrecto';
+                            $('login_error_msg').show(); Windows.focusedWindow.updateHeight();
+                            new Effect.Shake(Windows.focusedWindow.getId());
+                            document.getElementById('Eliminacion').disabled=true;
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            function Autoriza(login,contrasenia) {
+                req2 = null;
+                if (window.XMLHttpRequest) {
+                    req2 = new XMLHttpRequest();
+                }else if (window.ActiveXObject) {
+                    req2 = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                if(req2!=null){
+                    var PATH = "<%= request.getContextPath()%>";
+                    var url = PATH + "/SAutorizarUsuario?login="+login+"&contrasenia="+contrasenia;
+                    req2.open("GET",url,true);
+                    req2.onreadystatechange = procesando;
+                    req2.send(null);
+                }
+            }
+
+            function procesando(){
+                contenido = document.getElementById('res');
+                contenido.innerHTML="Cargando los datos...";
+                contenido.innerHTML="";
+                if (req2.readyState==4 && req2.status==200) {
+                    contenido.innerHTML = req2.responseText;
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            //para ingresar valores decimales ejm:2.68 y si por equivocación digitas dos
+            //decimales ejem 2..51 sale un error
+            function myIsNaN(x){
+                return(isNaN(x)||(typeof x=='number'&&!isFinite(x)));
+            }
+
+            function round(n,nd){
+                if(isFinite(n)&&isFinite(nd)){
+                    var sign_n=(n<0)?-1:1;
+                    var abs_n=Math.abs(n);
+                    var factor=Math.pow(10,nd);
+                    return sign_n*Math.round(abs_n*factor)/factor;
+                }else{
+                    return NaN;
+                }
+            }
+
+            function b2s(b){
+                return b?eetrue:eefalse;
+            }
+
+            function eeparseFloat(str){
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeparsePercent(str){
+                var parts=String(str).split('%');
+                var tmp=String(parts[0]).replace(eedecreg,".");
+                var res=parseFloat(tmp)/100;if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            var near0RegExp=new RegExp("[.](.*0000000|.*9999999)");
+            function eedisplayFloat(x){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var str=String(x);
+                    if(near0RegExp.test(str)){
+                        x=round(x,8);
+                        str=String(x);
+                    }
+                    return str.replace(/\./g,eedec);
+                }
+            }
+
+            function eedisplayFloatV(x){
+                if(x=="")return x;
+                if(isFinite(x)){
+                    return eedisplayFloat(x);
+                }else{
+                    return x;
+                }
+            }
+
+            function eedisplayFloatND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(parts[0]).toString()+eedec+decimals;
+                        }
+                    }else{
+                        return res;
+                    }
+                }
+            }
+
+            function eedisplayPercentND(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    return eedisplayFloatND(x*100,nd)+'%';
+                }
+            }
+
+            function eeparseFloatTh(str){
+                str=String(str).replace(eethreg,"");
+                str=String(str).replace(eedecreg,".");
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return 0;
+                }else{
+                    return res;
+                }
+            }
+
+            function eedisplayFloatNDTh(x,nd){
+                if(myIsNaN(x)){
+                    return Number.NaN;
+                }else{
+                    var res=round(x,nd);
+                    if(nd>0){
+                        var str=String(res);
+                        if(str.indexOf('e')!=-1)
+                            return str;
+                        if(str.indexOf('E')!=-1)
+                            return str;
+                        var parts=str.split('.');
+                        var res2=eeinsertThousand(parts[0].toString());
+                        if(parts.length<2){
+                            var decimals=('00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }else{
+                            var decimals=((parts[1]).toString()+'00000000000000').substring(0,nd);
+                            return(res2+eedec+decimals);
+                        }
+                    }else{
+                        return(eeinsertThousand(res.toString()));
+                    }
+                }
+            }
+
+            var eeparseFloatVreg=new RegExp("^ *-?[0-9.]+ *$");
+            function eeparseFloatV(str){
+                if(str=="")
+                    return str;str=String(str).replace(eedecreg,".");
+                if(!eeparseFloatVreg.test(str)){
+                    return str;
+                }
+                var res=parseFloat(str);
+                if(isNaN(res)){
+                    return str;
+                }else{
+                    return res;
+                }
+            }
+
+            function eeinsertThousand(whole){
+                if(whole==""||whole.indexOf("e")>=0){
+                    return whole;
+                }else{
+                    var minus_sign="";
+                    if(whole.charAt(0)=="-"){
+                        minus_sign="-";
+                        whole=whole.substring(1);
+                    }
+                    var res="";
+                    var str_length=whole.length-1;
+                    for(var ii=0;ii<=str_length;ii++){
+                        if(ii>0&&ii%3==0){
+                            res=eeth+res;
+                        }
+                        res=whole.charAt(str_length-ii)+res;
+                    }
+                    return minus_sign+res;
+                }
+            }
+
+            function validar(e){
+                var obj=e.srcElement || e.target;
+                var tecla_codigo = (document.all) ? e.keyCode : e.which;
+                if(tecla_codigo<14)return true;
+                var patron =/[\d.]/;
+                var tecla_valor = String.fromCharCode(tecla_codigo);
+                var control=(tecla_codigo==46 && (/[.]/).test(obj.value))?false:true
+                return patron.test(tecla_valor) &&  control;
+            }
+        </script>
+        <style type="text/css">
+            .tableItems {
+                border: 1px solid #008585;
+                border-spacing: 0px;
+                border-collapse: collapse;
+            }
+            .thItems {
+                background: #008585;
+                font-family: Arial;
+                font-size: 12pt;
+                color: #FFFFFF;
+            }
+            .trItems {
+                background: #FFFFFF;
+            }
+            .tdItems {
+                border: 1px solid #008585;
+                font-family: Arial;
+                font-size: 10pt;
+            }
+            .trItemspar {
+                background: #9BCFCF;
+            }
+        </style>
+        <style type="text/css">
+            .tamanno1 {font-size: 15pt; font-family: arial,helvetica}
+        </style>
+        <style type="text/css">
+            .fieldset {
+                width: 94%;
+                border: solid gray 1px;
+                background-color: #f7fff7;
+                padding: 6px;
+                display: block;
+            }
+        </style>
+    </head>
+    <body onload="document.getElementById('compraM0').focus();">
+        <%
+                    request.setAttribute("idmenu", "20110228202911471839");
+        %>
+        <%@include file="../common/header.jsp" %>
+        <div id="login" style="display:none">
+            <p>
+                <span id='login_error_msg' class="login_error" style="display:none;font-size:15px;">&nbsp;</span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <p>
+                <span class="login_label">Usuario</span>
+                <span class="login_input">
+                    <input type="text" id="user"/>
+                </span>
+            </p>
+            <div style="clear:both"></div>
+            <p>
+                <span class="login_label">Contrase&ntilde;a</span>
+                <span class="login_input">
+                    <input type="password" id="passwd"/>
+                </span>
+            </p>
+            <div style="clear:both">
+            </div>
+            <div id="res" style="display:none">
+            </div>
+        </div>
+        <div id="content">
+            <div id="sidebar">
+                <div id="menu">
+                    <%@include file="../common/menu.jsp" %>
+                </div>
+                <div id="login" class="boxed">
+                    <h2 class="title">Cuenta del Cliente</h2>
+                    <div class="content">
+                        <form id="form1" method="post" action="principal.htm">
+                            <fieldset>
+                                <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Salir" />
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="main">
+                <div id="welcome" class="post">
+                    <h2 class="title">CAMBIO DE MONEDA</h2>
+                    <h3 class="date"><span class="month"><script type="text/javascript">
+                        var fecha=new Date();
+                        var fmtmonthnamesshort=new Array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+                        document.write(fmtmonthnamesshort[fecha.getMonth()]);
+                            </script></span> <span class="day"><script type="text/javascript">
+                                document.write(fecha.getDate());
+                            </script></span><span class="year">, <script type="text/javascript">document.write(fecha.getFullYear());</script></span></h3>
+                    <div class="story">
+                        <%
+                                    //sessFact = HibernateUtil.getSessionFactory();
+                                    //sess = sessFact.openSession();
+                                    //tr = sess.beginTransaction();
+                                    List result = d.findAll("from TMoneda money where money.estado='ACTIVO' order by codParaNumCuenta");
+                                    // Query query= query.list();
+                                    Iterator it = result.iterator();
+                        %>
+                        <div id="divdos">
+                            <form name="fcambio1" action="">
+                                <fieldset class="fieldset">
+                                    <legend style="font-size:12px"><b><font color="#487388">ACTUALIZAR PRECIOS MONETARIOS</font></b> </legend>
+                                    <br>
+                                    <table id="tablamoneda" border="1" cellspacing="0" bordercolor="#3E8992">
+                                        <tr>
+                                            <td align="right" colspan="8">
+                                                Eliminar Moneda <input type="checkbox" name="Eliminacion" id="Eliminacion"  value="ON" onchange="ventanaCodigo()" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="display:none"><center><b>CODIGO MONEDA</b></center></td>
+                                            <td><center><b><font color="#487388">MONEDA</font></b></center></td>
+                                            <td><center><b><font color="#487388">COMPRA</font></b></center></td>
+                                            <td><center><b><font color="#487388">VENTA</font></b></center></td>
+                                            <td><center><b><font color="#487388">DESCRIPCI&Oacute;N</font></b></center></td>
+                                            <td><center><b><font color="#487388">FECHA</font></b></center></td>
+                                            <td><center><b><font color="#487388">HORA</font></b></center></td>
+                                        </tr>
+                                        <%
+                                                    int u = 0;
+                                                    while (it.hasNext()) {
+                                                        TMoneda mon = (TMoneda) it.next();
+                                                        if (!mon.getCodMoneda().equals("PEN")) {
+                                        %>
+                                        <tr valign="middle">
+                                            <td style="display:none" id="codmoneda<%=u%>"><%=mon.getCodMoneda()%></td>
+                                            <td><h1><font color="<%=mon.getColor()%>"><b><%=mon.getNombre()%></b></font></h1></td>
+                                            <td><input class="tamanno1" id="compraM<%=u%>" name="compraM" type="text" value="" style="width:58px" onkeypress="return validar(event);" onchange="range = /^\d{1,3}(\.\d{1,3})?$/;
+                                                hundred = /^1000$/;if(!(range.test(this.value) || hundred.test(this.value))){alert('La tasa de interes es invalida.'); };"/></td>
+                                            <td><input class="tamanno1" id="ventaM<%=u%>" name="ventaM" type="text" value="" style="width:58px" onkeypress="return validar(event);" onchange="range = /^\d{1,3}(\.\d{1,3})?$/;
+                                                hundred = /^1000$/;if(!(range.test(this.value) || hundred.test(this.value))){alert('La tasa de interes es invalida.'); };"/></td>
+                                            <td><select id="tipoT<%=u%>" name="tipoT" >
+                                                    <option>TASA MERCADO</option>
+                                                    <option>TASA ESPECIAL</option>
+                                                </select>
+                                            </td>
+                                            <%
+                                                                                                        DateFormat fechas = new SimpleDateFormat("dd/MM/yyyy");
+                                                                                                        String unafecha = fechas.format(new Date()) + System.nanoTime();
+                                                                                                        unafecha = unafecha.substring(0, 10);
+                                                                                                        DateFormat horas = new SimpleDateFormat("HH:mm:ss");
+                                                                                                        String unahora = horas.format(new Date()) + System.nanoTime();
+                                                                                                        unahora = unahora.substring(0, 8);
+                                            %>
+                                            <td><%=unafecha%></td>
+                                            <td><%=unahora%></td>
+                                            <td><input id="guardarTasa<%=u%>" name="guardarTasa<%=u%>"  type="button" value="GUARDAR" onclick="GuardarTasaMoneda('<%=u%>')"/></td>
+                                            <td><input id="eliminarTasa<%=u%>" name="eliminarTasa<%=u%>" type="button" value="ELIMINAR" onclick="EliminarMoneda('<%=u%>')" disabled/></td>
+                                        </tr>
+                                        <%
+                                                            u++;
+                                                        }
+                                                    }
+                                        %>
+                                    </table>
+                                    <br>
+                                </fieldset>
+                            </form>
+                            <br>
+                            <br>
+                            <fieldset>
+                                <legend style="font-size:12px"><font color="#487388" ><b>INGRESE NUEVA MONEDA</b></font></legend>
+                                <br>
+                                <table>
+                                    <tr>
+                                        <td><font color="#1E551D">NOMBRE</font></td>
+                                        <td><input  type="text" id="txtNombre" name="txtNombre" value="" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><font color="#1E551D">C&Oacute;DIGO</font></td>
+                                        <td><input type="text" id="txtCodigo" name="txtCodigo" value="" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><font color="#1E551D">SIMBOLO</font><font color="#000000"><b>(&#)</b></font></td>
+                                        <td><input type="text" id="txtSimbolo" name="txtSimbolo" value="" onkeypress="return solonumeros(event);"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><font color="#1E551D">COLOR</font></td>
+                                        <td><input type="text" id="txtColor" name="txtColor" value="" onclick='startColorPicker(this)' onkeyup='maskedHex(this)' /></td>
+                                        <td><input type="button" id="btnguardarM" name="btnguardarM" value="GUARDAR" onclick="GuardarMoneda()" /></td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                            <%
+                                        //sessFact = HibernateUtil.getSessionFactory();
+                                        //sess = sessFact.openSession();
+                                        //tr = sess.beginTransaction();
+                                        List resulta = d.findAll("from TMoneda money where money.estado='INACTIVO' order by codParaNumCuenta");
+                                        // Query querya= querya.list();
+                                        Iterator ita = resulta.iterator();
+                            %>
+                            <br>
+                            <br>
+                            <fieldset>
+                                <legend style="font-size:12px" ><b><font color="#487388">LISTA DE MONEDAS INABILITADAS</font></b></legend>
+                                <table id="tablainferior" border="1" cellspacing="0">
+                                    <tr>
+                                        <td style="display:none"><center><b>CODIGO MONEDA</b></center></td>
+                                        <td><center><b><font color="#487388">MONEDA</font></b></center></td>
+                                        <td><center><b><font color="#487388">ESTADO</font></b></center></td>
+                                    </tr>
+                                    <%
+                                                int ut = 0;
+                                                while (ita.hasNext()) {
+                                                    TMoneda mona = (TMoneda) ita.next();
+                                                    if (!mona.getCodMoneda().equals("PEN")) {
+                                    %>
+                                    <tr>
+                                        <td style="display:none" id="codmoneda2<%=ut%>"><%=mona.getCodMoneda()%></td>
+                                        <td><%=mona.getNombre()%></td>
+                                        <td><%=mona.getEstado()%></td>
+                                        <td><input id="guardarT2" type="button" value="ACTIVAR" onclick="ActivarMoneda('<%=ut%>')"/></td>
+                                    </tr>
+                                    <%
+                                                        ut++;
+                                                    }
+                                                }
+                                    %>
+                                </table>
+                            </fieldset>
+                        </div>
+                        <%
+                                    //sessFact = HibernateUtil.getSessionFactory();
+                                    //sess = sessFact.openSession();
+                                    //tr = sess.beginTransaction();
+                                    List resultd= d.findAll("from TMoneda money where money.estado='ACTIVO' order by codParaNumCuenta");
+                                    //Query queryd  = queryd.list();
+                                    Iterator itd = resultd.iterator();
+                        %>
+                        <br>
+                        <br>
+                        <fieldset>
+                            <legend style="font-size:12px"><font color="#487388"><b>INGRESAR BILLETES Y MONEDAS</b></font> </legend>
+                            <br>
+                            <table>
+                                <tr>
+                                    <td><font color="#1E551D"> CODIGO MONEDA</font></td>
+                                    <td>
+                                        <select id="idCodigo" name="idCodigo">
+                                            <%
+                                                        int ud = 0;
+                                                        while (itd.hasNext()) {
+                                                            TMoneda monad = (TMoneda) itd.next();
+                                            %>
+                                            <option><%=monad.getCodMoneda()%></option>
+                                            <%
+                                                            ud++;
+                                                        }
+                                            %>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><font color="#1E551D">TIPO</font></td>
+                                    <td>
+                                        <select id="idTipo" name="idtipo">
+                                            <option>BILLETE</option>
+                                            <option>MONEDA</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><font color="#1E551D">MONTO</font></td>
+                                    <td ><input id="idMonto" name="idMonto" type="text" name="" value="" onkeypress="return solodecimales(event);"/></td>
+                                    <td><input  id="idGuardarD" type="button" value="GUARDAR" onclick="GuardarDenominacion()"/></td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                        <br>
+                        <br>
+                        <div id="divsubirfichero">
+                            <form id="frmsubirfile" name="frmsubirfile" method="POST" action="SUploadArchivo" enctype='multipart/form-data'>
+                                <table style="display:none">
+                                    <tr>
+                                        <td colspan="2">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><font color="#385b88" style="font-size: 12px;"><b>BUSCAR IMAGEN </b></font></td>
+                                        <td><input type="file" id="ExaminarFoto" name="ExaminarFoto" value="" maxlength="200" onfocus="enviarsessionimagen();" accept="image/jpg;image/jpeg;image/gif;image/png;image/bmp"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input id="cmdsubir" type="submit" value="Subir" disabled >
+                                            <input type="button" id="cmdLimpiar" value="Limpiar" onclick="limpiarcelda();" disabled>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%@include file="../common/footer.jsp" %>
+    </body>
+</html>

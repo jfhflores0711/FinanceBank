@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+    <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+    <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/test001</property>
+    <property name="hibernate.connection.username">postgres</property>
+    <property name="hibernate.connection.password">123456</property>
+    <property name="hibernate.show_sql">false</property>
+    <mapping resource="org/finance/bank/bean/TFilial.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCobranza.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoCambio.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDepartamento.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TRegistroCompraVenta.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TMoneda.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TUtilidad.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TPersonaCaja.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDetalleSuma.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCaja.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TContrato.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDistrito.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDetalleCuentaPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TGarantiaCliente.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCategoriaPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTransaccionC.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoCredito.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTasa.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TRegistroDepositoRetiro.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoGarantia.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TControlTipo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTransaccion.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCargosAdmin.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDetalleCaja.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoOperacion.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCuentaAcceso.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/THistorialCuentaPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TSumaMoneda.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TProvincia.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TOperacion.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TSobregiro.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCuentaPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoPersona.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/Sumasnashot.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTransferenciaCaja.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TTipoCuenta.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TLogFinance.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDetallePrestamo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCargosPrestamo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDenominacionMoneda.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TModulo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TControlModulo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TCertificado.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TRegistroPrestamo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TSesion.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TRegistroOtros.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TDetalleIntereses.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TBloqueo.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TRegistroGiro.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TPatrimonioTransit.hbm.xml"/>
+    <mapping resource="org/finance/bank/bean/TBalancexmoneda.hbm.xml"/>
+  </session-factory>
+</hibernate-configuration>

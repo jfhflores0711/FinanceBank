@@ -1,0 +1,109 @@
+package org.finance.bank.Servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.util.Date;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.finance.bank.bean.TCuentaPersona;
+import org.finance.bank.bean.TDetalleCuentaPersona;
+import org.finance.bank.model.dao.DAOGeneral;
+import org.finance.bank.util.DateUtil;
+
+/**
+ *
+ * @author roger
+ */
+public class SMantenerCuenta extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        DAOGeneral dao = new DAOGeneral();
+        request.getSession(true);
+        try {
+            String op = request.getParameter("casoOP");
+            String idcuenta = request.getParameter("idcuenta");
+            String interes = request.getParameter("interes");
+            String estado = request.getParameter("estado");
+            String observacion = request.getParameter("observacion");
+            String tipocuenta = request.getParameter("tipocuenta");
+            String fechaPF = "";
+            if (tipocuenta.equals("CUENTA A PLAZO FIJO")) {
+                fechaPF = request.getParameter("fechaPF");
+            }
+            if (op.equals("1")) {
+                TCuentaPersona cp = (TCuentaPersona) dao.load(TCuentaPersona.class, idcuenta);
+                if (tipocuenta.equals("CUENTA A PLAZO FIJO")) {
+                    TDetalleCuentaPersona dcp = (TDetalleCuentaPersona) dao.findAll("from TDetalleCuentaPersona where TCuentaPersona='" + idcuenta + "'").get(0);
+                    dcp.setInteres(new BigDecimal(interes));
+                    String fnp = fechaPF;
+                    if (fnp == null) {
+                        fnp = Double.toString(DateUtil.today() + 30);
+                    } else {
+                        fnp = fnp.trim();
+                        String[] fh = fnp.split("/");
+                        fnp = Double.toString(DateUtil.date(Double.parseDouble(fh[2]), Double.parseDouble(fh[1]), Double.parseDouble(fh[0])));
+                    }
+                    dcp.setFechaPlazo(fnp);
+                    dao.update();
+                } else {
+                    cp.setInteres(new BigDecimal(interes));
+                    cp.setFechaActualizacion(DateUtil.getNOW_S());
+                    cp.setFechaCap(DateUtil.getDateTime("yyyy/MM/dd", new Date()));
+                    cp.setSaldoSinInteres(cp.getSaldo());
+                }
+                cp.setEstado(estado);
+                cp.setObservaciones(observacion);
+                dao.update();
+            } else if (op.equals("2")) {
+                TCuentaPersona cp = (TCuentaPersona) dao.load(TCuentaPersona.class, idcuenta);
+                cp.setEstado("INACTIVO");
+                dao.update();
+            }
+            out.print("OK");
+        } finally {
+            out.close();
+        }
+    }
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

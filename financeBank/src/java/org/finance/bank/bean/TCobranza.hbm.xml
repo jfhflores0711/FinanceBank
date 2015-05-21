@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 07/01/2014 06:22:59 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TCobranza" table="t_cobranza" schema="public">
+        <id name="idcobranza" type="string">
+            <column name="idcobranza" length="41" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="TDetallePrestamo" class="org.finance.bank.bean.TDetallePrestamo" fetch="select">
+            <column name="iddetalleprestamo" length="41" not-null="true" />
+        </many-to-one>
+        <many-to-one name="TOperacion" class="org.finance.bank.bean.TOperacion" fetch="select">
+            <column name="idoperacion" length="41" not-null="true" />
+        </many-to-one>
+        <property name="fecha" type="string">
+            <column name="fecha" length="50" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <property name="estado" type="string">
+            <column name="estado" length="50" not-null="true" />
+        </property>
+        <property name="importeTotal" type="big_decimal">
+            <column name="importe_total" precision="20" />
+        </property>
+        <property name="codigoOperacion" type="java.lang.Integer">
+            <column name="codigo_operacion" />
+        </property>
+        <property name="capitalPagado" type="big_decimal">
+            <column name="capital_pagado" precision="20" />
+        </property>
+        <property name="interesPagado" type="big_decimal">
+            <column name="interes_pagado" precision="20" />
+        </property>
+        <property name="moraPagada" type="big_decimal">
+            <column name="mora_pagada" precision="20" />
+        </property>
+        <property name="cargosPagados" type="big_decimal">
+            <column name="cargos_pagados" precision="20" />
+        </property>
+        <property name="seguroPagado" type="big_decimal">
+            <column name="seguro_pagado" precision="20" />
+        </property>
+        <property name="compPagado" type="big_decimal">
+            <column name="comp_pagado" precision="20" />
+        </property>
+        <property name="suspendPagado" type="big_decimal">
+            <column name="suspend_pagado" precision="20" />
+        </property>
+        <property name="numeroCuota" type="java.lang.Integer">
+            <column name="numero_cuota" />
+        </property>
+        <property name="numeroTicket" type="string">
+            <column name="numero_ticket" length="50" />
+        </property>
+        <property name="igv" type="big_decimal">
+            <column name="igv" precision="20" />
+        </property>
+    </class>
+</hibernate-mapping>

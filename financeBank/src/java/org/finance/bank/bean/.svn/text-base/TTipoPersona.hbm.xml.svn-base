@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 25/08/2011 07:51:23 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.finance.bank.bean.TTipoPersona" table="t_tipo_persona" schema="public">
+        <id name="idtipopersona" type="string">
+            <column name="idtipopersona" length="41" />
+            <generator class="assigned" />
+        </id>
+        <property name="descripcion" type="string">
+            <column name="descripcion" length="200" not-null="true" />
+        </property>
+        <property name="idUser" type="string">
+            <column name="id_user" length="50" not-null="true" />
+        </property>
+        <property name="ipUser" type="string">
+            <column name="ip_user" length="50" not-null="true" />
+        </property>
+        <property name="dateUser" type="string">
+            <column name="date_user" length="50" not-null="true" />
+        </property>
+        <set name="TControlTipos" inverse="true">
+            <key>
+                <column name="idtipopersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TControlTipo" />
+        </set>
+        <set name="TControlModulos" inverse="true">
+            <key>
+                <column name="idtipopersona" length="41" not-null="true" />
+            </key>
+            <one-to-many class="org.finance.bank.bean.TControlModulo" />
+        </set>
+    </class>
+</hibernate-mapping>
